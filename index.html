@@ -29,7 +29,7 @@ h1{font-family:var(--mincho);font-size:28px;margin:0;letter-spacing:.06em;font-w
 .count{font-family:var(--num);font-size:12px;color:var(--inkSoft)}
 nav{display:flex;background:var(--card);border-bottom:1px solid var(--rule);
   position:sticky;top:0;z-index:5}
-nav button{flex:1;padding:13px 0;border:none;background:none;font-family:var(--mincho);
+nav button{flex:1;padding:13px 2px;font-size:14px;border:none;background:none;font-family:var(--mincho);
   font-size:15px;color:var(--inkSoft);border-bottom:2px solid transparent;margin-bottom:-1px}
 nav button.on{color:var(--ai);border-bottom-color:var(--ai)}
 main{padding:22px 20px;max-width:620px;margin:0 auto}
@@ -118,6 +118,9 @@ textarea{width:100%;height:200px;font-family:var(--num);font-size:11px;border:1p
   padding:8px;background:#fff;color:var(--ink)}
 .modal .close{margin-top:10px;width:100%;padding:11px 0;border:none;background:var(--ai);color:#fff;font-size:14px}
 #toast{position:fixed;left:0;right:0;bottom:26px;display:flex;justify-content:center;pointer-events:none}
+#report{height:260px;font-size:11px;line-height:1.6}
+.linkbtn{display:block;text-align:center;text-decoration:none;padding:12px 0;margin-top:10px;
+  border:1px solid var(--rule);border-radius:2px;color:var(--ai);font-size:13px}
 #toast div{background:var(--ai);color:#fff;font-size:13px;padding:10px 16px;border-radius:2px;
   pointer-events:auto;display:flex;align-items:center;gap:14px}
 #toast button{background:none;border:none;color:#fff;font-size:13px;font-weight:700;
@@ -136,6 +139,7 @@ textarea{width:100%;height:200px;font-family:var(--num);font-size:11px;border:1p
   <button data-tab="write" class="on">記録</button>
   <button data-tab="book">台帳</button>
   <button data-tab="view">傾向</button>
+  <button data-tab="report">レポート</button>
 </nav>
 <main id="main"></main>
 <div id="toast" class="hide"></div>
@@ -145,10 +149,10 @@ const KINDS=["転記・入力","指示の抜け漏れ","期限・スケジュー
 const STAGES=["指示を受けた時","作業中","見直し時","提出後"];
 const DETECTORS=["自分","先輩・上司","顧客・外部"];
 const SEV=[
-  ["自己","自分で気づいて自分で直した。誰の手も止めていない"],
-  ["社内","先輩や上司が確認・手直しに時間を使った。関与先には出ていない"],
-  ["関与先","関与先に訂正・再提出・追加の手間が発生した"],
-  ["申告","期限・申告内容・納税額に影響する。加算税や延滞税が生じうる"]
+  ["Lv1","自分の時間を少し使った（15分ほどで直せた）"],
+  ["Lv2","自分の時間を多く使った。または社内の人の時間を少し使わせた（その場の指摘で済んだ）"],
+  ["Lv3","社内の人の時間を多く使わせた（手を動かさせた・別途時間を取らせた）。または関与先の時間を少し使わせた"],
+  ["Lv4","関与先の時間を多く使わせた"]
 ];
 const KEY="misslog:v1";
 
@@ -168,10 +172,13 @@ const newId=()=>{let id;do{id=Date.now().toString(36)+Math.random().toString(36)
 const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let tab="write";
-let form={date:today(),client:"",what:"",kind:"",stage:"",detector:"",sev:"",cause:"",why:"",fix:"",repeat:false};
+const blankForm=()=>({date:today(),client:"",what:"",kind:"",stage:"",detector:"",sev:"",loss:false,cause:"",why:"",fix:"",repeat:false});
+let form=blankForm();
+let editing=null;
 let more=false;
 let showTrash=false;
 let sortKey="date",sortDir=-1;
+let period="week";
 
 function toast(m,undoId){const t=document.getElementById("toast");
   t.innerHTML='<div>'+esc(m)+(undoId?' <button data-act="undo" data-id="'+undoId+'">元に戻す</button>':"")+'</div>';
@@ -187,7 +194,8 @@ function stats(){
     kinds:KINDS.map(k=>({label:k,n:entries.filter(e=>e.kind===k).length})),
     stages:STAGES.map(s=>({label:s,n:entries.filter(e=>e.stage===s).length})),
     sevs:SEV.map(([k])=>({label:k,n:entries.filter(e=>e.sev===k).length})),
-    heavy:entries.filter(e=>e.sev==="申告").length};
+    heavy:entries.filter(e=>e.sev==="Lv4").length,
+    loss:entries.filter(e=>e.loss).length};
 }
 
 function chips(list,sel,act,shu){
@@ -202,10 +210,11 @@ function viewWrite(){
     <input type="text" id="what" value="${esc(form.what)}" placeholder="源泉の税額を前期の数字のまま入力した"></div>
   <div class="f"><div class="lbl">種類</div>${chips(KINDS,form.kind,"kind")}</div>
   <div class="f"><div class="lbl">誰が気づいた</div>${chips(DETECTORS,form.detector,"detector",true)}</div>
-  <div class="f"><div class="lbl">重大度<span>どこまで波及したか</span></div>
+  <div class="f"><div class="lbl">重大度<span>誰の時間をどれだけ使わせたか</span></div>
     <div class="sev">${SEV.map(([k,d],i)=>
       `<button class="sevbtn s${i+1}${form.sev===k?" on":""}" data-act="sev" data-v="${esc(k)}"><b>${esc(k)}</b><i>${esc(d)}</i></button>`
-    ).join("")}</div></div>
+    ).join("")}</div>
+    <div style="margin-top:8px"><button class="chip shu${form.loss?" on":""}" data-act="loss">実損が発生した</button></div></div>
   ${more?`<div id="more">
     <div class="f"><div class="lbl">発生工程</div>${chips(STAGES,form.stage,"stage")}</div>
     <div class="f"><div class="lbl">原因<span>なぜを1回だけ</span></div>
@@ -219,8 +228,9 @@ function viewWrite(){
       <input type="text" id="client" value="${esc(form.client)}" placeholder="案件（記号で）"></div>
     <button class="chip shu${form.repeat?" on":""}" data-act="repeat">同じ型の再発</button>
   </div>`:`<button class="link" data-act="more">原因・なぜまずいか・防ぎ方を書く</button>`}
-  <button class="save" id="save" ${form.what.trim()&&form.kind&&form.detector&&form.sev?"":"disabled"}>記入する</button>
-  <div class="note">上の3つだけで記入できます。原因と防ぎ方は、あとから台帳で足しても構いません。</div>`;
+  <button class="save" id="save" ${form.what.trim()&&form.kind&&form.detector&&form.sev?"":"disabled"}>${editing?"更新する":"記入する"}</button>
+  ${editing?`<button class="link" data-act="cancel" style="display:block;margin-top:12px">編集をやめる</button>`
+    :`<div class="note">上の4つだけで記入できます。原因や防ぎ方は、あとから台帳の「編集」で足せます。</div>`}`;
 }
 
 const SORTS=[["date","日付"],["sev","重大度"],["kind","種類"],["stage","工程"],["detector","発見者"],["client","案件"],["repeat","再発"]];
@@ -268,8 +278,8 @@ function trashSection(){
 }
 
 function viewBook(){
-  if(!entries.length)return `<div class="empty">まだ1件もありません。<br>次に何か起きたら、その場で「記録」に1行だけ入れてください。</div>`
-    +trashSection();
+  if(!entries.length)return `<div class="empty">まだ1件もありません。<br>次に何か起きたら、その場で「記録」に1行だけ入れてください。</div>
+    <button class="ghost" data-act="import">控えから読み込む</button>`+trashSection();
   const num={};entries.forEach((e,i)=>num[e.id]=entries.length-i);
   const rows=sortedEntries().map(e=>`
     <div class="row">
@@ -279,10 +289,12 @@ function viewBook(){
         <div class="meta"><span style="font-family:var(--num)">${esc(e.date)}</span>
           ${e.client?"<span>"+esc(e.client)+"</span>":""}
           ${e.sev?`<span class="badge s${SEV.findIndex(v=>v[0]===e.sev)+1}">${esc(e.sev)}</span>`:""}
+          ${e.loss?`<span class="badge s4">実損</span>`:""}
           <span>${esc(e.kind)}</span>${e.stage?"<span>"+esc(e.stage)+"</span>":""}
           <span class="${e.detector==="自分"?"self":"other"}">${esc(e.detector)}が発見</span></div>
         ${e.cause||e.why||e.fix?`<div class="deep">${e.cause?"<div>因 — "+esc(e.cause)+"</div>":""}${e.why?'<div class="why">害 — '+esc(e.why)+"</div>":""}${e.fix?'<div class="fix">次 — '+esc(e.fix)+"</div>":""}</div>`:""}
         <div class="acts">
+          <button data-act="edit" data-id="${e.id}" style="color:var(--ai)">編集</button>
           <button data-act="rep" data-id="${e.id}" class="${e.repeat?"on":""}">${e.repeat?"● 再発":"○ 再発にする"}</button>
           <button data-act="del" data-id="${e.id}">削除</button>
         </div>
@@ -290,6 +302,7 @@ function viewBook(){
     </div>`).join("");
   return sortBar()+`<div class="book">${rows}</div>
     <button class="ghost" data-act="export">スプレッドシートに貼る形で出す</button>
+    <button class="ghost" data-act="import">控えから読み込む</button>
     ${trashSection()}`;
 }
 
@@ -314,7 +327,8 @@ function viewStats(){
   if(!empty){
     html+=`<div class="nums">
       <div><div class="cap">直近90日</div><div class="v">${s.recN?Math.round(s.recRate*100)+"%":"—"}</div></div>
-      <div><div class="cap">申告</div><div class="v" style="color:${s.heavy?"var(--shu)":"inherit"}">${s.heavy}</div></div>
+      <div><div class="cap">Lv4</div><div class="v" style="color:${s.heavy?"var(--och)":"inherit"}">${s.heavy}</div></div>
+      <div><div class="cap">実損</div><div class="v" style="color:${s.loss?"var(--shu)":"inherit"}">${s.loss}</div></div>
       <div><div class="cap">再発</div><div class="v" style="color:${s.rep?"var(--shu)":"inherit"}">${s.rep}</div></div>
       <div><div class="cap">総件数</div><div class="v">${s.n}</div></div></div>`;
   }
@@ -331,16 +345,70 @@ function viewStats(){
     });
     html+=`<div class="note">全部は潰さないこと。上位2つだけを作業チェックリストに落とします。</div></div>`;
   }
-  html+=tally("波及範囲別",s.sevs)+tally("種類別",s.kinds)+tally("発生工程別",s.stages);
+  html+=tally("重大度別",s.sevs)+tally("種類別",s.kinds)+tally("発生工程別",s.stages);
   if(empty)html+=`<div class="empty">3か月ぶん貯まると、自分のミスが数パターンに収束していることが見えます。</div>`;
   return html;
+}
+
+function periodRange(){
+  const to=today();
+  if(period==="month")return [to.slice(0,8)+"01",to];
+  const d=new Date(); d.setDate(d.getDate()-6);
+  return [new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10),to];
+}
+function countLine(arr,keys,pick){
+  return keys.map(k=>{const n=arr.filter(e=>pick(e)===k).length;return n?k+"×"+n:null})
+    .filter(Boolean).join(" ")||"なし";
+}
+function buildReport(){
+  const [from,to]=periodRange();
+  const a=entries.filter(e=>e.date>=from&&e.date<=to)
+    .sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);
+  const label=period==="week"?"週次":"月次";
+  if(!a.length)return `【ミス台帳・${label}レポート依頼】\n期間: ${from} 〜 ${to}\n\nこの期間の記録は0件でした。`;
+  const self=a.filter(e=>e.detector==="自分").length;
+  const nofix=a.filter(e=>!e.fix).length;
+  const nowhy=a.filter(e=>!e.why).length;
+  const rep_=a.filter(e=>e.repeat).length;
+  const ask=period==="week"
+    ? "この内容から週次レポートを作ってください。反省文ではなく、未処理の督促が主目的です。5行以内でお願いします。"
+    : "この内容から月次レポートを作ってください。型の分布、自己検知率、再発の状況、今月潰すべき2つ、知識不足から抽出した勉強リストを含めてください。";
+  const rows=a.map((e,i)=>{
+    const d=[e.cause?"因: "+e.cause:"",e.why?"害: "+e.why:"",e.fix?"次: "+e.fix:"次: (未記入)"]
+      .filter(Boolean).join(" / ");
+    return `${i+1}) ${e.date} [${e.sev||"?"}/${e.kind}/${e.detector}が発見${e.loss?"/実損":""}${e.repeat?"/再発":""}]${e.client?" "+e.client:""}\n   ${e.what}\n   ${d}`;
+  }).join("\n");
+  return `【ミス台帳・${label}レポート依頼】
+期間: ${from} 〜 ${to}
+件数: ${a.length}（うち再発 ${rep_}）
+自己検知率: ${Math.round(self/a.length*100)}%（${self}/${a.length}）
+重大度: ${countLine(a,SEV.map(v=>v[0]),e=>e.sev)}\n実損が出た件: ${a.filter(e=>e.loss).length}
+種類: ${countLine(a,KINDS,e=>e.kind)}
+発生工程: ${countLine(a,STAGES,e=>e.stage)}
+未記入: 防ぎ方${nofix}件 / なぜまずいか${nowhy}件
+
+■明細
+${rows}
+
+${ask}`;
+}
+function viewReport(){
+  return `<div class="chips" style="margin-bottom:14px">
+      <button class="chip${period==="week"?" on":""}" data-act="period" data-v="week">今週（直近7日）</button>
+      <button class="chip${period==="month"?" on":""}" data-act="period" data-v="month">今月</button>
+    </div>
+    <textarea id="report" readonly></textarea>
+    <button class="save" data-act="copy">コピーする</button>
+    <a class="linkbtn" href="https://claude.ai/new" target="_blank" rel="noopener">Claudeを開く</a>
+    <div class="note">コピーしてから、Claudeの入力欄に貼り付けてください。</div>`;
 }
 
 function render(){
   document.getElementById("count").textContent=String(entries.length).padStart(3,"0")+" 件";
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   document.getElementById("main").innerHTML=
-    tab==="write"?viewWrite():tab==="book"?viewBook():viewStats();
+    tab==="write"?viewWrite():tab==="book"?viewBook():tab==="report"?viewReport():viewStats();
+  if(tab==="report")document.getElementById("report").value=buildReport();
 }
 
 function readInputs(){
@@ -366,6 +434,7 @@ document.addEventListener("click",e=>{
     if(a==="more"){readInputs();more=true;render()}
     else if(["kind","stage","detector","sev"].includes(a)){readInputs();form[a]=form[a]===b.dataset.v?"":b.dataset.v;render()}
     else if(a==="repeat"){readInputs();form.repeat=!form.repeat;render()}
+    else if(a==="loss"){readInputs();form.loss=!form.loss;render()}
     else if(a==="rep"){const x=entries.find(v=>v.id===b.dataset.id);x.repeat=!x.repeat;save();render()}
     else if(a==="del"){
       const i=entries.findIndex(v=>v.id===b.dataset.id);
@@ -382,6 +451,22 @@ document.addEventListener("click",e=>{
         {trash=trash.filter(v=>v.id!==b.dataset.id);save();render()}
     }
     else if(a==="trash"){showTrash=!showTrash;render()}
+    else if(a==="edit"){
+      const x=entries.find(v=>v.id===b.dataset.id);
+      if(x){form={...x};editing=x.id;more=true;tab="write";render();
+        if(typeof scrollTo==="function")scrollTo(0,0)}
+    }
+    else if(a==="cancel"){editing=null;form=blankForm();more=false;render()}
+    else if(a==="period"){period=b.dataset.v;render()}
+    else if(a==="copy"){
+      const t=document.getElementById("report");
+      t.focus();t.setSelectionRange(0,t.value.length);
+      const done=()=>toast("コピーしました");
+      if(navigator.clipboard&&navigator.clipboard.writeText)
+        navigator.clipboard.writeText(t.value).then(done).catch(()=>toast("選択したので、長押しでコピーしてください"));
+      else{try{document.execCommand("copy");done()}catch(err){toast("選択したので、長押しでコピーしてください")}}
+    }
+    else if(a==="import"){showImport()}
     else if(a==="sort"){
       const k=b.dataset.k;
       if(sortKey===k)sortDir=-sortDir; else{sortKey=k;sortDir=(k==="date"||k==="sev"||k==="repeat"?-1:1)}
@@ -393,17 +478,61 @@ document.addEventListener("click",e=>{
   if(e.target.id==="save"){
     readInputs();
     if(!(form.what.trim()&&form.kind&&form.detector&&form.sev))return;
-    entries.unshift({...form,what:form.what.trim(),id:newId()});
+    if(editing){
+      const i=entries.findIndex(v=>v.id===editing);
+      if(i>=0)entries[i]={...entries[i],...form,what:form.what.trim(),id:editing};
+      editing=null;
+    }else{
+      entries.unshift({...form,what:form.what.trim(),id:newId()});
+    }
     save();
-    form={date:today(),client:"",what:"",kind:"",stage:"",detector:"",sev:"",cause:"",why:"",fix:"",repeat:false};
-    more=false;render();toast("台帳に記入しました");
+    form=blankForm();
+    more=false;render();toast("保存しました");
   }
 });
 
+function importTSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length&&/^日付\t/.test(lines[0]))lines.shift();
+  let added=0,skipped=0;
+  lines.forEach(l=>{
+    const c=l.split("\t");
+    if(c.length<3)return;
+    const e={date:(c[0]||"").trim()||today(),client:c[1]||"",what:(c[2]||"").trim(),
+      sev:(c[3]||"").trim(),kind:(c[4]||"").trim(),stage:(c[5]||"").trim(),
+      detector:(c[6]||"").trim(),cause:c[7]||"",why:c[8]||"",fix:c[9]||"",
+      loss:!!(c[10]&&c[10].trim()),repeat:!!(c[11]&&c[11].trim())};
+    if(!e.what)return;
+    if(entries.some(x=>x.date===e.date&&x.what===e.what)){skipped++;return}
+    e.id=newId(); entries.unshift(e); added++;
+  });
+  if(added)save();
+  return [added,skipped];
+}
+function showImport(){
+  const d=document.createElement("div");
+  d.className="modal";
+  d.innerHTML=`<div class="box"><h2>控えを貼り付けて読み込む</h2>
+    <div class="note" style="margin:0 0 8px">スプレッドシートから該当範囲をコピーして貼り付けてください。見出し行は入っていても大丈夫です。同じ日付・同じ内容のものは重複登録しません。</div>
+    <textarea placeholder="日付	案件	何が起きた	…"></textarea>
+    <button class="close" data-go="1">読み込む</button>
+    <button class="ghost" style="margin-top:8px">やめる</button></div>`;
+  const ta=d.querySelector("textarea"); ta.readOnly=false;
+  d.addEventListener("click",ev=>{
+    if(ev.target===d||ev.target.classList.contains("ghost")){d.remove();return}
+    if(ev.target.dataset.go){
+      const [n,sk]=importTSV(ta.value);
+      d.remove(); render();
+      toast(n?`${n}件を読み込みました${sk?`（重複${sk}件は除外）`:""}`:"読み込めるデータが見つかりませんでした");
+    }
+  });
+  document.body.appendChild(d);
+  ta.focus();
+}
 function showExport(){
-  const head="日付\t案件\t何が起きた\t重大度\t種類\t発生工程\t誰が気づいた\t原因\tなぜまずいか\t次の防ぎ方\t再発";
+  const head="日付\t案件\t何が起きた\t重大度\t種類\t発生工程\t誰が気づいた\t原因\tなぜまずいか\t次の防ぎ方\t実損\t再発";
   const rows=[...entries].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>
-    [e.date,e.client,e.what,e.sev,e.kind,e.stage,e.detector,e.cause,e.why,e.fix,e.repeat?"○":""]
+    [e.date,e.client,e.what,e.sev,e.kind,e.stage,e.detector,e.cause,e.why,e.fix,e.loss?"○":"",e.repeat?"○":""]
       .map(v=>String(v||"").replace(/[\t\n]/g," ")).join("\t"));
   const tsv=[head,...rows].join("\n");
   const d=document.createElement("div");
