@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --desk:#E6E2DA; --paper:#FBF9F4; --ink:#2A2724; --inkSoft:#77706A; --shu:#A8463A; --rule:#CFC8BC;
+  --desk:#E6E2DA; --paper:#FBF7EE; --ink:#2A2724; --inkSoft:#77706A; --shu:#B2363A; --kin:#B0904F; --rule:#D8CDB8;
   --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;
   --sans:"Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
 }
@@ -21,23 +21,32 @@ body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--mincho);
 
 /* 紙面（A5縦） */
 .page{width:min(100%,148mm);aspect-ratio:148/210;margin:0 auto 24px;background:var(--paper);
-  position:relative;overflow:hidden;container-type:inline-size;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+  position:relative;overflow:hidden;container-type:inline-size;box-shadow:0 1px 6px rgba(0,0,0,.1);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .48 0 0 0 0 .38 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E")}
+.page::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6cqw;opacity:.75;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23B0904F' stroke-width='.8'%3E%3Cg id='w'%3E%3Ccircle cx='20' cy='20' r='19'/%3E%3Ccircle cx='20' cy='20' r='14'/%3E%3Ccircle cx='20' cy='20' r='9'/%3E%3Ccircle cx='20' cy='20' r='4'/%3E%3C/g%3E%3Cuse href='%23w' x='-20' y='-10'/%3E%3Cuse href='%23w' x='20' y='-10'/%3E%3Cuse href='%23w' x='-20' y='10'/%3E%3Cuse href='%23w' x='20' y='10'/%3E%3C/g%3E%3C/svg%3E") repeat-x left bottom/6cqw 3cqw;
+  border-top:.15cqw solid var(--kin)}
 .in{position:absolute;inset:10cqw 10cqw;display:flex;flex-direction:column}
-h2{font-size:4cqw;font-weight:600;letter-spacing:.5em;margin:0 0 5cqw;padding-bottom:1.6cqw;border-bottom:.15cqw solid var(--ink)}
+h2{font-size:4cqw;font-weight:600;letter-spacing:.5em;margin:0 0 5cqw;padding-bottom:1.6cqw;border-bottom:.5cqw double var(--kin);
+  display:flex;align-items:center}
+h2::before{content:"";width:1.6cqw;height:1.6cqw;background:var(--shu);transform:rotate(45deg);margin:0 2.6cqw 0 .6cqw;flex-shrink:0}
 p,li,td,dd,dt{font-size:2.9cqw;line-height:1.9}
 
-/* 表紙 */
-.cover .in{flex-direction:row-reverse;justify-content:space-between;align-items:stretch}
-.cover .title{writing-mode:vertical-rl;font-size:7.4cqw;font-weight:600;letter-spacing:.4em;margin:6cqw 4cqw 0 0;line-height:1}
-.cover .side{writing-mode:vertical-rl;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;margin-top:6cqw}
-.cover .names{font-size:4.2cqw;letter-spacing:.3em;line-height:1.9}
-.cover .when{font-size:2.8cqw;line-height:2;color:var(--inkSoft);letter-spacing:.1em}
-.cover .seal{width:9cqw;height:9cqw;border:.35cqw solid var(--shu);color:var(--shu);border-radius:.6cqw;
-  display:flex;align-items:center;justify-content:center;font-size:3cqw;line-height:1.1;writing-mode:vertical-rl;letter-spacing:.1em;align-self:flex-end}
+/* 表紙（祝儀袋の見立て） */
+.cover .in{inset:0;display:block}
+.noshi{position:absolute;top:7cqw;right:8cqw;width:7cqw;height:auto}
+.cover .title{position:absolute;top:16cqw;left:0;right:0;margin:auto;writing-mode:vertical-rl;
+  font-size:8cqw;font-weight:600;letter-spacing:.35em;line-height:1;width:max-content}
+.mizuhiki{position:absolute;left:0;right:0;top:86cqw;height:auto;width:100%}
+.cover .names{position:absolute;top:100cqw;left:0;right:0;margin:auto;writing-mode:vertical-rl;
+  font-size:4.6cqw;letter-spacing:.4em;line-height:2.1;width:max-content}
+.cover .when{position:absolute;left:9cqw;bottom:11cqw;writing-mode:vertical-rl;font-size:2.6cqw;
+  line-height:2;color:var(--inkSoft);letter-spacing:.15em}
 
 /* ごあいさつ（縦書き） */
 .tate{writing-mode:vertical-rl;flex:1;font-size:3.1cqw;line-height:2.2;letter-spacing:.08em}
 .tate h2{border:none;padding:0;margin:0 0 0 5cqw;font-size:4cqw}
+.tate h2::before{margin:0 0 2.6cqw}
 .tate p{margin:0;font-size:3.1cqw;line-height:2.2}
 .tate .from{margin-top:auto;margin-right:3cqw;text-align:end}
 
@@ -72,7 +81,9 @@ p,li,td,dd,dt{font-size:2.9cqw;line-height:1.9}
 .menu li{display:flex;gap:4cqw;font-size:2.8cqw;line-height:2.15}
 .menu li i{font-style:normal;width:9cqw;color:var(--inkSoft);font-size:2.5cqw}
 .musubi{margin-top:auto;font-size:2.8cqw;line-height:2}
-.sign{text-align:right;font-size:3cqw;letter-spacing:.2em}
+.sign{display:flex;justify-content:flex-end;align-items:center;gap:2.5cqw;font-size:3cqw;letter-spacing:.2em}
+.seal{width:7.5cqw;height:7.5cqw;background:var(--shu);color:#FBF7EE;border-radius:.8cqw;display:flex;
+  align-items:center;justify-content:center;font-size:4.4cqw;font-weight:600;letter-spacing:0}
 
 /* 編集 */
 body.edit [data-k]{outline:1px dashed var(--shu);outline-offset:2px;cursor:text}
@@ -104,12 +115,20 @@ body.edit [data-k]:focus{outline-style:solid;background:#FFF5EC}
 <!-- 表紙 -->
 <section class="page cover">
   <div class="in">
+    <svg class="noshi" viewBox="0 0 40 90" aria-hidden="true">
+      <polygon points="20,2 36,16 30,88 10,88 4,16" fill="#FBF7EE" stroke="#B2363A" stroke-width="1.2"/>
+      <polygon points="20,12 29,21 25,80 15,80 11,21" fill="#B2363A"/>
+      <rect x="18.2" y="22" width="3.6" height="54" fill="#E4C766"/>
+    </svg>
     <div class="title" data-k="c_title">両家顔合わせ</div>
-    <div class="side">
-      <div class="names" data-k="c_names">山田太郎<br>佐藤花子</div>
-      <div class="when" data-k="c_when">令和八年十一月二十二日<br>料亭 ○○にて</div>
-    </div>
-    <div class="seal" data-k="c_seal">寿</div>
+    <svg class="mizuhiki" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke-width="1.3">
+        <path d="M0 13 H300" stroke="#B2363A"/><path d="M0 16.5 H300" stroke="#B2363A"/><path d="M0 20 H300" stroke="#B0904F"/>
+        <path d="M0 23.5 H300" stroke="#B0904F"/><path d="M0 27 H300" stroke="#B0904F"/>
+      </g>
+    </svg>
+    <div class="names" data-k="c_names">山田太郎<br>佐藤花子</div>
+    <div class="when" data-k="c_when">令和八年十一月二十二日<br>料亭 ○○にて</div>
   </div>
 </section>
 
@@ -210,7 +229,7 @@ body.edit [data-k]:focus{outline-style:solid;background:#FFF5EC}
       <li><i>甘味</i>柿のゼリー</li>
     </ul>
     <p class="musubi" data-k="musubi">至らないところの多いふたりですが、これからもどうぞよろしくお願いします。</p>
-    <p class="sign" data-k="sign">太郎・花子</p>
+    <div class="sign"><span data-k="sign">太郎・花子</span><span class="seal">寿</span></div>
   </div>
 </section>
 
@@ -221,7 +240,7 @@ body.edit [data-k]:focus{outline-style:solid;background:#FFF5EC}
 </div>
 
 <script>
-const KEY = "kaoawase-shiori-v2";
+const KEY = "kaoawase-shiori-v3";
 const els = [...document.querySelectorAll("[data-k]")];
 const defaults = Object.fromEntries(els.map(e => [e.dataset.k, e.innerHTML]));
 
