@@ -163,6 +163,7 @@ const SFX = {
   steal()  { tone(700, 0.06, "square", 0.04, 300); later(70, () => tone(500, 0.08, "square", 0.04, 200)); },
   chomp()  { noise(0.1, 0.12, 300); tone(120, 0.15, "square", 0.08, 60); },
   crack()  { tone(300, 0.1, "square", 0.08, 150); noise(0.08, 0.1, 1500); },
+  graze()  { tone(1800, 0.02, "square", 0.015); },
   beat()   { tone(70, 0.09, "sine", 0.12, 50); later(160, () => tone(65, 0.09, "sine", 0.09, 45)); },
   shatter(){ noise(0.6, 0.12, 1200); tone(200, 0.5, "sawtooth", 0.05, 40); },
   revive() { [262, 330, 392, 523, 659, 784].forEach((f, i) => later(i * 90, () => tone(f, 0.18, "triangle", 0.06))); },
@@ -719,7 +720,7 @@ function buildFormation() {
   const nt = NEW_TYPE[wave] && NEW_TYPE[wave].type;
   if (nt != null && !rowTypes.includes(nt)) rowTypes[Math.floor(rows / 2)] = nt;
   // たいれつの かたち（ウェーブ3から いろいろ）
-  const shape = wave < 3 ? "grid" : pick(["grid", "grid", "checker", "v", "pillars", "diamond"]);
+  const shape = wave < 3 || NEW_TYPE[wave] ? "grid" : pick(rows >= 4 ? ["grid", "grid", "checker", "v", "pillars", "diamond"] : ["grid", "grid", "checker", "pillars"]);
   const keep = (r, c) => {
     switch (shape) {
       case "checker": return (r + c) % 2 === 0 || r === rows - 1;
@@ -860,18 +861,22 @@ function pressCmd(i) {
   }
 }
 
-// ケツイ ブラスト：たまを ぜんぶ けして、てき ぜんいんに ダメージ
+function graze(b) {
+  if (soul.tp >= 100) return;
+  soul.tp = Math.min(100, soul.tp + 5); SFX.graze();
+  parts.push({ x: b.x, y: b.y, vx: 0, vy: -20, life: 0.2, max: 0.2, delay: 0, color: C.white, s: 1 });
+  if (soul.tp >= 100) { SFX.lvup(); pops.push({ x: soul.x + 3, y: soul.y - 16, text: "ケツイ MAX！", color: C.red, t: 0 }); }
+}
+// ケツイ ブラスト：たまを ぜんぶ けして、てき ぜんいんに ダメージ（あいてが いない ときは つかわない）
 function ketsuiBlast() {
+  const targets = enemies.some(e => !e.dead && !e.dying && !e.spare && !MON[e.type].ghost);
+  if (!targets && !ebul.length && !beams.length) { SFX.cancel(); return; }
   soul.tp = 0; ebul = []; beams = []; shake = 8; hurtT = 0;
   SFX.shatter(); later(80, () => SFX.lvup()); vibrate(80);
   form.blastT = 0.5;
-  const dmg = atk() * 3 + 2;
-  for (const e of enemies) {
-    if (e.dead || e.dying || e.spare || MON[e.type].ghost) continue;
-    damageEnemy(e, dmg, true);
-  }
-  enemies = enemies.filter(e => !e.dead);
+  bombAll(atk() * 3 + 2);
   pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "ケツイ！", color: C.red, t: 0, big: true });
+  later(0, saveRun);
 }
 
 function confirmTap(p) {
@@ -1080,6 +1085,7 @@ function healMsg(text, n) {
 function bombAll(dmg) {
   for (const e of enemies) {
     if (e.dead || e.dying || e.spare || MON[e.type].ghost) continue; // みのがせる あいては まきこまない
+    if (e.reflect || (MON[e.type].shield && e.guard)) { e.flash = 0.1; continue; } // たて・はねかえしは ふせぐ
     damageEnemy(e, dmg, true);
   }
   enemies = enemies.filter(e => !e.dead);
@@ -1364,6 +1370,7 @@ function update(dt) {
   time += dt; stateT += dt;
   if (paused) return;
   if (hurtT > 0) hurtT -= dt;
+  if (form && form.blastT > 0) form.blastT -= dt;
 
   if (state === "menu" || state === "shop" || state === "chest" || state === "talk" || state === "revive" || state === "ending" || state === "savept") {
     updateMsg(dt, state === "talk");
@@ -1593,24 +1600,18 @@ function updatePlay(dt) {
   // 当たり判定：敵の こうげき → ソウル（見た目より すこし ちいさめ）
   if (soul.inv <= 0) {
     const cx = soul.x + 3.5, cy = soul.y + 2.5, moving = soul.moveT > 0;
-    // かする：あたらずに ちかくを とおると ケツイが たまる
     for (const b of ebul) {
-      if (b.grazed || b.dead) continue;
       const gx = Math.abs(b.x - cx) - b.w / 2, gy = Math.abs(b.y - cy) - b.h / 2;
-      if (gx < 9 && gy < 7 && !(gx < 2 && gy < 2)) {
-        b.grazed = true;
-        if (soul.tp < 100) { soul.tp = Math.min(100, soul.tp + 5); tone(1800, 0.02, "square", 0.015);
-          parts.push({ x: b.x, y: b.y, vx: 0, vy: -20, life: 0.2, max: 0.2, delay: 0, color: C.white, s: 1 });
-          if (soul.tp >= 100) { SFX.lvup(); pops.push({ x: soul.x + 3, y: soul.y - 16, text: "ケツイ MAX！", color: C.red, t: 0 }); } }
-      }
-    }
-    for (const b of ebul) {
-      if (Math.abs(b.x - cx) < b.w / 2 + 2 && Math.abs(b.y - cy) < b.h / 2 + 2) {
-        if (b.c === "b" && !moving) continue; // あお：とまっていれば へいき
-        if (b.c === "o" && moving) continue;  // オレンジ：うごいていれば へいき
+      if (gx < 2 && gy < 2) {
+        if (b.c === "b" && !moving) { b.near = true; continue; } // あお：とまっていれば へいき
+        if (b.c === "o" && moving) { b.near = true; continue; }  // オレンジ：うごいていれば へいき
+        b.hitSoul = true;
         if (!b.keep) b.dead = true;
         hurt(b.dmg); break;
       }
+      // かする：あたらずに すれすれを とおりぬけたら ケツイが たまる
+      if (gx < 9 && gy < 7) b.near = true;
+      else if (b.near && !b.grazed && !b.hitSoul) { b.grazed = true; graze(b); }
     }
     if (soul.inv <= 0) for (const bm of beams) {
       if (bm.fired && Math.abs(bm.x - cx) < bm.w / 2 + 1) { hurt(bm.dmg); break; }
@@ -2153,7 +2154,7 @@ function draw() {
   else drawGame();
 
   ctx.restore();
-  if (form && form.blastT > 0) { form.blastT -= 1 / 60; ctx.globalAlpha = Math.max(0, form.blastT * 1.5); ctx.fillStyle = C.white; ctx.fillRect(BOX.x, BOX.y, BOX.w, BOX.h); ctx.globalAlpha = 1; }
+  if (form && form.blastT > 0) { ctx.globalAlpha = Math.max(0, form.blastT * 1.5); ctx.fillStyle = C.white; ctx.fillRect(BOX.x, BOX.y, BOX.w, BOX.h); ctx.globalAlpha = 1; }
   if (hurtT > 0) { ctx.globalAlpha = hurtT * 2; rectLine(BOX.x - 2, BOX.y - 2, BOX.w + 4, BOX.h + 4, C.red, 2); ctx.globalAlpha = 1; }
   drawTopButtons();
   if (paused) {
