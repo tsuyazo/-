@@ -717,8 +717,21 @@ function buildFormation() {
   }
   const nt = NEW_TYPE[wave] && NEW_TYPE[wave].type;
   if (nt != null && !rowTypes.includes(nt)) rowTypes[Math.floor(rows / 2)] = nt;
+  // たいれつの かたち（ウェーブ3から いろいろ）
+  const shape = wave < 3 ? "grid" : pick(["grid", "grid", "checker", "v", "pillars", "diamond"]);
+  const keep = (r, c) => {
+    switch (shape) {
+      case "checker": return (r + c) % 2 === 0 || r === rows - 1;
+      case "v": return Math.abs(c - 2.5) + 0.5 >= r * 0.7 || r === 0;
+      case "pillars": return c <= 1 || c >= 4;
+      case "diamond": return Math.abs(c - 2.5) + Math.abs(r - (rows - 1) / 2) <= 3;
+      default: return true;
+    }
+  };
+  form.shape = shape;
   rowTypes.forEach((type, r) => {
     for (let c = 0; c < cols; c++) {
+      if (!keep(r, c)) continue;
       const m = MON[type];
       const e = mkEnemy(type, 0, 0, { fx: c * gx + (12 - m.w) / 2, fy: r * gy + (10 - m.h) / 2 });
       enemies.push(e);
