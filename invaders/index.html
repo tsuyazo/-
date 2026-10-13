@@ -367,6 +367,12 @@ const ITEMS = {
     use: () => { ebul = []; beams = []; SFX.heal(); return "＊ けむりだま を なげた。\n＊ てきの こうげきが きえた！"; } },
   bomb:  { name: "ばくだんリンゴ",   price: 30, desc: "てき ぜんいんに 3ダメージ。",
     use: () => { SFX.dust(); bombAll(3); return "＊ ばくだんリンゴ を なげた。\n＊ ドカーン！"; } },
+  clock: { name: "ゆっくりどけい",   price: 35, desc: "6びょう てきが ゆっくりに なる。",
+    use: () => { form.slowT = 6; SFX.warn(); return "＊ ゆっくりどけい を ふった。\n＊ じかんが のびていく…"; } },
+  star:  { name: "ほしのかけら",     price: 40, desc: "5びょう むてきに なる。",
+    use: () => { soul.inv = 5; SFX.revive(); return "＊ ほしのかけら を にぎった。\n＊ からだが ひかりだした！"; } },
+  seed:  { name: "ちからのたね",     price: 60, desc: "さいだいHPが 5 あがる。",
+    use: () => { soul.maxHp += 5; soul.hp += 5; SFX.lvup(); return "＊ ちからのたね を たべた。\n＊ さいだいHPが 5 あがった！"; } },
   cotton: { name: "あまぐもわたあめ", price: 0, unique: true, desc: "HPを ぜんぶ かいふく。ふわふわ。",
     use: () => healMsg("あまぐもわたあめ を たべた。\n＊ くちの なかで あめが ふった。", 999) },
 };
@@ -1276,6 +1282,9 @@ function updatePlay(dt) {
   if (form.pendingTalk) { const t = form.pendingTalk; form.pendingTalk = null; startTalk(t.lines, t.who, t.after); return; }
   moveSoulKeys(dt);
   if (soul.inv > 0) soul.inv -= dt;
+  // ゆっくりどけい：てきの じかんだけ おそく なる
+  if (form.slowT > 0) form.slowT -= dt;
+  const edt = form.slowT > 0 ? dt * 0.5 : dt;
   // うごいているか（あお・オレンジの はんてい）
   if (Math.abs(soul.x - soul.px) > 0.05) soul.moveT = 0.1; else soul.moveT = Math.max(0, soul.moveT - dt);
   soul.px = soul.x;
@@ -1298,21 +1307,21 @@ function updatePlay(dt) {
     if (form.rush <= 0) form.rush = -1;
   }
 
-  updateFormation(dt);
+  updateFormation(edt);
   if (state !== "play") return;
 
   for (const e of enemies) {
-    e.t += dt;
+    e.t += edt;
     if (e.flash > 0) e.flash -= dt;
     if (e.shakeT > 0) e.shakeT -= dt;
     const m = MON[e.type];
     if (m.shield) { e.guardT -= dt; if (e.guardT <= 0) { e.guard = !e.guard; e.guardT = e.guard ? 1.4 : 1.0; } }
-    if (e.free) updateFree(e, m, dt);
+    if (e.free) updateFree(e, m, edt);
   }
   if (state !== "play") return;
 
   // 隊列の 射撃
-  efireT -= dt;
+  efireT -= edt;
   const shooters = enemies.filter(e => e.fm && !e.free);
   if (form.peace > 0) {
     form.peace -= dt;
@@ -1330,13 +1339,13 @@ function updatePlay(dt) {
   }
 
   for (const b of ebul) {
-    b.x += b.vx * dt; b.y += b.vy * dt;
-    if (b.ay) b.vy += b.ay * dt;
+    b.x += b.vx * edt; b.y += b.vy * edt;
+    if (b.ay) b.vy += b.ay * edt;
     if (b.bounce && (b.x < BOX.x + 4 || b.x > BOX.x + BOX.w - 4)) { b.vx = -b.vx; b.x = clamp(b.x, BOX.x + 4, BOX.x + BOX.w - 4); }
   }
   ebul = ebul.filter(b => b.y < BOX.y + BOX.h + 20 && b.y > BOX.y - 30 && b.x > BOX.x - 40 && b.x < BOX.x + BOX.w + 40 && !b.dead);
   for (const bm of beams) {
-    bm.t += dt;
+    bm.t += edt;
     if (!bm.fired && bm.t >= bm.warn) { bm.fired = true; SFX.beam(); shake = 3; }
   }
   beams = beams.filter(bm => bm.t < bm.warn + bm.dur);
@@ -2136,6 +2145,7 @@ function drawField() {
     if (s.ally) { ctx.fillStyle = C.white; ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 10); ctx.fillRect(Math.round(s.x) - 1, Math.round(s.y), 3, 2); ctx.fillRect(Math.round(s.x) - 1, Math.round(s.y) + 8, 3, 2); }
     else { ctx.fillStyle = C.yellow; ctx.fillRect(Math.round(s.x) - 0.5, Math.round(s.y), 1, 5); }
   }
+  if (form.slowT > 0 && state === "play") { ctx.fillStyle = "rgba(40,80,255,0.08)"; ctx.fillRect(BOX.x + 2, BOX.y + 2, BOX.w - 4, BOX.h - 4); txt("ゆっくり " + Math.ceil(form.slowT), BOX.x + BOX.w - 6, BOX.y + BOX.h - 14, 8, C.blue, "right"); }
   if (soul.mirrorShield && state === "play") { ctx.fillStyle = C.yellow; ctx.globalAlpha = 0.5 + Math.sin(time * 6) * 0.3; rectLine(Math.round(soul.x) - 3, Math.round(soul.y) - 3, 13, 12, C.yellow, 1); ctx.globalAlpha = 1; }
   for (const b of ebul) drawBullet(b);
   for (const it of items) spr(it.kind === "coin" ? SPR.coin : SPR.candy, it.x, it.y);
@@ -2194,6 +2204,12 @@ function drawSoul() {
     if (soul.cracked || state === "revive") { spr(SPR.heartL, soul.x - 1, soul.y); spr(SPR.heartR, soul.x + 1, soul.y); }
     else spr(SPR.heart, soul.x, soul.y);
     return;
+  }
+  if (soul.inv > 1.6 && state === "play") { // ほしのかけら：ひかる
+    ctx.fillStyle = Math.floor(time * 10) % 2 ? C.yellow : C.white;
+    ctx.fillRect(Math.round(soul.x) - 2, Math.round(soul.y) + 2, 1, 1); ctx.fillRect(Math.round(soul.x) + 9, Math.round(soul.y) + 2, 1, 1);
+    ctx.fillRect(Math.round(soul.x) + 3, Math.round(soul.y) - 3, 1, 1);
+    spr(SPR.heart, soul.x, soul.y); return;
   }
   if (soul.inv > 0 && Math.floor(soul.inv * 12) % 2 === 0) return; // 無敵中は点滅
   spr(SPR.heart, soul.x, soul.y);
