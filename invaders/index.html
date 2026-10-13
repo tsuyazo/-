@@ -800,11 +800,32 @@ function confirmTap(p) {
   else if (state === "over" && stateT > 3.2) { SFX.select(); setState("title"); }
 }
 
+let helpOpen = false;
+function drawHelp() {
+  ctx.fillStyle = C.black; ctx.fillRect(0, 0, W, H);
+  rectLine(BOX0.x, 30, BOX0.w, 336, C.white, 2);
+  const x = BOX0.x + 12;
+  let y = 42;
+  txt("＊ あそびかた", x, y, 12); y += 22;
+  const sec = (title, lines, col = C.yellow) => {
+    txt(title, x, y, 10, col); y += 14;
+    for (const l of lines) { txt(l, x + 8, y, 9, C.white); y += 13; }
+    y += 4;
+  };
+  sec("うごく", ["どこでも ドラッグ → ソウルが ひだり・みぎ", "こうげきは じどう"]);
+  sec("いろの ついた こうげき", ["あお … うごかなければ あたらない", "オレンジ … うごいていれば あたらない"], C.blue);
+  sec("したの コマンド", ["アイテム・そうび … ひらくと ときが とまる", "みのがす … ひかったら おせる", "たたかう … みのがさずに たたかう"]);
+  sec("おりてくる もの", ["SHOP … かいもの・ぶきを きたえる", "たからばこ … ときどき ミミック", "ひかる ほし … HP まんたん＆セーブ"]);
+  sec("ちゅうだん", ["みぎうえの II で いつでも ポーズ", "とじても タイトルの「つづきから」"]);
+  txt("[ タップで もどる ]", W / 2, 374, 11, C.yellow, "center");
+}
 function pausedTap(p) {
   // ポーズ画面：「タイトルへ」以外は どこを タップしても さいかい
   if (p && p.y > H / 2 + 24 && p.y < H / 2 + 54) { saveRun(); paused = false; welcome = null; setState("title"); SFX.cancel(); return; }
+  if (helpOpen) { helpOpen = false; SFX.cancel(); return; }
   if (p && p.y > H / 2 + 56 && p.y < H / 2 + 86) { sensI = (sensI + 1) % SENS.length; store.set("sens", sensI); SFX.move(); return; }
-  paused = false; welcome = null; SFX.select();
+  if (p && p.y > H / 2 + 88 && p.y < H / 2 + 118) { helpOpen = true; SFX.select(); return; }
+  paused = false; welcome = null; helpOpen = false; SFX.select();
 }
 
 cv.addEventListener("pointerdown", e => {
@@ -1977,7 +1998,10 @@ function draw() {
     txt("セーブして タイトルへ", W / 2, H / 2 + 33, 10, C.gray, "center");
     rectLine(W / 2 - 60, H / 2 + 58, 120, 26, C.gray, 1);
     txt("うごきの はやさ：" + SENS[sensI].n, W / 2, H / 2 + 65, 10, C.gray, "center");
-    txt("＊ とじても じどうで セーブされる", W / 2, H / 2 + 100, 9, C.dim, "center");
+    rectLine(W / 2 - 60, H / 2 + 90, 120, 26, C.gray, 1);
+    txt("あそびかた", W / 2, H / 2 + 97, 10, C.gray, "center");
+    txt("＊ とじても じどうで セーブされる", W / 2, H / 2 + 132, 9, C.dim, "center");
+    if (helpOpen) drawHelp();
   }
 }
 
