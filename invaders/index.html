@@ -77,6 +77,11 @@ const store = {
 const memStored = store.get("mem", {});
 const mem = Object.assign({ flower: (memStored.runs || 0) > 0, deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, memStored);
 const saveMem = () => store.set("mem", mem);
+// ヒマワリンの ばんごうが 20 → 21 に なった ときの ひっこし
+if (!mem.mig21) {
+  if (mem.seen[20] && !mem.met.clock) { delete mem.seen[20]; mem.seen[21] = 1; }
+  mem.mig21 = true; saveMem();
+}
 
 // ---------------- サウンド（WebAudioで合成） ----------------
 // おと: 0=ぜんぶ / 1=こうかおんだけ / 2=けす
@@ -326,12 +331,18 @@ const MON = [
       "..###...###..", ".#####.#####.", "#############", "#############", "#############", ".###########.",
       "..#########..", "...#######...", "....#####....", ".....###.....", "......#......"]] },
   { name: "ポコ", hp: 130, pts: 5000, gold: [150, 150], exp: 40, boss: "poko", scale: 2, frames: [SHOPKEEPER] },
+  // ---- 4ばんめの ボス ----
+  { name: "ホーホークロック", hp: 100, pts: 3500, gold: [90, 90], exp: 35, boss: "clock", scale: 2, frames: [[
+      "....##......##....", "...####....####...", "..##############..", ".################.",
+      ".##....####....##.", "##..##..##..##..##", "##..#.#.##.#.#..##", "##..##..##..##..##",
+      ".##....####....##.", ".######.##.######.", "..######..######..", "..####......####..",
+      "...####....####...", "....##########....", ".....#.#..#.#.....", "....##.#..#.##...."]] },
   // ---- はじめての ときだけ ----
   { name: "ヒマワリン", hp: 999, pts: 0, gold: [0, 0], exp: 0, ghost: true, flower: true, color: C.gold, scale: 2, frames: [[
       "...#.##.#...", "..#.####.#..", ".#.######.#.", "..##....##..", ".##.#..#.##.", ".##......##.",
       ".##.#..#.##.", "..##.##.##..", ".#.######.#.", "....####....", ".....##.....", "...#.##.#...", "....###....."]] },
 ];
-const T = { boss: [12, 13, 14], secret: { shadow: 18, poko: 19 } };
+const T = { boss: [12, 13, 14, 20], secret: { shadow: 18, poko: 19 }, flower: 21 };
 // ずかんの せつめい
 const LORE = [
   "ふわふわ ただよう。\nなにも かんがえていない。", "かさが じまん。\nあめの ひは きげんが いい。",
@@ -344,6 +355,7 @@ const LORE = [
   "かがみの まじょ。\nうつくしい ものが すき。", "きづくと そこに いる。\nきづくと もう いない。",
   "ふわふわ ただよい\nたまを まきちらす。", "れんしゅうよう。\nうたれるのは すきじゃない。",
   "あなたの かたちを した\nなにか。", "よろずやの てんしゅ。\nおこると こわい。",
+  "とけいじかけの ふくろう。\nじかんに うるさい。",
   "ひまわりの ような なにか。\nえがおが ちょっと こわい。",
 ];
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
@@ -386,6 +398,7 @@ const WEAPONS = {
   sword:  { name: "ゆうしゃのけん",   atk: 3, price: 120, pierce: true,   desc: "ATK3。てきを つらぬく。" },
   umbrella: { name: "かみなりのかさ", atk: 2, price: 0, unique: true, shot: "spread", desc: "ATK2。3ほうこう。ショボンの おくりもの。" },
   shard:  { name: "かがみのかけら",   atk: 2, price: 0, unique: true, shot: "twin", pierce: true, desc: "ATK2。2れつで つらぬく。" },
+  hand:   { name: "とけいの はり",     atk: 2, price: 0, unique: true, pierce: true, rate: 0.85, desc: "ATK2。つらぬいて はやい。" },
   abacus: { name: "ポコのそろばん",   atk: 3, price: 0, unique: true, rate: 0.8, desc: "ATK3。パチパチ はやうち。" },
 };
 const ARMORS = {
@@ -434,6 +447,17 @@ const BOSS = {
     spared: ["ふふ。", "わたしの まけね。", "これを。\nかがみの かけらよ。"],
     gift: { type: "weapon", key: "shard" },
     patterns: ["spiral", "invert", "reflect", "mirrorRain"], extra: ["crossBeams"],
+  },
+  clock: {
+    intro: m => m.killed.clock ? ["…ホー。", "きみの ことは\nきろくに のこっている。", "こんどは じかんを\nまちがえない。"]
+      : m.spared.clock ? ["ホー。", "また じかんどおりに\nきたね。", "では はじめよう。"]
+      : ["ホー。", "じかんどおりに\nきたね。", "では きっかり\nおわらせよう。"],
+    mid: ["ホーホー。", "じかんを\nとめて あげよう。"],
+    spare: ["…ホー。", "もう こんな じかん。", "そろそろ\nおひらきに しないか。"],
+    killed: ["…はりが\nとまる…", "チク…タク…"],
+    spared: ["ホー。", "いい じかんだった。", "この はりを\nもっていきなさい。"],
+    gift: { type: "weapon", key: "hand" },
+    patterns: ["pendulum", "timeStop", "tickRain", "beam"],
   },
   shadow: {
     intro: (m, s) => Object.values(s.route).every(v => v === "spared")
@@ -537,7 +561,7 @@ function flowerScene() {
   shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
   Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
   form = { ox: 0, oy: BOX0.y + 14, dir: 1, total: 0, anim: 0, animT: 0, appear: 0, dark: false, rush: 0, flower: 1 };
-  const e = mkEnemy(20, W / 2 - 12, BOX0.y + 70, { free: true, fm: false });
+  const e = mkEnemy(T.flower, W / 2 - 12, BOX0.y + 70, { free: true, fm: false });
   enemies.push(e);
   soul.hold = true;
   form.bossIntro = ["やあ！ ぼくは ヒマワリン。", "きみ、ここは はじめて？", "じゃあ ぼくが\nいろいろ おしえて あげる！",
@@ -580,9 +604,9 @@ function nextWave() {
 
   let text;
   if (isBossWave(wave)) {
-    let type = T.boss[(wave / 5 - 1) % 3];
+    let type = T.boss[(wave / 5 - 1) % 4];
     if (wave === 20 && soul.endingDone) type = Object.values(soul.route).every(v => v === "killed") ? T.secret.poko : T.secret.shadow;
-    const m = MON[type], key = m.boss, loop = m.boss === "shadow" || m.boss === "poko" ? 0 : Math.floor((wave / 5 - 1) / 3);
+    const m = MON[type], key = m.boss, loop = m.boss === "shadow" || m.boss === "poko" ? 0 : Math.floor((wave / 5 - 1) / 4);
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
     e.maxHp = e.hp = m.hp + loop * 40 + wave * 2;
     e.cx = W / 2; e.loop = loop;
@@ -698,6 +722,7 @@ function loadRun() {
   const r = store.get("run", null);
   if (!r || r.v !== SAVE_V) return false;
   ({ score, wave, shots, ebul, beams, enemies, items, events, form, ui, fireT, efireT, eventT, regenT, nextId } = r);
+  if (wave === 0) for (const e of enemies) if (e.type === 20) e.type = T.flower; // ふるい セーブ
   soul = Object.assign(newSoul(), r.soul);
   Object.assign(BOX, r.box); Object.assign(TBOX, r.tbox);
   parts = []; pops = [];
@@ -1396,6 +1421,14 @@ function updatePlay(dt) {
   for (const b of ebul) {
     b.x += (b.vx + (form.wind || 0)) * edt; b.y += b.vy * edt;
     if (b.ay) b.vy += b.ay * edt;
+    if (b.stopT != null) { // ときが とまる → うごきだす
+      b.stopT -= edt;
+      if (b.stopT <= 0 && !b.stopped) { b.stopped = true; b.vx = 0; b.vy = 0; }
+      if (b.stopped && !b.gone) {
+        b.goT -= edt;
+        if (b.goT <= 0) { b.gone = true; const ax = soul.x + 3.5 - b.x, ay = soul.y + 3 - b.y, l = Math.hypot(ax, ay) || 1; b.vx = ax / l * 115; b.vy = ay / l * 115; }
+      }
+    }
     if (b.split && b.y > b.split) { // ひょうが われる
       b.dead = true;
       for (const a of [-0.6, 0, 0.6]) ebul.push({ x: b.x, y: b.y, vx: Math.sin(a) * 70 * (b.sp || 1), vy: Math.cos(a) * 70 * (b.sp || 1), dmg: b.sd || 3, c: "w", shape: "dot", w: 3, h: 3 });
@@ -1736,6 +1769,7 @@ function bossPhase2(e) {
   const key = MON[e.type].boss;
   e.phase2 = true;
   if (key === "bones" || key === "mirror") { TBOX.w = 150; TBOX.x = W / 2 - 75; }
+  if (key === "clock") { TBOX.w = 160; TBOX.x = W / 2 - 80; }
   if (key === "cloud") form.dark = true;
   if (key === "shadow" || key === "poko") { TBOX.w = 170; TBOX.x = W / 2 - 85; }
 }
@@ -1803,6 +1837,28 @@ function updateBoss(e, m, dt) {
     }
     case "invert": e.pt = 0.55; for (let i = 0; i < 3; i++) dot(L + Math.random() * (R - L), BOX.y + 6, 0, 80 * sp); break;
     case "reflect": e.pt = 0.9; dot(bx, by, 0, 90 * sp); break;
+    case "pendulum": { // ふりこ
+      e.pt = p2 ? 0.06 : 0.08;
+      const px = W / 2 + Math.sin(e.t * 2.4) * (BOX.w / 2 - 14);
+      dot(px, BOX.y + 40, 0, 95 * sp, p2 && Math.sin(e.t * 2.4) > 0.8 ? "b" : "w");
+      break;
+    }
+    case "timeStop": { // とまって、いっせいに とんでくる
+      e.pt = p2 ? 1.0 : 1.3;
+      for (let i = 0; i < 10; i++) {
+        const a = 0.3 + i * (Math.PI - 0.6) / 9;
+        ebul.push({ x: bx, y: by, vx: Math.cos(a) * 120 * sp, vy: Math.sin(a) * 120 * sp, dmg: 4 + lp, c: "w", shape: "dot", w: 3, h: 3, stopT: 0.55, goT: 0.6 });
+      }
+      SFX.warn();
+      break;
+    }
+    case "tickRain": { // チク・タクに あわせて れつが ふる
+      e.pt = p2 ? 0.5 : 0.65;
+      tone((e.pa ^= 1) ? 1500 : 1100, 0.03, "square", 0.03);
+      const g1 = L + Math.random() * (R - L), g2 = L + Math.random() * (R - L);
+      for (let x = L; x <= R; x += 9) if (Math.abs(x - g1) > 13 && Math.abs(x - g2) > 13) dot(x, BOX.y + 6, 0, 110 * sp);
+      break;
+    }
     case "boneStairs": { // かいだんじょうに ふってくる
       e.pt = 0.09;
       e.pa = (e.pa || 0) + 1;
@@ -2103,8 +2159,8 @@ function drawRecords() {
   line("ハイスコア", hi);
   y += 8;
   txt("ボス　　　であった / みのがした / たおした", x, y, 9, C.gray); y += 16;
-  [["bones", T.boss[0]], ["cloud", T.boss[1]], ["mirror", T.boss[2]], ["shadow", T.secret.shadow], ["poko", T.secret.poko]].forEach(([k, ti]) => {
-    if ((k === "shadow" || k === "poko") && !mem.met[k]) return;
+  [["bones", T.boss[0]], ["cloud", T.boss[1]], ["mirror", T.boss[2]], ["clock", T.boss[3]], ["shadow", T.secret.shadow], ["poko", T.secret.poko]].forEach(([k, ti]) => {
+    if ((k === "clock" || k === "shadow" || k === "poko") && !mem.met[k]) return;
     const name = MON[ti].name;
     const met = mem.met[k] || 0;
     txt(met ? name : "？？？", x, y, 10, met ? C.white : C.dim);
