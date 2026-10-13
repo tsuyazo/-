@@ -74,7 +74,7 @@ const store = {
   del(k) { try { localStorage.removeItem("soulinv." + k); } catch (e) {} },
 };
 // ゲームを またいで のこる「きおく」
-const mem = Object.assign({ deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, store.get("mem", {}));
+const mem = Object.assign({ flower: false, deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, store.get("mem", {}));
 const saveMem = () => store.set("mem", mem);
 
 // ---------------- サウンド（WebAudioで合成） ----------------
@@ -325,6 +325,10 @@ const MON = [
       "..###...###..", ".#####.#####.", "#############", "#############", "#############", ".###########.",
       "..#########..", "...#######...", "....#####....", ".....###.....", "......#......"]] },
   { name: "ポコ", hp: 130, pts: 5000, gold: [150, 150], exp: 40, boss: "poko", scale: 2, frames: [SHOPKEEPER] },
+  // ---- はじめての ときだけ ----
+  { name: "ヒマワリン", hp: 999, pts: 0, gold: [0, 0], exp: 0, ghost: true, flower: true, color: C.gold, scale: 2, frames: [[
+      "...#.##.#...", "..#.####.#..", ".#.######.#.", "..##....##..", ".##.#..#.##.", ".##......##.",
+      ".##.#..#.##.", "..##.##.##..", ".#.######.#.", "....####....", ".....##.....", "...#.##.#...", "....###....."]] },
 ];
 const T = { boss: [12, 13, 14], secret: { shadow: 18, poko: 19 } };
 // ずかんの せつめい
@@ -339,6 +343,7 @@ const LORE = [
   "かがみの まじょ。\nうつくしい ものが すき。", "きづくと そこに いる。\nきづくと もう いない。",
   "ふわふわ ただよい\nたまを まきちらす。", "れんしゅうよう。\nうたれるのは すきじゃない。",
   "あなたの かたちを した\nなにか。", "よろずやの てんしゅ。\nおこると こわい。",
+  "ひまわりの ような なにか。\nえがおが ちょっと こわい。",
 ];
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
 
@@ -515,7 +520,41 @@ function newGame() {
   soul = newSoul();
   parts = []; pops = [];
   mem.runs++; saveMem();
+  if (!mem.flower) { flowerScene(); return; }
   nextWave();
+}
+
+// はじめての ときだけ：ヒマワリンの「なかよしの つぶ」
+function flowerScene() {
+  wave = 0;
+  shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
+  Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
+  form = { ox: 0, oy: BOX0.y + 14, dir: 1, total: 0, anim: 0, animT: 0, appear: 0, dark: false, rush: 0, flower: 1 };
+  const e = mkEnemy(20, W / 2 - 12, BOX0.y + 70, { free: true, fm: false });
+  enemies.push(e);
+  soul.hold = true;
+  form.bossIntro = ["やあ！ ぼくは ヒマワリン。", "きみ、ここは はじめて？", "じゃあ ぼくが\nいろいろ おしえて あげる！",
+    "この せかいでは\nソウルを つよく するために", "「なかよしの つぶ」を\nあつめるんだ！", "ほら、ぜんぶ うけとって！"];
+  setState("intro");
+  say("＊ …？");
+}
+function updateFlower(e, dt) {
+  e.y = BOX0.y + 70 + Math.sin(e.t * 2) * 2;
+  if (form.flower === 1) { // つぶを ならべる
+    form.flower = 2; form.flowerT = 0; form.flowerHit = false;
+    for (let i = 0; i < 6; i++) ebul.push({ x: W / 2 - 40 + i * 16, y: BOX0.y + 120, vx: 0, vy: 0, dmg: 3, c: "w", shape: "dot", w: 3, h: 3, pellet: true });
+  } else if (form.flower === 2) {
+    form.flowerT += dt;
+    if (form.flowerT > 1.2) for (const b of ebul) if (b.pellet && !b.aimed) { // ソウルに むかって ゆっくり
+      const ax = soul.x + 3.5 - b.x, ay = soul.y + 3 - b.y, l = Math.hypot(ax, ay) || 1;
+      b.vx = ax / l * 42; b.vy = ay / l * 42; b.aimed = true;
+    }
+    if (form.flowerT > 6.5 || (form.flowerHit && form.flowerT > 2)) {
+      form.flower = 3; ebul = [];
+      startTalk(form.flowerHit ? ["あはは！ ひっかかった！", "この せかいでは\nやられる まえに やれ。", "…せいぜい がんばってね。"]
+        : ["…ちっ。", "よけるなんて\nなまいきな ソウル。", "まあ いいや。\nまた あおうね。"], e.id, "flowerLeave");
+    }
+  }
 }
 
 function isBossWave(w) { return w % 5 === 0; }
@@ -957,6 +996,14 @@ function talkTap() {
   const e = enemies.find(x => x.id === who);
   if (!e) return;
   const m = MON[e.type], key = m.boss;
+  if (after === "flowerLeave") {
+    e.dead = true; fadeOut(e, C.gold); SFX.spare();
+    enemies = enemies.filter(x => !x.dead);
+    mem.flower = true; saveMem();
+    soul.hold = false; soul.hp = soul.maxHp; form.flower = 0;
+    nextWave();
+    return;
+  }
   if (after === "phase2") bossPhase2(e);
   else if (after === "bossDust") {
     killEnemy(e); soul.bossKills++; soul.route[key] = "killed";
@@ -1304,7 +1351,7 @@ function updatePlay(dt) {
 
   // みせ・たからばこ が おりてくる
   eventT -= dt;
-  if (eventT <= 0 && !events.length && !form.rush && !enemies.some(e => MON[e.type].boss)) { spawnEvent(); eventT = 16 + Math.random() * 12; }
+  if (eventT <= 0 && !form.flower && !events.length && !form.rush && !enemies.some(e => MON[e.type].boss)) { spawnEvent(); eventT = 16 + Math.random() * 12; }
   for (const ev of events) ev.y += 16 * dt;
   events = events.filter(ev => ev.y < BOX.y + BOX.h - 4);
   for (const ev of events) {
@@ -1364,7 +1411,7 @@ function updatePlay(dt) {
   }
 
   const blocking = enemies.filter(e => e.fm || MON[e.type].boss || MON[e.type].mimic);
-  if (!blocking.length && state === "play" && form.rush <= 0 && !form.bossIntro) {
+  if (!blocking.length && state === "play" && form.rush <= 0 && !form.bossIntro && !form.flower) {
     if (form.rush !== -1) pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "WAVE CLEAR", color: C.yellow, t: 0, big: true });
     score += wave * 50;
     // のこった ゴースト・ネズミは どこかへ いく
@@ -1449,11 +1496,12 @@ function updateFree(e, m, dt) {
       const bx = e.x + e.w / 2, by = e.y + e.h;
       for (const a of [-0.5, -0.25, 0, 0.25, 0.5]) ebul.push({ x: bx, y: by, vx: Math.sin(a) * 80, vy: Math.cos(a) * 80, dmg: 4, c: "w", shape: "dot", w: 3, h: 3 });
     }
-  } else if (m.ghost) {
+  } else if (m.ghost && !m.flower) {
     e.x = e.cx + Math.sin(e.t * 0.8) * 70; e.y = BOX.y + 120 + Math.sin(e.t * 1.7) * 10;
     e.life -= dt;
     if (e.life <= 0) { e.dead = true; fadeOut(e, C.gray); pops.push({ x: e.x + 6, y: e.y - 8, text: "…", color: C.gray, t: 0 }); }
-  } else if (m.boss) updateBoss(e, m, dt);
+  } else if (m.flower) updateFlower(e, dt);
+  else if (m.boss) updateBoss(e, m, dt);
 }
 
 // みのがした ボスたちが てつだってくれる
@@ -1607,6 +1655,7 @@ function hurt(dmg, raw) {
   vibrate(40); hurtT = 0.25;
   let d = raw ? dmg : Math.max(1, dmg - def());
   if (easy) d = Math.max(1, Math.ceil(d * 0.6));
+  if (form && form.flower) { form.flowerHit = true; d = Math.min(d, soul.hp - 1); } // はじめは しなない
   soul.hp = Math.max(0, soul.hp - d);
   soul.inv = armor().inv || 1.0; shake = 4;
   SFX.hurt();
