@@ -163,6 +163,7 @@ const SFX = {
   steal()  { tone(700, 0.06, "square", 0.04, 300); later(70, () => tone(500, 0.08, "square", 0.04, 200)); },
   chomp()  { noise(0.1, 0.12, 300); tone(120, 0.15, "square", 0.08, 60); },
   crack()  { tone(300, 0.1, "square", 0.08, 150); noise(0.08, 0.1, 1500); },
+  beat()   { tone(70, 0.09, "sine", 0.12, 50); later(160, () => tone(65, 0.09, "sine", 0.09, 45)); },
   shatter(){ noise(0.6, 0.12, 1200); tone(200, 0.5, "sawtooth", 0.05, 40); },
   revive() { [262, 330, 392, 523, 659, 784].forEach((f, i) => later(i * 90, () => tone(f, 0.18, "triangle", 0.06))); },
 };
@@ -394,7 +395,7 @@ const LORE = [
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
 
 const SPR = {
-  heart: makeSprite(HEART, C.red), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
+  heart: makeSprite(HEART, C.red), heartW: makeSprite(HEART, "#fbb"), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
   chest: makeSprite(CHEST, C.gold), star: makeSprite(SAVESTAR, C.yellow), starW: makeSprite(SAVESTAR, C.white), chestOpen: makeSprite(CHEST_OPEN, C.gold), keeper: makeSprite(SHOPKEEPER, C.white),
   mon: MON.map(m => ({
@@ -1436,6 +1437,8 @@ function updatePlay(dt) {
   moveSoulKeys(dt);
   if (soul.inv > 0) soul.inv -= dt;
   if (soul.starT > 0) soul.starT -= dt;
+  // HPが すくないと しんぞうの おと
+  if (soul.hp > 0 && soul.hp <= soul.maxHp * 0.25) { soul.beatT = (soul.beatT || 0) - dt; if (soul.beatT <= 0) { soul.beatT = 1.1; SFX.beat(); } }
   // ゆっくりどけい：てきの じかんだけ おそく なる
   if (soul.slowT > 0) soul.slowT -= dt;
   const edt = soul.slowT > 0 ? dt * 0.5 : dt;
@@ -2456,7 +2459,8 @@ function drawSoul() {
     spr(SPR.heart, soul.x, soul.y); return;
   }
   if (soul.inv > 0 && Math.floor(soul.inv * 12) % 2 === 0) return; // 無敵中は点滅
-  spr(SPR.heart, soul.x, soul.y);
+  const low = soul.hp <= soul.maxHp * 0.25 && state === "play";
+  spr(low && Math.floor(time * 4) % 2 ? SPR.heartW : SPR.heart, soul.x, soul.y);
   if (soul.invert) txt("⇄", soul.x + 3.5, soul.y + 7, 8, C.yellow, "center");
 }
 
@@ -2564,7 +2568,7 @@ function drawStatus() {
   const bw = Math.min(70, soul.maxHp * 1.4), filled = bw * soul.hp / soul.maxHp;
   ctx.fillStyle = C.hpRed; ctx.fillRect(106, y + 1, bw, 9);
   ctx.fillStyle = C.yellow; ctx.fillRect(106, y + 1, filled, 9);
-  txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10);
+  txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10, soul.hp <= soul.maxHp * 0.25 ? C.red : C.white);
 
   const usable = state === "play" || state === "menu";
   const canSpare = usable && spareables().length > 0;
