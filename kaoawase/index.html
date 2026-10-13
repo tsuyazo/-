@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>両家顔合わせの栞</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#E6E2DA; --paper:#FBF7EE; --ink:#2A2724; --inkSoft:#77706A; --shu:#B2363A; --kin:#B0904F; --rule:#D8CDB8;
+  --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;
+  --sans:"Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --desk:#24211E; } }
+:root[data-theme="dark"]{ --desk:#24211E; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--mincho);
+  padding:24px 16px calc(110px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+
+/* 紙面（A5縦） */
+.page{width:min(100%,148mm);aspect-ratio:148/210;margin:0 auto 24px;background:var(--paper);
+  position:relative;overflow:hidden;container-type:inline-size;box-shadow:0 1px 6px rgba(0,0,0,.1);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .48 0 0 0 0 .38 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E")}
+.page::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6cqw;opacity:.75;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23B0904F' stroke-width='.8'%3E%3Cg id='w'%3E%3Ccircle cx='20' cy='20' r='19'/%3E%3Ccircle cx='20' cy='20' r='14'/%3E%3Ccircle cx='20' cy='20' r='9'/%3E%3Ccircle cx='20' cy='20' r='4'/%3E%3C/g%3E%3Cuse href='%23w' x='-20' y='-10'/%3E%3Cuse href='%23w' x='20' y='-10'/%3E%3Cuse href='%23w' x='-20' y='10'/%3E%3Cuse href='%23w' x='20' y='10'/%3E%3C/g%3E%3C/svg%3E") repeat-x left bottom/6cqw 3cqw;
+  border-top:.15cqw solid var(--kin)}
+.in{position:absolute;inset:10cqw 10cqw;display:flex;flex-direction:column}
+h2{font-size:4cqw;font-weight:600;letter-spacing:.5em;margin:0 0 5cqw;padding-bottom:1.6cqw;border-bottom:.5cqw double var(--kin);
+  display:flex;align-items:center}
+h2::before{content:"";width:1.6cqw;height:1.6cqw;background:var(--shu);transform:rotate(45deg);margin:0 2.6cqw 0 .6cqw;flex-shrink:0}
+p,li,td,dd,dt{font-size:2.9cqw;line-height:1.9}
+
+/* 表紙（祝儀袋の見立て） */
+.cover .in{inset:0;display:block}
+.noshi{position:absolute;top:7cqw;right:8cqw;width:7cqw;height:auto}
+.cover .title{position:absolute;top:16cqw;left:0;right:0;margin:auto;writing-mode:vertical-rl;
+  font-size:8cqw;font-weight:600;letter-spacing:.35em;line-height:1;width:max-content}
+.mizuhiki{position:absolute;left:0;right:0;top:86cqw;height:auto;width:100%}
+.cover .names{position:absolute;top:100cqw;left:0;right:0;margin:auto;writing-mode:vertical-rl;
+  font-size:4.6cqw;letter-spacing:.4em;line-height:2.1;width:max-content}
+.cover .when{position:absolute;left:9cqw;bottom:11cqw;writing-mode:vertical-rl;font-size:2.6cqw;
+  line-height:2;color:var(--inkSoft);letter-spacing:.15em}
+
+/* ごあいさつ（縦書き） */
+.tate{writing-mode:vertical-rl;flex:1;font-size:3.1cqw;line-height:2.2;letter-spacing:.08em}
+.tate h2{border:none;padding:0;margin:0 0 0 5cqw;font-size:4cqw}
+.tate h2::before{margin:0 0 2.6cqw}
+.tate p{margin:0;font-size:3.1cqw;line-height:2.2}
+.tate .from{margin-top:auto;margin-right:3cqw;text-align:end}
+
+/* 次第 */
+.shidai{list-style:none;padding:0;margin:0}
+.shidai li{display:flex;align-items:baseline;gap:2cqw;padding:1.3cqw 0;border-bottom:.1cqw dotted var(--rule)}
+.shidai li .n{width:5cqw;flex-shrink:0;color:var(--inkSoft)}
+.shidai li .w{margin-left:auto;font-size:2.5cqw;color:var(--inkSoft)}
+.note2{margin-top:4cqw;font-size:2.5cqw;color:var(--inkSoft);line-height:1.8}
+
+/* 家族紹介 */
+.fam{margin-bottom:5cqw}
+.fam h3{font-size:3.4cqw;font-weight:600;letter-spacing:.3em;margin:0 0 1.5cqw}
+.fam table{width:100%;border-collapse:collapse}
+.fam td{vertical-align:baseline;padding:.8cqw 0;font-size:2.8cqw;line-height:1.6}
+.fam td:nth-child(1){width:10cqw;color:var(--inkSoft);font-size:2.5cqw}
+.fam td:nth-child(2){width:22cqw;white-space:nowrap}
+.fam td:nth-child(3){font-size:2.5cqw;color:var(--inkSoft)}
+
+/* ふたり */
+.prof{display:grid;grid-template-columns:1fr 1fr;gap:6cqw;margin-bottom:5cqw}
+.prof h3{font-size:3.6cqw;font-weight:600;letter-spacing:.2em;margin:0 0 2cqw}
+.prof dl{margin:0;display:grid;grid-template-columns:auto 1fr;column-gap:2.5cqw}
+.prof dt{font-size:2.4cqw;color:var(--inkSoft);line-height:1.9}
+.prof dd{margin:0;font-size:2.6cqw;line-height:1.9}
+.prof .hito{grid-column:1/-1;margin-top:1.5cqw;font-size:2.6cqw;line-height:1.8}
+.ayumi td{font-size:2.6cqw;padding:.6cqw 0;vertical-align:baseline;line-height:1.7}
+.ayumi td:first-child{width:22cqw;color:var(--inkSoft);font-size:2.4cqw}
+
+/* お品書き */
+.menu{list-style:none;padding:0;margin:0}
+.menu li{display:flex;gap:4cqw;font-size:2.8cqw;line-height:2.15}
+.menu li i{font-style:normal;width:9cqw;color:var(--inkSoft);font-size:2.5cqw}
+.musubi{margin-top:auto;font-size:2.8cqw;line-height:2}
+.sign{display:flex;justify-content:flex-end;align-items:center;gap:2.5cqw;font-size:3cqw;letter-spacing:.2em}
+.seal{width:7.5cqw;height:7.5cqw;background:var(--shu);color:#FBF7EE;border-radius:.8cqw;display:flex;
+  align-items:center;justify-content:center;font-size:4.4cqw;font-weight:600;letter-spacing:0}
+
+/* 編集 */
+body.edit [data-k]{outline:1px dashed var(--shu);outline-offset:2px;cursor:text}
+body.edit [data-k]:focus{outline-style:solid;background:#FFF5EC}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(251,249,244,.96);
+  border-top:1px solid var(--rule);font-family:var(--sans);z-index:10}
+.bar button{font:inherit;font-size:14px;padding:10px 16px;border-radius:4px;border:1px solid var(--rule);background:#fff;color:var(--ink)}
+.bar button.main{background:var(--ink);border-color:var(--ink);color:#fff}
+.hint{max-width:148mm;margin:0 auto 20px;font-family:var(--sans);font-size:13px;line-height:1.8;color:var(--inkSoft)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .hint{color:#B9AFA3} }
+:root[data-theme="dark"] .hint{color:#B9AFA3}
+
+@page{size:A5 portrait;margin:0}
+@media print{
+  body{background:none;padding:0}
+  .bar,.hint{display:none}
+  .page{width:148mm;height:210mm;margin:0;box-shadow:none;break-after:page;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page:last-child{break-after:auto}
+  body.edit [data-k]{outline:none;background:none}
+}
+</style>
+</head>
+<body>
+
+<p class="hint">「編集する」を押して、点線の部分を書き換えてください。内容はこの端末に保存されます。印刷はA5用紙か、A4に「2ページ/枚」でどうぞ。</p>
+
+<!-- 表紙 -->
+<section class="page cover">
+  <div class="in">
+    <svg class="noshi" viewBox="0 0 40 90" aria-hidden="true">
+      <polygon points="20,2 36,16 30,88 10,88 4,16" fill="#FBF7EE" stroke="#B2363A" stroke-width="1.2"/>
+      <polygon points="20,12 29,21 25,80 15,80 11,21" fill="#B2363A"/>
+      <rect x="18.2" y="22" width="3.6" height="54" fill="#E4C766"/>
+    </svg>
+    <div class="title" data-k="c_title">両家顔合わせ</div>
+    <svg class="mizuhiki" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke-width="1.3">
+        <path d="M0 13 H300" stroke="#B2363A"/><path d="M0 16.5 H300" stroke="#B2363A"/><path d="M0 20 H300" stroke="#B0904F"/>
+        <path d="M0 23.5 H300" stroke="#B0904F"/><path d="M0 27 H300" stroke="#B0904F"/>
+      </g>
+    </svg>
+    <div class="names" data-k="c_names">山田太郎<br>佐藤花子</div>
+    <div class="when" data-k="c_when">令和八年十一月二十二日<br>料亭 ○○にて</div>
+  </div>
+</section>
+
+<!-- ごあいさつ -->
+<section class="page">
+  <div class="in tate">
+    <h2>ごあいさつ</h2>
+    <p data-k="greet">本日はお集まりいただき、ありがとうございます。<br>私たちが付き合いはじめて四年、ようやく両家の皆さんに一度に会っていただく日を迎えられました。<br>堅苦しい会にするつもりはありません。お料理を楽しみながら、ゆっくりお話ししていただけたら嬉しいです。</p>
+    <p class="from" data-k="greet_from">太郎　花子</p>
+  </div>
+</section>
+
+<!-- 次第 -->
+<section class="page">
+  <div class="in">
+    <h2>次第</h2>
+    <ol class="shidai" data-k="shidai">
+      <li><span class="n">一</span>はじめの挨拶<span class="w">太郎</span></li>
+      <li><span class="n">二</span>家族の紹介<span class="w">太郎・花子</span></li>
+      <li><span class="n">三</span>婚約記念品の交換</li>
+      <li><span class="n">四</span>乾杯<span class="w">山田 一郎</span></li>
+      <li><span class="n">五</span>お食事・ご歓談</li>
+      <li><span class="n">六</span>結びの挨拶<span class="w">佐藤 健二</span></li>
+      <li><span class="n">七</span>記念撮影</li>
+    </ol>
+    <p class="note2" data-k="shidai_note">十二時開始、十四時半ごろお開きの予定です。<br>お車でお越しの方は、お店の駐車場（四台）をご利用ください。</p>
+  </div>
+</section>
+
+<!-- 家族紹介 -->
+<section class="page">
+  <div class="in">
+    <h2>家族紹介</h2>
+    <div class="fam">
+      <h3 data-k="f1_name">山田家</h3>
+      <table><tbody data-k="f1">
+        <tr><td>父</td><td>山田 一郎</td><td>定年後に始めた家庭菜園で、毎年トマトを作りすぎる</td></tr>
+        <tr><td>母</td><td>山田 恵子</td><td>パート勤務。朝ドラは欠かさず見ている</td></tr>
+        <tr><td>妹</td><td>山田 美咲</td><td>大学三年。今日の写真係</td></tr>
+      </tbody></table>
+    </div>
+    <div class="fam">
+      <h3 data-k="f2_name">佐藤家</h3>
+      <table><tbody data-k="f2">
+        <tr><td>父</td><td>佐藤 健二</td><td>地元の消防団に三十年。お酒は日本酒派</td></tr>
+        <tr><td>母</td><td>佐藤 和子</td><td>庭いじりが好きで、玄関の花はいつも母の担当</td></tr>
+        <tr><td>兄</td><td>佐藤 大輔</td><td>二児の父。今日は奥さんと子どもたちも一緒です</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ふたりのこと -->
+<section class="page">
+  <div class="in">
+    <h2>ふたりのこと</h2>
+    <div class="prof">
+      <div>
+        <h3 data-k="p1_name">山田 太郎</h3>
+        <dl data-k="p1">
+          <dt>生まれ</dt><dd>平成八年　横浜</dd>
+          <dt>仕事</dt><dd>機械メーカーの設計</dd>
+          <dt>休日</dt><dd>写真、たまにキャンプ</dd>
+          <dd class="hito">「花子さんの家の人たちは、みんな声が大きくて楽しいです」</dd>
+        </dl>
+      </div>
+      <div>
+        <h3 data-k="p2_name">佐藤 花子</h3>
+        <dl data-k="p2">
+          <dt>生まれ</dt><dd>平成九年　静岡</dd>
+          <dt>仕事</dt><dd>病院の看護師</dd>
+          <dt>休日</dt><dd>パンを焼く、温泉</dd>
+          <dd class="hito">「太郎くんのお母さんの筑前煮、作り方を教わりたいです」</dd>
+        </dl>
+      </div>
+    </div>
+    <h2>これまで</h2>
+    <table class="ayumi"><tbody data-k="ayumi">
+      <tr><td>二〇二二年春</td><td>友人の結婚式の二次会で出会う</td></tr>
+      <tr><td>二〇二二年夏</td><td>付き合いはじめる</td></tr>
+      <tr><td>二〇二六年六月</td><td>結婚の約束</td></tr>
+      <tr><td>二〇二七年四月</td><td>入籍の予定。式は秋ごろを考えています</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<!-- お品書き -->
+<section class="page">
+  <div class="in">
+    <h2>お品書き</h2>
+    <ul class="menu" data-k="menu">
+      <li><i>先付</i>胡麻豆腐</li>
+      <li><i>八寸</i>季節の取り合わせ</li>
+      <li><i>椀物</i>松茸の土瓶蒸し</li>
+      <li><i>造り</i>鯛　鮪　烏賊</li>
+      <li><i>焼物</i>鰆の西京焼き</li>
+      <li><i>食事</i>鯛めし　赤出汁　香の物</li>
+      <li><i>甘味</i>柿のゼリー</li>
+    </ul>
+    <p class="musubi" data-k="musubi">至らないところの多いふたりですが、これからもどうぞよろしくお願いします。</p>
+    <div class="sign"><span data-k="sign">太郎・花子</span><span class="seal">寿</span></div>
+  </div>
+</section>
+
+<div class="bar">
+  <button class="main" id="editBtn">編集する</button>
+  <button id="printBtn">印刷する</button>
+  <button id="resetBtn">見本に戻す</button>
+</div>
+
+<script>
+const KEY = "kaoawase-shiori-v3";
+const els = [...document.querySelectorAll("[data-k]")];
+const defaults = Object.fromEntries(els.map(e => [e.dataset.k, e.innerHTML]));
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(_){ return {}; }
+}
+function save(){
+  const data = Object.fromEntries(els.map(e => [e.dataset.k, e.innerHTML]));
+  try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(_){}
+}
+const saved = load();
+els.forEach(e => { if (saved[e.dataset.k] != null) e.innerHTML = saved[e.dataset.k]; });
+
+let editing = false;
+const editBtn = document.getElementById("editBtn");
+editBtn.onclick = () => {
+  editing = !editing;
+  document.body.classList.toggle("edit", editing);
+  els.forEach(e => e.contentEditable = editing ? "true" : "false");
+  editBtn.textContent = editing ? "編集をおわる" : "編集する";
+  if (!editing) save();
+};
+els.forEach(e => e.addEventListener("input", save));
+// 貼り付けは書式を落としてテキストのみ
+els.forEach(e => e.addEventListener("paste", ev => {
+  ev.preventDefault();
+  document.execCommand("insertText", false, (ev.clipboardData || window.clipboardData).getData("text"));
+}));
+
+document.getElementById("printBtn").onclick = () => window.print();
+document.getElementById("resetBtn").onclick = () => {
+  if (!confirm("入力した内容を消して見本の文面に戻しますか？")) return;
+  try{ localStorage.removeItem(KEY); }catch(_){}
+  els.forEach(e => e.innerHTML = defaults[e.dataset.k]);
+};
+</script>
+</body>
+</html>
