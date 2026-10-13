@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>SOUL INVADERS</title>
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  box-sizing:border-box}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+"use strict";
+// ============================================================
+//  SOUL INVADERS — 片手で遊べる インベーダー（Undertale風）
+//  操作: 画面のどこでもドラッグ → ソウルが左右にうごく / 弾は自動
+//        キーボード: ← → (A D) / Z・Enter・Space で決定 / M で消音
+// ============================================================
+
+const W = 240, H = 400;                       // 論理解像度（縦持ち）
+const BOX = { x: 10, y: 34, w: 220, h: 292 }; // バトルボックス
+const FONT = '"DotGothic16", ui-monospace, monospace';
+const C = { white: "#fff", yellow: "#ff0", red: "#f00", orange: "#ff7f27", hpRed: "#c00", gray: "#888", green: "#3f3" };
+
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+let scale = 1, dpr = 1;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+  cv.style.width = Math.floor(W * scale) + "px";
+  cv.style.height = Math.floor(H * scale) + "px";
+  cv.width = Math.floor(W * scale * dpr);
+  cv.height = Math.floor(H * scale * dpr);
+  ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// ---------------- ストレージ（失敗しても動く） ----------------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("soulinv." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("soulinv." + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+// ---------------- サウンド（WebAudioで合成） ----------------
+let AC = null, muted = store.get("muted", false);
+function audio() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === "suspended") AC.resume();
+}
+function tone(f, d, type = "square", v = 0.05, f2) {
+  if (!AC || muted) return;
+  const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d + 0.02);
+}
+let noiseBuf = null;
+function noise(d, v = 0.08, hp = 800) {
+  if (!AC || muted) return;
+  if (!noiseBuf) {
+    noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+    const ch = noiseBuf.getChannelData(0);
+    for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  }
+  const t = AC.currentTime, s = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  s.buffer = noiseBuf; f.type = "highpass"; f.frequency.value = hp;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  s.connect(f).connect(g).connect(AC.destination); s.start(t); s.stop(t + d);
+}
+const SFX = {
+  shot()   { tone(880, 0.05, "square", 0.025, 1320); },
+  hit()    { tone(220, 0.08, "square", 0.05, 110); },
+  dust()   { noise(0.45, 0.07, 2500); tone(520, 0.3, "triangle", 0.04, 90); },
+  hurt()   { tone(140, 0.18, "sawtooth", 0.08, 60); noise(0.12, 0.06, 400); },
+  blip()   { tone(560 + Math.random() * 40, 0.035, "square", 0.025); },
+  select() { tone(660, 0.06, "square", 0.04); setTimeout(() => tone(990, 0.08, "square", 0.04), 60); },
+  heal()   { tone(523, 0.08, "triangle", 0.06); setTimeout(() => tone(784, 0.14, "triangle", 0.06), 80); },
+  lvup()   { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.1, "square", 0.04), i * 70)); },
+  crack()  { tone(300, 0.1, "square", 0.08, 150); noise(0.08, 0.1, 1500); },
+  shatter(){ noise(0.6, 0.12, 1200); tone(200, 0.5, "sawtooth", 0.05, 40); }
+};
+
+// ---------------- スプライト ----------------
+function makeSprite(rows, color) {
+  const c = document.createElement("canvas");
+  c.width = rows[0].length; c.height = rows.length;
+  const x = c.getContext("2d"); x.fillStyle = color;
+  rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] === "#") x.fillRect(i, j, 1, 1); });
+  c.rows = rows;
+  return c;
+}
+
+const HEART = [
+  ".##.##.",
+  "#######",
+  "#######",
+  ".#####.",
+  "..###..",
+  "...#...",
+];
+const HEART_L = [
+  ".##....",
+  "####...",
+  "###....",
+  ".###...",
+  "..##...",
+  "...#...",
+];
+const HEART_R = [
+  "....##.",
+  "...####",
+  "....###",
+  "...##..",
+  "....#..",
+  ".......",
+];
+const CANDY = [
+  "#.###.#",
+  "#######",
+  "#.###.#",
+];
+
+// モンスター（オリジナル）。2フレームずつ
+const MONSTERS = [
+  { // 0: ふわりん（おばけ）
+    name: "ふわりん", hp: 1, pts: 10, fire: "straight",
+    frames: [[
+      "....####....",
+      "..########..",
+      ".##########.",
+      ".##..##..##.",
+      ".##..##..##.",
+      ".##########.",
+      ".####..####.",
+      ".##########.",
+      ".##########.",
+      ".#.##.##.##.",
+    ], [
+      "....####....",
+      "..########..",
+      ".##########.",
+      ".##########.",
+      ".##..##..##.",
+      ".##..##..##.",
+      ".####..####.",
+      ".##########.",
+      ".##########.",
+      "..##.##.##.#",
+    ]]
+  },
+  { // 1: キノコロ（きのこ）
+    name: "キノコロ", hp: 2, pts: 20, fire: "aimed",
+    frames: [[
+      "...######...",
+      ".##########.",
+      "############",
+      "##.##..##.##",
+      "############",
+      "....#..#....",
+      "...######...",
+      "...#.##.#...",
+      "...######...",
+      "..##....##..",
+    ], [
+      "...######...",
+      ".##########.",
+      "############",
+      "#.##.##.##.#",
+      "############",
+      "....#..#....",
+      "...######...",
+      "...#.##.#...",
+      "...######...",
+      "...##..##...",
+    ]]
+  },
+  { // 2: ホネコウモリ
+    name: "ホネコウモリ", hp: 3, pts: 30, fire: "spread",
+    frames: [[
+      "#..........#",
+      "##...##...##",
+      "###.####.###",
+      "############",
+      ".##.#..#.##.",
+      "..########..",
+      "...#.##.#...",
+      "....####....",
+      ".....##.....",
+      "............",
+    ], [
+      "............",
+      ".....##.....",
+      "....####....",
+      "############",
+      "###.#..#.###",
+      "##.######.##",
+      "#..#.##.#..#",
+      "....####....",
+      ".....##.....",
+      "............",
+    ]]
+  },
+];
+
+const SPR = {
+  heart: makeSprite(HEART, C.red),
+  heartL: makeSprite(HEART_L, C.red),
+  heartR: makeSprite(HEART_R, C.red),
+  heartY: makeSprite(HEART, C.yellow),
+  candy: makeSprite(CANDY, "#f9c"),
+  mon: MONSTERS.map(m => ({
+    white: m.frames.map(f => makeSprite(f, C.white)),
+    red: m.frames.map(f => makeSprite(f, C.red)),
+  })),
+};
+const MW = 12, MH = 10; // モンスターのサイズ
+
+// ---------------- 描画ヘルパー ----------------
+function txt(s, x, y, size = 10, color = C.white, align = "left") {
+  ctx.font = `${size}px ${FONT}`;
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "top";
+  ctx.fillText(s, x, y);
+}
+function rectLine(x, y, w, h, color = C.white, lw = 2) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, lw); ctx.fillRect(x, y + h - lw, w, lw);
+  ctx.fillRect(x, y, lw, h); ctx.fillRect(x + w - lw, y, lw, h);
+}
+function spr(img, x, y, s = 1) { ctx.drawImage(img, Math.round(x), Math.round(y), img.width * s, img.height * s); }
+
+// ---------------- ゲーム状態 ----------------
+let state = "title";   // title / intro / play / dying / over
+let stateT = 0, time = 0, paused = false;
+let hi = store.get("hi", 0);
+let score, wave, soul, shots, ebul, enemies, items, form, fireT, efireT;
+let parts = [], pops = [], shake = 0;
+
+const msg = { lines: [], shown: 0, t: 0, done: false, hold: 0 };
+function say(text) { msg.lines = text.split("\n"); msg.shown = 0; msg.t = 0; msg.done = false; msg.hold = 0; }
+function msgLen() { return msg.lines.reduce((a, l) => a + l.length, 0); }
+
+const WAVE_TEXT = [
+  "＊ モンスターたちが\n　 あらわれた！",
+  "＊ くうきが ピリピリしている。",
+  "＊ ホネコウモリが\n　 カタカタと わらっている。",
+  "＊ キノコロが じぶんの かさを\n　 じまんしている。",
+  "＊ なにかが うごめいている…",
+  "＊ ふわりんは あなたを\n　 じっと みつめている。",
+  "＊ あなたは ケツイで\n　 みたされた。",
+];
+
+function newGame() {
+  score = 0; wave = 0;
+  soul = { x: W / 2 - 3.5, y: BOX.y + BOX.h - 16, hp: 20, maxHp: 20, inv: 0, lv: 1, exp: 0 };
+  parts = []; pops = [];
+  nextWave();
+}
+
+function nextWave() {
+  wave++;
+  shots = []; ebul = []; enemies = []; items = [];
+  fireT = 0; efireT = 1.2; shake = 0;
+  const rows = Math.min(3 + Math.floor((wave - 1) / 2), 5), cols = 6;
+  const gx = 30, gy = 22, fw = (cols - 1) * gx + MW;
+  const sx = BOX.x + (BOX.w - fw) / 2, sy = BOX.y + 14;
+  for (let r = 0; r < rows; r++) {
+    const type = r === 0 ? 2 : (r <= (rows - 1) / 2 ? 1 : 0);
+    const m = MONSTERS[type];
+    for (let c = 0; c < cols; c++) {
+      enemies.push({ type, x: sx + c * gx, y: sy + r * gy, hp: m.hp + Math.floor((wave - 1) / 3), flash: 0, shakeT: 0 });
+    }
+  }
+  form = { dir: 1, total: enemies.length, anim: 0, animT: 0, appear: 0 };
+  setState("intro");
+  say(WAVE_TEXT[wave <= 3 ? wave - 1 : 3 + Math.floor(Math.random() * (WAVE_TEXT.length - 3))]);
+}
+
+function setState(s) { state = s; stateT = 0; }
+
+// ---------------- 入力（片手：どこでもドラッグ） ----------------
+let drag = null;
+const keys = {};
+function toLogical(e) {
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+}
+function inMuteBtn(p) { return p.x > W - 30 && p.y < 26; }
+
+function confirm() {
+  if (paused) { paused = false; return; }
+  if (state === "title") { SFX.select(); newGame(); }
+  else if (state === "intro") {
+    if (!msg.done) { msg.shown = msgLen(); msg.done = true; }
+    else if (msg.hold > 0.15) startPlay();
+  }
+  else if (state === "over" && stateT > 3.2) { SFX.select(); setState("title"); }
+}
+function startPlay() { setState("play"); }
+
+cv.addEventListener("pointerdown", e => {
+  e.preventDefault(); audio();
+  const p = toLogical(e);
+  if (inMuteBtn(p)) { muted = !muted; store.set("muted", muted); return; }
+  drag = { id: e.pointerId, x: p.x };
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  confirm();
+});
+cv.addEventListener("pointermove", e => {
+  if (!drag || drag.id !== e.pointerId) return;
+  const p = toLogical(e);
+  if ((state === "play" || state === "intro") && !paused && soul) {
+    soul.x = clampSoul(soul.x + (p.x - drag.x) * 1.5); // 相対移動：指でソウルを隠さない
+  }
+  drag.x = p.x;
+});
+const endDrag = e => { if (drag && drag.id === e.pointerId) drag = null; };
+cv.addEventListener("pointerup", endDrag);
+cv.addEventListener("pointercancel", endDrag);
+window.addEventListener("keydown", e => {
+  audio();
+  keys[e.key] = true;
+  if (["z", "Z", "Enter", " "].includes(e.key)) { e.preventDefault(); if (!e.repeat) confirm(); }
+  if (e.key === "m" || e.key === "M") { muted = !muted; store.set("muted", muted); }
+  if (e.key.startsWith("Arrow")) e.preventDefault();
+});
+window.addEventListener("keyup", e => { keys[e.key] = false; });
+document.addEventListener("visibilitychange", () => { if (document.hidden && state === "play") paused = true; });
+
+function clampSoul(x) { return Math.max(BOX.x + 4, Math.min(BOX.x + BOX.w - 4 - 7, x)); }
+
+// ---------------- 更新 ----------------
+function update(dt) {
+  time += dt; stateT += dt;
+  if (paused) return;
+
+  // パーティクル・ポップアップは常に動く
+  for (const p of parts) {
+    if (p.delay > 0) { p.delay -= dt; continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += (p.g || 0) * dt; p.life -= dt;
+  }
+  parts = parts.filter(p => p.life > 0);
+  for (const p of pops) { p.t += dt; p.y -= 14 * dt; }
+  pops = pops.filter(p => p.t < 0.8);
+  if (shake > 0) shake = Math.max(0, shake - dt * 20);
+
+  if (state === "intro") {
+    updateMsg(dt);
+    moveSoulKeys(dt);
+    form.appear = Math.min(1, form.appear + dt * 1.5);
+    if (msg.done) { msg.hold += dt; if (msg.hold > 1.6) startPlay(); }
+  } else if (state === "play") {
+    updatePlay(dt);
+  } else if (state === "dying") {
+    updateDying(dt);
+  }
+}
+
+function updateMsg(dt) {
+  if (msg.done) return;
+  msg.t += dt;
+  const n = Math.min(msgLen(), Math.floor(msg.t * 28));
+  if (n > msg.shown) {
+    const all = msg.lines.join("");
+    for (let i = msg.shown; i < n; i++) if (i % 2 === 0 && !/[\s　]/.test(all[i])) SFX.blip();
+    msg.shown = n;
+  }
+  if (msg.shown >= msgLen()) msg.done = true;
+}
+
+function moveSoulKeys(dt) {
+  let d = 0;
+  if (keys.ArrowLeft || keys.a || keys.A) d -= 1;
+  if (keys.ArrowRight || keys.d || keys.D) d += 1;
+  if (d) soul.x = clampSoul(soul.x + d * 110 * dt);
+}
+
+function updatePlay(dt) {
+  moveSoulKeys(dt);
+  if (soul.inv > 0) soul.inv -= dt;
+
+  // 自動射撃
+  fireT -= dt;
+  if (fireT <= 0) {
+    fireT = Math.max(0.13, 0.3 - (soul.lv - 1) * 0.02);
+    shots.push({ x: soul.x + 3, y: soul.y - 2 });
+    SFX.shot();
+  }
+  for (const s of shots) s.y -= 240 * dt;
+  shots = shots.filter(s => s.y > BOX.y && !s.dead);
+
+  // 隊列の移動
+  const alive = enemies.length;
+  const speed = 10 + wave * 2 + (1 - alive / form.total) * 45;
+  let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const e of enemies) { minX = Math.min(minX, e.x); maxX = Math.max(maxX, e.x + MW); maxY = Math.max(maxY, e.y + MH); }
+  let dx = form.dir * speed * dt, dy = 0;
+  if ((form.dir > 0 && maxX + dx > BOX.x + BOX.w - 6) || (form.dir < 0 && minX + dx < BOX.x + 6)) {
+    form.dir *= -1; dx = 0; dy = 8;
+  }
+  for (const e of enemies) { e.x += dx; e.y += dy; if (e.flash > 0) e.flash -= dt; if (e.shakeT > 0) e.shakeT -= dt; }
+  form.animT += dt;
+  if (form.animT > Math.max(0.15, 0.6 - (1 - alive / form.total) * 0.4)) { form.animT = 0; form.anim ^= 1; }
+  if (maxY + dy >= soul.y - 2) { soul.hp = 0; die(); return; }
+
+  // 敵の射撃
+  efireT -= dt;
+  if (efireT <= 0 && enemies.length) {
+    efireT = Math.max(0.3, 1.25 - wave * 0.09) * (0.6 + Math.random() * 0.8);
+    enemyFire(enemies[Math.floor(Math.random() * enemies.length)]);
+  }
+  for (const b of ebul) { b.x += b.vx * dt; b.y += b.vy * dt; }
+  ebul = ebul.filter(b => b.y < BOX.y + BOX.h - 2 && b.x > BOX.x && b.x < BOX.x + BOX.w);
+
+  // アイテム
+  for (const it of items) it.y += 40 * dt;
+  items = items.filter(it => {
+    if (it.y > BOX.y + BOX.h - 4) return false;
+    if (Math.abs(it.x + 3.5 - (soul.x + 3.5)) < 7 && Math.abs(it.y + 1.5 - (soul.y + 3)) < 6) {
+      const heal = Math.min(10, soul.maxHp - soul.hp);
+      soul.hp += heal; SFX.heal();
+      pops.push({ x: soul.x + 3, y: soul.y - 10, text: heal > 0 ? "+" + heal : "MAX", color: C.green, t: 0 });
+      return false;
+    }
+    return true;
+  });
+
+  // 当たり判定：弾 → 敵
+  for (const s of shots) {
+    for (const e of enemies) {
+      if (s.x >= e.x && s.x <= e.x + MW && s.y <= e.y + MH && s.y + 5 >= e.y) {
+        s.dead = true; hitEnemy(e); break;
+      }
+    }
+  }
+  enemies = enemies.filter(e => e.hp > 0);
+
+  // 当たり判定：敵弾 → ソウル（見た目より少し小さめ）
+  if (soul.inv <= 0) {
+    const cx = soul.x + 3.5, cy = soul.y + 2.5;
+    for (const b of ebul) {
+      if (Math.abs(b.x - cx) < 3.5 && Math.abs(b.y - cy) < 3.5) {
+        b.y = 9999; hurt(b.dmg); break;
+      }
+    }
+  }
+
+  if (!enemies.length && state === "play") {
+    pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "WAVE CLEAR", color: C.yellow, t: 0, big: true });
+    score += wave * 50;
+    nextWave();
+  }
+}
+
+function enemyFire(e) {
+  const m = MONSTERS[e.type];
+  const bx = e.x + MW / 2, by = e.y + MH;
+  const sp = 70 + wave * 5;
+  const dmg = 3 + e.type;
+  if (m.fire === "straight" || wave < 2) {
+    ebul.push({ x: bx, y: by, vx: 0, vy: sp, dmg });
+  } else if (m.fire === "aimed") {
+    const ax = soul.x + 3.5 - bx, ay = soul.y - by, l = Math.hypot(ax, ay) || 1;
+    ebul.push({ x: bx, y: by, vx: ax / l * sp, vy: ay / l * sp, dmg });
+  } else {
+    for (const a of [-0.35, 0, 0.35]) ebul.push({ x: bx, y: by, vx: Math.sin(a) * sp, vy: Math.cos(a) * sp, dmg });
+  }
+}
+
+function hitEnemy(e) {
+  const dmg = 1 + Math.floor((soul.lv - 1) / 4); // LVが上がると ちからも あがる
+  e.hp -= dmg; e.flash = 0.12; e.shakeT = 0.25;
+  pops.push({ x: e.x + MW / 2, y: e.y - 6, text: String(dmg), color: C.red, t: 0 });
+  if (e.hp > 0) { SFX.hit(); return; }
+  // 撃破：上から下へチリになって消える
+  const m = MONSTERS[e.type];
+  const rows = m.frames[form.anim];
+  rows.forEach((r, j) => {
+    for (let i = 0; i < r.length; i++) if (r[i] === "#") {
+      parts.push({ x: e.x + i, y: e.y + j, vx: (Math.random() - 0.3) * 14, vy: -6 - Math.random() * 18,
+        life: 0.6 + Math.random() * 0.6, max: 1.2, delay: j * 0.03, color: C.white, s: 1 });
+    }
+  });
+  SFX.dust();
+  score += m.pts * wave;
+  gainExp(e.type + 1);
+  if (Math.random() < 0.06) items.push({ x: e.x + 2.5, y: e.y + 4 });
+}
+
+function gainExp(n) {
+  soul.exp += n;
+  const need = lv => 4 * lv * lv; // 次のLVまでの累計EXP
+  while (soul.exp >= need(soul.lv)) {
+    soul.lv++; soul.maxHp += 4; soul.hp = Math.min(soul.maxHp, soul.hp + 4);
+    SFX.lvup();
+    pops.push({ x: soul.x + 3, y: soul.y - 14, text: "LV UP", color: C.yellow, t: 0 });
+  }
+}
+
+function hurt(dmg) {
+  soul.hp = Math.max(0, soul.hp - dmg);
+  soul.inv = 1.0; shake = 4;
+  SFX.hurt();
+  if (soul.hp <= 0) die();
+}
+
+function die() {
+  setState("dying");
+  ebul = []; shots = [];
+  if (score > hi) { hi = score; store.set("hi", hi); }
+}
+
+function updateDying(dt) {
+  if (stateT > 0.6 && !soul.cracked) { soul.cracked = true; SFX.crack(); }
+  if (stateT > 1.6 && !soul.shattered) {
+    soul.shattered = true; SFX.shatter();
+    for (let i = 0; i < 6; i++) {
+      parts.push({ x: soul.x + 3, y: soul.y + 2, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, g: 160,
+        life: 2.5, max: 2.5, delay: 0, color: C.red, s: 2, shard: true });
+    }
+  }
+  if (stateT > 2.6) { setState("over"); say("＊ あきらめては いけない…\n＊ ケツイを ちからに かえて！"); }
+}
+
+// ---------------- 描画 ----------------
+function draw() {
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  if (shake > 0) ctx.translate(Math.round((Math.random() - 0.5) * shake), Math.round((Math.random() - 0.5) * shake));
+
+  if (state === "title") drawTitle();
+  else if (state === "over") drawOver();
+  else drawGame();
+
+  ctx.restore();
+  drawMute();
+  if (paused) {
+    ctx.fillStyle = "rgba(0,0,0,.75)"; ctx.fillRect(0, 0, W, H);
+    txt("PAUSE", W / 2, H / 2 - 20, 16, C.white, "center");
+    txt("＊ タップで さいかい", W / 2, H / 2 + 4, 10, C.white, "center");
+  }
+}
+
+function drawMute() {
+  const x = W - 22, y = 8, col = muted ? "#555" : C.gray;
+  ctx.fillStyle = col;
+  ctx.fillRect(x, y + 3, 3, 4); ctx.fillRect(x + 3, y + 2, 1, 6); ctx.fillRect(x + 4, y + 1, 1, 8); ctx.fillRect(x + 5, y, 1, 10);
+  if (muted) { ctx.fillRect(x + 8, y + 2, 1, 1); ctx.fillRect(x + 9, y + 3, 1, 1); ctx.fillRect(x + 10, y + 4, 1, 1); ctx.fillRect(x + 11, y + 5, 1, 1); ctx.fillRect(x + 11, y + 2, 1, 1); ctx.fillRect(x + 10, y + 3, 1, 1); ctx.fillRect(x + 9, y + 5, 1, 1); ctx.fillRect(x + 8, y + 6, 1, 1); }
+  else { ctx.fillRect(x + 8, y + 3, 1, 4); ctx.fillRect(x + 10, y + 1, 1, 8); }
+}
+
+function drawTitle() {
+  // ゆらゆら踊るモンスター
+  for (let i = 0; i < 3; i++) {
+    const fr = Math.floor(time * 2 + i) % 2;
+    spr(SPR.mon[i].white[fr], 60 + i * 50 - 12, 92 + Math.sin(time * 2 + i) * 3, 2);
+  }
+  txt("SOUL", W / 2, 140, 28, C.white, "center");
+  txt("INVADERS", W / 2, 170, 28, C.white, "center");
+  txt("ソウル・インベーダー", W / 2, 206, 10, C.gray, "center");
+
+  spr(SPR.heart, W / 2 - 7, 236 + Math.sin(time * 3) * 2, 2);
+
+  if (Math.floor(time * 2) % 2 === 0) txt("[ タップで はじめる ]", W / 2, 272, 12, C.yellow, "center");
+  txt("＊ どこでも ドラッグで いどう", W / 2, 304, 10, C.white, "center");
+  txt("＊ こうげきは じどう", W / 2, 320, 10, C.white, "center");
+  txt("HI " + String(hi).padStart(6, "0"), W / 2, 356, 10, C.gray, "center");
+}
+
+function drawGame() {
+  // 上部：スコア
+  txt("SCORE " + String(score).padStart(6, "0"), 10, 10, 10);
+  txt("WAVE " + wave, W - 34, 10, 10, C.white, "right");
+
+  // バトルボックス
+  rectLine(BOX.x, BOX.y, BOX.w, BOX.h, C.white, 2);
+
+  // 敵
+  const showEnemies = state !== "intro" || form.appear > 0;
+  if (showEnemies) {
+    ctx.globalAlpha = state === "intro" ? form.appear : 1;
+    for (const e of enemies) {
+      const set = SPR.mon[e.type];
+      const img = e.flash > 0 ? set.red[form.anim] : set.white[form.anim];
+      const ox = e.shakeT > 0 ? Math.round(Math.sin(e.shakeT * 60) * 2) : 0;
+      spr(img, e.x + ox, e.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // テキスト（イントロ中はボックス内に表示）
+  if (state === "intro") drawMsg(BOX.x + 10, BOX.y + BOX.h - 70, 12);
+
+  // 自弾
+  ctx.fillStyle = C.yellow;
+  for (const s of shots) ctx.fillRect(Math.round(s.x) - 0.5, Math.round(s.y), 1, 5);
+  // 敵弾
+  ctx.fillStyle = C.white;
+  for (const b of ebul) ctx.fillRect(Math.round(b.x) - 1.5, Math.round(b.y) - 1.5, 3, 3);
+  // アイテム
+  for (const it of items) spr(SPR.candy, it.x, it.y);
+
+  // ソウル
+  drawSoul();
+
+  // パーティクル
+  for (const p of parts) {
+    if (p.delay > 0) {
+      ctx.fillStyle = p.color; ctx.fillRect(Math.round(p.x), Math.round(p.y), p.s, p.s); continue;
+    }
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life / (p.shard ? 0.6 : p.max)));
+    ctx.fillStyle = p.color;
+    if (p.shard) { // 割れたハートの破片
+      const x = Math.round(p.x), y = Math.round(p.y);
+      ctx.fillRect(x, y, 2, 1); ctx.fillRect(x + 1, y + 1, 1, 2);
+    } else ctx.fillRect(Math.round(p.x), Math.round(p.y), p.s, p.s);
+  }
+  ctx.globalAlpha = 1;
+
+  // ダメージ数字など
+  for (const p of pops) {
+    ctx.globalAlpha = Math.max(0, 1 - p.t / 0.8);
+    txt(p.text, p.x, p.y, p.big ? 16 : 10, p.color, "center");
+  }
+  ctx.globalAlpha = 1;
+
+  drawStatus();
+}
+
+function drawSoul() {
+  if (!soul) return;
+  if (state === "dying") {
+    if (soul.shattered) return;
+    if (soul.cracked) { spr(SPR.heartL, soul.x - 1, soul.y); spr(SPR.heartR, soul.x + 1, soul.y); }
+    else spr(SPR.heart, soul.x, soul.y);
+    return;
+  }
+  if (soul.inv > 0 && Math.floor(soul.inv * 12) % 2 === 0) return; // 無敵中は点滅
+  spr(SPR.heart, soul.x, soul.y);
+}
+
+function drawStatus() {
+  const y = BOX.y + BOX.h + 10;
+  txt("SOUL", 12, y, 10);
+  txt("LV " + soul.lv, 50, y, 10);
+  txt("HP", 90, y + 1, 8);
+  const bw = Math.min(70, soul.maxHp * 1.4), filled = bw * soul.hp / soul.maxHp;
+  ctx.fillStyle = C.hpRed; ctx.fillRect(106, y + 1, bw, 9);
+  ctx.fillStyle = C.yellow; ctx.fillRect(106, y + 1, filled, 9);
+  txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10);
+
+  // おなじみのコマンド（いまは「たたかう」固定）
+  const labels = ["たたかう", "こうどう", "アイテム", "みのがす"];
+  const bw2 = 52, gap = 4, bx0 = (W - (bw2 * 4 + gap * 3)) / 2, by = y + 20;
+  labels.forEach((l, i) => {
+    const x = bx0 + i * (bw2 + gap);
+    const on = i === 0;
+    const col = on ? C.yellow : C.orange;
+    rectLine(x, by, bw2, 22, col, 1);
+    if (on) spr(SPR.heart, x + 4, by + 8);
+    txt(l, x + (on ? 31 : bw2 / 2), by + 6, 9, col, "center");
+  });
+}
+
+function drawMsg(x, y, size) {
+  let left = msg.shown;
+  msg.lines.forEach((line, i) => {
+    const s = line.slice(0, Math.max(0, left));
+    left -= line.length;
+    txt(s, x, y + i * (size + 6), size, C.white);
+  });
+}
+
+function drawOver() {
+  // 破片だけ残す
+  for (const p of parts) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 0.6));
+    ctx.fillStyle = p.color;
+    ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 1); ctx.fillRect(Math.round(p.x) + 1, Math.round(p.y) + 1, 1, 2);
+  }
+  ctx.globalAlpha = Math.min(1, stateT / 1.2);
+  txt("GAME", W / 2, 90, 36, C.white, "center");
+  txt("OVER", W / 2, 132, 36, C.white, "center");
+  ctx.globalAlpha = 1;
+  if (stateT > 1.2) { updateMsg(1 / 60); drawMsg(30, 210, 12); }
+  if (stateT > 2.0) {
+    txt("SCORE " + String(score).padStart(6, "0"), W / 2, 270, 10, C.white, "center");
+    txt("HI    " + String(hi).padStart(6, "0"), W / 2, 286, 10, C.gray, "center");
+    txt("WAVE " + wave + "  /  LV " + soul.lv, W / 2, 302, 10, C.gray, "center");
+  }
+  if (stateT > 3.2 && Math.floor(time * 2) % 2 === 0) txt("[ タップで タイトルへ ]", W / 2, 340, 12, C.yellow, "center");
+}
+
+// ---------------- ループ ----------------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+// フォント読み込みを少し待ってから開始（失敗しても始める）
+(document.fonts && document.fonts.load ? document.fonts.load(`12px "DotGothic16"`).catch(() => {}) : Promise.resolve())
+  .finally(() => requestAnimationFrame(t => { last = t; loop(t); }));
+</script>
+</body>
+</html>
