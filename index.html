@@ -125,7 +125,10 @@ textarea{width:100%;height:200px;font-family:var(--num);font-size:11px;border:1p
   pointer-events:auto;display:flex;align-items:center;gap:14px}
 #toast button{background:none;border:none;color:#fff;font-size:13px;font-weight:700;
   text-decoration:underline;font-family:var(--sans);padding:0}
-.hide{display:none}
+#upd{position:fixed;left:0;right:0;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:center;z-index:20}
+#upd div{background:var(--och);color:#fff;font-size:13px;padding:10px 16px;border-radius:2px;display:flex;align-items:center;gap:14px}
+#upd button{background:none;border:none;color:#fff;font-size:13px;font-weight:700;text-decoration:underline;font-family:var(--sans);padding:0}
+.hide,#upd.hide{display:none}
 @media (prefers-reduced-motion:no-preference){#toast div{animation:up .2s ease}}
 @keyframes up{from{opacity:0;transform:translateY(6px)}}
 </style>
@@ -143,6 +146,7 @@ textarea{width:100%;height:200px;font-family:var(--num);font-size:11px;border:1p
 </nav>
 <main id="main"></main>
 <div id="toast" class="hide"></div>
+<div id="upd" class="hide"><div>新しい版があります <button>更新する</button></div></div>
 
 <script>
 const KINDS=["転記・入力","指示の抜け漏れ","期限・スケジュール","確認不足","認識違い","知識不足","紛失・所在不明"];
@@ -547,6 +551,19 @@ function showExport(){
 
 render();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+// 公開中の版が変わったら知らせる（入力中の内容を消さないよう、更新はボタンで）
+(function(){
+  let base=null;
+  const check=()=>fetch("index.html",{cache:"no-store"}).then(r=>r.ok?r.text():null).then(t=>{
+    if(!t)return;
+    if(base===null){base=t;return}
+    if(t!==base)document.getElementById("upd").classList.remove("hide");
+  }).catch(()=>{});
+  document.querySelector("#upd button").addEventListener("click",()=>location.reload());
+  check();
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")check()});
+})();
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE = "missdaicho-v8";
+const CACHE = "missdaicho-v9";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -13,10 +13,11 @@ self.addEventListener("activate", e => {
 });
 
 // ネットワーク優先・失敗したらキャッシュ（機内でも開ける）
+// cache:"no-cache" でブラウザのHTTPキャッシュを素通りさせ、更新をすぐ反映する
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request.url, { cache: "no-cache" })
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
