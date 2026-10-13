@@ -74,7 +74,8 @@ const store = {
   del(k) { try { localStorage.removeItem("soulinv." + k); } catch (e) {} },
 };
 // ゲームを またいで のこる「きおく」
-const mem = Object.assign({ flower: false, deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, store.get("mem", {}));
+const memStored = store.get("mem", {});
+const mem = Object.assign({ flower: (memStored.runs || 0) > 0, deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, memStored);
 const saveMem = () => store.set("mem", mem);
 
 // ---------------- サウンド（WebAudioで合成） ----------------
@@ -368,9 +369,9 @@ const ITEMS = {
   bomb:  { name: "ばくだんリンゴ",   price: 30, desc: "てき ぜんいんに 3ダメージ。",
     use: () => { SFX.dust(); bombAll(3); return "＊ ばくだんリンゴ を なげた。\n＊ ドカーン！"; } },
   clock: { name: "ゆっくりどけい",   price: 35, desc: "6びょう てきが ゆっくりに なる。",
-    use: () => { form.slowT = 6; SFX.warn(); return "＊ ゆっくりどけい を ふった。\n＊ じかんが のびていく…"; } },
+    use: () => { soul.slowT = 6; SFX.warn(); return "＊ ゆっくりどけい を ふった。\n＊ じかんが のびていく…"; } },
   star:  { name: "ほしのかけら",     price: 40, desc: "5びょう むてきに なる。",
-    use: () => { soul.inv = 5; SFX.revive(); return "＊ ほしのかけら を にぎった。\n＊ からだが ひかりだした！"; } },
+    use: () => { soul.inv = 5; soul.starT = 5; SFX.revive(); return "＊ ほしのかけら を にぎった。\n＊ からだが ひかりだした！"; } },
   seed:  { name: "ちからのたね",     price: 60, desc: "さいだいHPが 5 あがる。",
     use: () => { soul.maxHp += 5; soul.hp += 5; SFX.lvup(); return "＊ ちからのたね を たべた。\n＊ さいだいHPが 5 あがった！"; } },
   cotton: { name: "あまぐもわたあめ", price: 0, unique: true, desc: "HPを ぜんぶ かいふく。ふわふわ。",
@@ -570,7 +571,7 @@ function nextWave() {
   saveMem();
   shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
   fireT = 0; efireT = 1.2; shake = 0; regenT = 0;
-  eventT = 6 + Math.random() * 6;
+  eventT = wave % 5 === 4 ? 1.5 : 6 + Math.random() * 6; // ボスの まえは すぐ セーブポイント
   Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
   soul.invert = false; soul.hold = false;
   soul.mirrorShield = soul.friends.includes("mirror");
@@ -593,7 +594,7 @@ function nextWave() {
     buildFormation();
     form.glitch = 1.8; noise(1.2, 0.08, 200);
     text = "＊ ＃％＆…ＥＲＲ…\n＊ …なんでもない。\n　 きに しないで。";
-  } else if (wave >= 4 && Math.random() < 0.12 && !NEW_TYPE[wave]) {
+  } else if (wave >= 4 && wave % 5 !== 4 && Math.random() < 0.12 && !NEW_TYPE[wave]) {
     form.rush = 12; // おかねの あめ
     text = "＊ そらから おかねが\n　 ふってきた！？";
   } else {
@@ -672,6 +673,7 @@ function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null
 const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept"];
 function saveRun() {
   if (!soul || !SAVEABLE.includes(state)) return;
+  saveMem(); // ずかんの かずなども いっしょに
   store.set("run", {
     v: SAVE_V, savedAt: Date.now(), state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
     fireT, efireT, eventT, regenT, nextId, box: { ...BOX }, tbox: { ...TBOX },
@@ -836,6 +838,16 @@ window.addEventListener("keydown", e => {
   const ok = ["z", "Z", "Enter", " "].includes(k), back = ["x", "X", "Escape"].includes(k);
   if (paused) { if (ok || k === "p" || k === "P") pausedTap(null); return; }
   if ((k === "p" || k === "P") && SAVEABLE.includes(state)) { pauseGame(); return; }
+  if (state === "title" && titleView !== "main") {
+    if (k === "ArrowLeft" || k === "ArrowRight") {
+      if (titleView === "records") { titleView = "zukan"; zukanSel = Math.max(0, zukanSel); }
+      else if (zukanSel >= 0) zukanSel = (zukanSel + (k === "ArrowLeft" ? MON.length - 1 : 1)) % MON.length;
+      SFX.move();
+    } else if (titleView === "zukan" && (k === "ArrowUp" || k === "ArrowDown")) {
+      zukanSel = clamp(Math.max(0, zukanSel) + (k === "ArrowUp" ? -5 : 5), 0, MON.length - 1); SFX.move();
+    } else if (ok || back) { titleView = "main"; SFX.cancel(); }
+    return;
+  }
   if (state === "title" && hasRun() && (k === "ArrowUp" || k === "ArrowDown")) { titleSel ^= 1; SFX.move(); return; }
   if (/^[1-4]$/.test(k) && (state === "play" || state === "menu")) { pressCmd(+k - 1); return; }
   if (state === "menu" || state === "shop") {
@@ -1282,9 +1294,10 @@ function updatePlay(dt) {
   if (form.pendingTalk) { const t = form.pendingTalk; form.pendingTalk = null; startTalk(t.lines, t.who, t.after); return; }
   moveSoulKeys(dt);
   if (soul.inv > 0) soul.inv -= dt;
+  if (soul.starT > 0) soul.starT -= dt;
   // ゆっくりどけい：てきの じかんだけ おそく なる
-  if (form.slowT > 0) form.slowT -= dt;
-  const edt = form.slowT > 0 ? dt * 0.5 : dt;
+  if (soul.slowT > 0) soul.slowT -= dt;
+  const edt = soul.slowT > 0 ? dt * 0.5 : dt;
   // うごいているか（あお・オレンジの はんてい）
   if (Math.abs(soul.x - soul.px) > 0.05) soul.moveT = 0.1; else soul.moveT = Math.max(0, soul.moveT - dt);
   soul.px = soul.x;
@@ -1343,7 +1356,7 @@ function updatePlay(dt) {
     if (b.ay) b.vy += b.ay * edt;
     if (b.split && b.y > b.split) { // ひょうが われる
       b.dead = true;
-      for (const a of [-0.6, 0, 0.6]) ebul.push({ x: b.x, y: b.y, vx: Math.sin(a) * 70, vy: Math.cos(a) * 70, dmg: 3, c: "w", shape: "dot", w: 3, h: 3 });
+      for (const a of [-0.6, 0, 0.6]) ebul.push({ x: b.x, y: b.y, vx: Math.sin(a) * 70 * (b.sp || 1), vy: Math.cos(a) * 70 * (b.sp || 1), dmg: b.sd || 3, c: "w", shape: "dot", w: 3, h: 3 });
     }
     if (b.bounce && (b.x < BOX.x + 4 || b.x > BOX.x + BOX.w - 4)) { b.vx = -b.vx; b.x = clamp(b.x, BOX.x + 4, BOX.x + BOX.w - 4); }
   }
@@ -1754,7 +1767,7 @@ function updateBoss(e, m, dt) {
       bone(L + (R - L) * idx / n, BOX.y + 4, 0, 120 * sp);
       break;
     }
-    case "hail": e.pt = p2 ? 0.45 : 0.6; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: 0, vy: 70 * sp, dmg: 5, c: "w", shape: "bubble", w: 7, h: 7, split: BOX.y + 120 + Math.random() * 60 }); break;
+    case "hail": e.pt = p2 ? 0.45 : 0.6; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: 0, vy: 70 * sp, dmg: 4 + lp, c: "w", shape: "bubble", w: 7, h: 7, split: BOX.y + 120 + Math.random() * 60, sp, sd: 3 + lp }); break;
     case "crossBeams": e.pt = 1.1; beam(soul.x + 3.5, 10); beam(W - (soul.x + 3.5), 10); break;
     case "echo": { // すこし まえの あなたの いちに ふってくる
       e.pt = p2 ? 0.16 : 0.22;
@@ -1996,14 +2009,15 @@ function drawTitle() {
 
 let zukanSel = -1;
 function recordsTap(p) {
-  if (!p || p.y > 360) { titleView = "main"; SFX.cancel(); return; }
-  if (p.y < 66 && p.y > 40) { titleView = p.x < W / 2 ? "records" : "zukan"; SFX.move(); return; }
-  if (titleView === "zukan") {
+  // タブ → きりかえ / ずかんの マス → えらぶ / それいがい → もどる
+  if (p && p.y > 40 && p.y < 66) { titleView = p.x < W / 2 ? "records" : "zukan"; SFX.move(); return; }
+  if (p && titleView === "zukan") {
     const c = Math.floor((p.x - ZK.x) / ZK.cw), r = Math.floor((p.y - ZK.y) / ZK.ch);
-    if (c >= 0 && c < 5 && r >= 0 && r < 4 && r * 5 + c < MON.length) { zukanSel = r * 5 + c; SFX.select(); }
+    if (c >= 0 && c < 5 && r >= 0 && r < ZK.rows && r * 5 + c < MON.length) { zukanSel = r * 5 + c; SFX.select(); return; }
   }
+  titleView = "main"; SFX.cancel();
 }
-const ZK = { x: BOX0.x + 10, y: 74, cw: 40, ch: 34 };
+const ZK = { x: BOX0.x + 10, y: 72, cw: 40, ch: 30, rows: Math.ceil(MON.length / 5) };
 function drawZukan() {
   MON.forEach((m, i) => {
     const c = i % 5, r = Math.floor(i / 5), x = ZK.x + c * ZK.cw, y = ZK.y + r * ZK.ch;
@@ -2015,7 +2029,7 @@ function drawZukan() {
   });
   const n = Object.keys(mem.seen).length;
   txt(n + " / " + MON.length, BOX0.x + BOX0.w - 14, 58, 9, C.gray, "right");
-  const y = ZK.y + ZK.ch * 4 + 10;
+  const y = ZK.y + ZK.ch * ZK.rows + 8;
   if (zukanSel >= 0) {
     const i = zukanSel;
     if (mem.seen[i]) {
@@ -2159,7 +2173,7 @@ function drawField() {
     if (s.ally) { ctx.fillStyle = C.white; ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 10); ctx.fillRect(Math.round(s.x) - 1, Math.round(s.y), 3, 2); ctx.fillRect(Math.round(s.x) - 1, Math.round(s.y) + 8, 3, 2); }
     else { ctx.fillStyle = C.yellow; ctx.fillRect(Math.round(s.x) - 0.5, Math.round(s.y), 1, 5); }
   }
-  if (form.slowT > 0 && state === "play") { ctx.fillStyle = "rgba(40,80,255,0.08)"; ctx.fillRect(BOX.x + 2, BOX.y + 2, BOX.w - 4, BOX.h - 4); txt("ゆっくり " + Math.ceil(form.slowT), BOX.x + BOX.w - 6, BOX.y + BOX.h - 14, 8, C.blue, "right"); }
+  if (soul.slowT > 0 && state === "play") { ctx.fillStyle = "rgba(40,80,255,0.08)"; ctx.fillRect(BOX.x + 2, BOX.y + 2, BOX.w - 4, BOX.h - 4); txt("ゆっくり " + Math.ceil(soul.slowT), BOX.x + BOX.w - 6, BOX.y + BOX.h - 14, 8, C.blue, "right"); }
   if (soul.mirrorShield && state === "play") { ctx.fillStyle = C.yellow; ctx.globalAlpha = 0.5 + Math.sin(time * 6) * 0.3; rectLine(Math.round(soul.x) - 3, Math.round(soul.y) - 3, 13, 12, C.yellow, 1); ctx.globalAlpha = 1; }
   for (const b of ebul) drawBullet(b);
   for (const it of items) spr(it.kind === "coin" ? SPR.coin : SPR.candy, it.x, it.y);
@@ -2219,7 +2233,7 @@ function drawSoul() {
     else spr(SPR.heart, soul.x, soul.y);
     return;
   }
-  if (soul.inv > 1.6 && state === "play") { // ほしのかけら：ひかる
+  if (soul.starT > 0 && state === "play") { // ほしのかけら：ひかる
     ctx.fillStyle = Math.floor(time * 10) % 2 ? C.yellow : C.white;
     ctx.fillRect(Math.round(soul.x) - 2, Math.round(soul.y) + 2, 1, 1); ctx.fillRect(Math.round(soul.x) + 9, Math.round(soul.y) + 2, 1, 1);
     ctx.fillRect(Math.round(soul.x) + 3, Math.round(soul.y) - 3, 1, 1);
