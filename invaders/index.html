@@ -410,7 +410,7 @@ const BOSS = {
     killed: ["…そうか。", "それが おまえの\nえらんだ みち か。"],
     spared: ["へへっ。", "おまえ いいやつ だな。", "これ もってけよ。"],
     gift: { type: "armor", key: "scarf" },
-    patterns: ["boneRain", "gapWall", "blueSweep", "beam"],
+    patterns: ["boneRain", "gapWall", "blueSweep", "beam"], extra: ["boneStairs"],
   },
   cloud: {
     intro: m => m.killed.cloud ? ["…あなた", "まえにも わたしを\nけしたよね。", "…ずっと あめが\nやまないの。"]
@@ -421,7 +421,7 @@ const BOSS = {
     killed: ["…やっぱり。", "…あめは\nやまなかった。"],
     spared: ["…ありがとう。", "ひさしぶりに\nはれた きがする。", "これ あげる。"],
     gift: { type: "weapon", key: "umbrella" },
-    patterns: ["rain", "lightning", "bubbles"],
+    patterns: ["rain", "lightning", "bubbles"], extra: ["hail"],
   },
   mirror: {
     intro: m => m.killed.mirror ? ["ふふ。", "かがみは ぜんぶ\nおぼえているのよ。", "あなたが\nなにを したか。"]
@@ -432,7 +432,7 @@ const BOSS = {
     killed: ["…かがみが われた。", "あなたの かお\nもう うつらないわ。"],
     spared: ["ふふ。", "わたしの まけね。", "これを。\nかがみの かけらよ。"],
     gift: { type: "weapon", key: "shard" },
-    patterns: ["spiral", "invert", "reflect", "mirrorRain"],
+    patterns: ["spiral", "invert", "reflect", "mirrorRain"], extra: ["crossBeams"],
   },
   shadow: {
     intro: (m, s) => Object.values(s.route).every(v => v === "spared")
@@ -1341,6 +1341,10 @@ function updatePlay(dt) {
   for (const b of ebul) {
     b.x += b.vx * edt; b.y += b.vy * edt;
     if (b.ay) b.vy += b.ay * edt;
+    if (b.split && b.y > b.split) { // ひょうが われる
+      b.dead = true;
+      for (const a of [-0.6, 0, 0.6]) ebul.push({ x: b.x, y: b.y, vx: Math.sin(a) * 70, vy: Math.cos(a) * 70, dmg: 3, c: "w", shape: "dot", w: 3, h: 3 });
+    }
     if (b.bounce && (b.x < BOX.x + 4 || b.x > BOX.x + BOX.w - 4)) { b.vx = -b.vx; b.x = clamp(b.x, BOX.x + 4, BOX.x + BOX.w - 4); }
   }
   ebul = ebul.filter(b => b.y < BOX.y + BOX.h + 20 && b.y > BOX.y - 30 && b.x > BOX.x - 40 && b.x < BOX.x + BOX.w + 40 && !b.dead);
@@ -1693,8 +1697,9 @@ function updateBoss(e, m, dt) {
   if (!e.pat || e.patT <= 0) {
     if (e.pat === "invert") soul.invert = false;
     e.reflect = false;
-    e.pi = ((e.pi == null ? -1 : e.pi) + 1) % B.patterns.length;
-    e.pat = B.patterns[e.pi]; e.patT = 4.5; e.pt = 0; e.pa = 0;
+    const pats = (e.loop || 0) >= 1 && B.extra ? B.patterns.concat(B.extra) : B.patterns; // 2しゅうめからの あたらしい こうげき
+    e.pi = ((e.pi == null ? -1 : e.pi) + 1) % pats.length;
+    e.pat = pats[e.pi]; e.patT = 4.5; e.pt = 0; e.pa = 0;
     if (m.boss === "shadow" || m.boss === "poko") { // ボックスを もとに もどす
       if (e.phase2) { TBOX.w = 170; TBOX.x = W / 2 - 85; } else Object.assign(TBOX, BOX0);
     }
@@ -1742,6 +1747,15 @@ function updateBoss(e, m, dt) {
     }
     case "invert": e.pt = 0.55; for (let i = 0; i < 3; i++) dot(L + Math.random() * (R - L), BOX.y + 6, 0, 80 * sp); break;
     case "reflect": e.pt = 0.9; dot(bx, by, 0, 90 * sp); break;
+    case "boneStairs": { // かいだんじょうに ふってくる
+      e.pt = 0.09;
+      e.pa = (e.pa || 0) + 1;
+      const n = 14, k = e.pa % (n * 2), idx = k < n ? k : n * 2 - k;
+      bone(L + (R - L) * idx / n, BOX.y + 4, 0, 120 * sp);
+      break;
+    }
+    case "hail": e.pt = p2 ? 0.45 : 0.6; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: 0, vy: 70 * sp, dmg: 5, c: "w", shape: "bubble", w: 7, h: 7, split: BOX.y + 120 + Math.random() * 60 }); break;
+    case "crossBeams": e.pt = 1.1; beam(soul.x + 3.5, 10); beam(W - (soul.x + 3.5), 10); break;
     case "echo": { // すこし まえの あなたの いちに ふってくる
       e.pt = p2 ? 0.16 : 0.22;
       const x = e.hx && e.hx.length ? e.hx[0] : soul.x + 3.5;
