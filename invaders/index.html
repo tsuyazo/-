@@ -92,15 +92,17 @@ const ACH = [
   ["ちりの みち", "ちりの エンディング", m => m.endings.genocide],
   ["ずかん コンプリート", "すべての モンスターに あった", m => Object.keys(m.seen).length >= MON.length],
 ];
-function checkAch() {
+function checkAch(silent) {
   mem.ach = mem.ach || {};
   ACH.forEach(([name, , cond], i) => {
     if (!mem.ach[i] && cond(mem)) {
       mem.ach[i] = 1;
-      if (typeof pops !== "undefined") { pops.push({ x: W / 2, y: BOX0.y + BOX0.h - 70, text: "しょうごう「" + name + "」", color: C.yellow, t: -1.2, big: true }); SFX.lvup(); }
+      if (!silent && typeof pops !== "undefined") { pops.push({ x: W / 2, y: BOX0.y + BOX0.h - 70, text: "しょうごう「" + name + "」", color: C.yellow, t: -1.2, big: true }); SFX.lvup(); }
     }
   });
 }
+// なんども あそんでいる ひとには ヒマワリンの はじめての えんしゅつを ださない
+if (!mem.migFlower) { if ((memStored.runs || 0) > 1) mem.flower = true; mem.migFlower = true; saveMem(); }
 // ヒマワリンの ばんごうが 20 → 21 に なった ときの ひっこし
 if (!mem.mig21) {
   if (mem.seen[20] && !mem.met.clock) { delete mem.seen[20]; mem.seen[21] = 1; }
@@ -645,9 +647,13 @@ function nextWave() {
 
   let text;
   if (isBossWave(wave)) {
-    let type = T.boss[(wave / 5 - 1) % 4];
-    if (wave === 20 && soul.endingDone) type = Object.values(soul.route).every(v => v === "killed") ? T.secret.poko : T.secret.shadow;
-    const m = MON[type], key = m.boss, loop = m.boss === "shadow" || m.boss === "poko" ? 0 : Math.floor((wave / 5 - 1) / 4);
+    // 5,10,15: ボーンズ・ショボン・マネキ / 20: かくしボス（エンディングの あと）/ 25〜: クロックから 4たいが じゅんばんに
+    const n = wave / 5;
+    let type, loop;
+    if (n <= 3) { type = T.boss[n - 1]; loop = 0; }
+    else if (n === 4 && soul.endingDone) { type = Object.values(soul.route).every(v => v === "killed") ? T.secret.poko : T.secret.shadow; loop = 0; }
+    else { const k = n === 4 ? 0 : n - 5; type = [T.boss[3], T.boss[0], T.boss[1], T.boss[2]][((k % 4) + 4) % 4]; loop = Math.max(0, Math.floor((k + 3) / 4)); }
+    const m = MON[type], key = m.boss;
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
     e.maxHp = e.hp = m.hp + loop * 40 + wave * 2;
     e.cx = W / 2; e.loop = loop;
@@ -666,13 +672,14 @@ function nextWave() {
     buildFormation();
     if (NEW_TYPE[wave]) text = NEW_TYPE[wave].text;
     else text = pick(WAVE_TEXT);
-    const ev = Math.random();
-    if (wave >= 4 && !NEW_TYPE[wave] && ev < 0.2) {
+    // ウェーブの できごと（ev の はんいで かくりつを わける）: まっくら 20% / かぜ 8% / おどり 12%
+    const ev = Math.random(), plain = !NEW_TYPE[wave];
+    if (plain && wave >= 4 && ev < 0.2) {
       form.dark = true; text = "＊ あたりが まっくらに なった…\n＊ てきの すがたが みえない。";
-    } else if (wave >= 5 && !NEW_TYPE[wave] && ev < 0.28 && ev >= 0.2) {
+    } else if (plain && wave >= 5 && ev < 0.28) {
       form.wind = (Math.random() < 0.5 ? -1 : 1) * (22 + Math.min(20, wave));
       text = "＊ つよい かぜが ふいている。\n＊ たまが " + (form.wind > 0 ? "みぎ" : "ひだり") + "へ ながされる！";
-    } else if (wave >= 6 && !NEW_TYPE[wave] && ev < 0.4) {
+    } else if (plain && wave >= 6 && ev < 0.4) {
       // おどりの ウェーブ：たたかうか、みのがすか
       form.peace = 20; soul.hold = true;
       for (const e of enemies) e.spare = true;
@@ -739,9 +746,9 @@ function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null
 
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
 const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept"];
-function saveRun() {
+function saveRun(periodic) {
   if (!soul || !SAVEABLE.includes(state)) return;
-  saveMem(); // ずかんの かずなども いっしょに
+  if (!periodic) saveMem(); // ずかんの かずなども いっしょに（2びょうごとの ときは かるく）
   store.set("run", {
     v: SAVE_V, savedAt: Date.now(), state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
     fireT, efireT, eventT, regenT, nextId, box: { ...BOX }, tbox: { ...TBOX },
@@ -887,8 +894,8 @@ function drawHelp() {
 }
 function pausedTap(p) {
   // ポーズ画面：「タイトルへ」以外は どこを タップしても さいかい
+  if (helpOpen) { helpOpen = false; SFX.cancel(); return; } // あそびかたを とじる（さいしょに みる）
   if (p && p.y > H / 2 + 24 && p.y < H / 2 + 54) { saveRun(); paused = false; welcome = null; setState("title"); SFX.cancel(); return; }
-  if (helpOpen) { helpOpen = false; SFX.cancel(); return; }
   if (p && p.y > H / 2 + 56 && p.y < H / 2 + 86) { sensI = (sensI + 1) % SENS.length; store.set("sens", sensI); SFX.move(); return; }
   if (p && p.y > H / 2 + 88 && p.y < H / 2 + 118) { helpOpen = true; SFX.select(); return; }
   paused = false; welcome = null; helpOpen = false; SFX.select();
@@ -934,6 +941,7 @@ window.addEventListener("keydown", e => {
     if (k === "ArrowLeft" || k === "ArrowRight") {
       if (titleView !== "zukan") { const v = ["records", "zukan", "ach"]; titleView = v[(v.indexOf(titleView) + (k === "ArrowLeft" ? 2 : 1)) % 3]; zukanSel = Math.max(0, zukanSel); }
       else if (k === "ArrowRight" && zukanSel === MON.length - 1) titleView = "ach";
+      else if (k === "ArrowLeft" && zukanSel <= 0) titleView = "records";
       else zukanSel = (zukanSel + (k === "ArrowLeft" ? MON.length - 1 : 1)) % MON.length;
       SFX.move();
     } else if (titleView === "zukan" && (k === "ArrowUp" || k === "ArrowDown")) {
@@ -1130,7 +1138,7 @@ function talkTap() {
   } else if (after === "bossSpared") {
     e.dead = true; soul.spares++; mem.totalSpares = (mem.totalSpares || 0) + 1; SFX.spare(); fadeOut(e, C.yellow);
     soul.route[key] = "spared"; if (!soul.friends.includes(key)) soul.friends.push(key);
-    mem.spared[key] = (mem.spared[key] || 0) + 1; saveMem();
+    mem.spared[key] = (mem.spared[key] || 0) + 1; checkAch(); saveMem();
     const g = BOSS[key].gift, gold = 40 + wave * 2;
     soul.gold += gold;
     const list = g.type === "weapon" ? soul.weapons : soul.armors;
@@ -1357,7 +1365,7 @@ function update(dt) {
   } else if (state === "play") {
     updatePlay(dt);
     saveT += dt;
-    if (saveT > 2) { saveT = 0; saveRun(); }
+    if (saveT > 2) { saveT = 0; saveRun(true); }
   } else if (state === "dying") {
     updateDying();
   }
@@ -1471,7 +1479,7 @@ function updatePlay(dt) {
     const cands = enemies.filter(e => e.fm && !e.free && CHAT[e.type]);
     if (cands.length && !form.dark) { const e = pick(cands); e.chat = pick(CHAT[e.type]); e.chatT = 1.8; }
   }
-  for (const e of enemies) if (e.chatT > 0) e.chatT -= dt;
+  for (const e of enemies) if (e.chatT > 0) e.chatT -= edt;
 
   // とくべつな てき（おどりの あいだは こない）
   if (!(form.peace > 0)) {
@@ -2070,7 +2078,7 @@ function updateDying() {
       say("＊ …だめだ。\n＊ まだ たおれる わけには\n　 いかない！");
       return;
     }
-    mem.deaths++; saveMem();
+    mem.deaths++; checkAch(); saveMem();
     clearRun();
     setState("over");
     say(mem.deaths >= 5 ? "＊ …まだ やるの？\n＊ いいね。その ケツイ。"
@@ -2209,7 +2217,7 @@ function drawZukan() {
   } else txt("＊ モンスターを タップ", BOX0.x + 14, y, 10, C.gray);
 }
 function drawAch() {
-  checkAch();
+  checkAch(true);
   const got = ACH.filter((_, i) => mem.ach[i]).length;
   txt(got + " / " + ACH.length, BOX0.x + BOX0.w - 14, 62, 9, C.gray, "right");
   ACH.forEach(([name, desc], i) => {
