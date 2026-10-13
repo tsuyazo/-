@@ -601,7 +601,7 @@ function placeFormation() {
   for (const e of enemies) if (e.fm && !e.free) { e.x = form.ox + e.fx; e.y = form.oy + e.fy; }
 }
 
-function setState(s) { state = s; stateT = 0; if (s === "title") titleRunInfo = null; }
+function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null; }
 
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
 const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending"];
@@ -616,7 +616,11 @@ function saveRun() {
 }
 let runCache = null; // タイトルで まいフレーム よまないように
 function hasRun() {
-  if (runCache === null) { const r = store.get("run", null); runCache = !!(r && r.v === SAVE_V); }
+  if (runCache === null) {
+    const r = store.get("run", null);
+    runCache = !!(r && r.v === SAVE_V);
+    titleRunInfo = runCache ? "WAVE " + r.wave + "  LV " + r.soul.lv : "";
+  }
   return runCache;
 }
 function clearRun() { store.del("run"); runCache = false; }
@@ -860,12 +864,7 @@ function healMsg(text, n) {
 }
 function bombAll(dmg) {
   for (const e of enemies) {
-    if (e.dead || e.dying || MON[e.type].ghost) continue;
-    if (MON[e.type].boss) { // メニューの なかで かいわが はじまらないように、ボスは きょくげんまで
-      const floor = Math.floor(e.maxHp * 0.2) + 1;
-      if (e.hp > floor) { e.hp = Math.max(floor, e.hp - dmg); e.flash = 0.3; }
-      continue;
-    }
+    if (e.dead || e.dying || e.spare || MON[e.type].ghost) continue; // みのがせる あいては まきこまない
     damageEnemy(e, dmg, true);
   }
   enemies = enemies.filter(e => !e.dead);
@@ -880,16 +879,13 @@ function equip(slot, key) {
 // ---------------- みのがす ----------------
 function doSpare() {
   if (form && form.peace > 0) {
-    const fm = enemies.filter(e => e.fm);
-    for (const e of fm) { e.dead = true; fadeOut(e, C.yellow); }
-    enemies = enemies.filter(e => !e.dead);
-    form.peace = 0; soul.hold = false; soul.spares++; SFX.spare();
-    const g = fm.length * 2 * (armor().goldX || 1);
-    soul.gold += g;
+    const n = dismissFormation(C.yellow, "みんな うれしそうに かえっていった", C.yellow);
+    soul.spares++; SFX.spare();
+    let g = n * 2 * (armor().goldX || 1), gift = "";
     const key = pick(["candy", "pie", "smoke", "bomb"]);
-    if (soul.bag.length < INV_MAX) soul.bag.push(key);
-    pops.push({ x: W / 2, y: BOX.y + 110, text: "みんな うれしそうに かえっていった", color: C.yellow, t: 0 });
-    pops.push({ x: W / 2, y: BOX.y + 126, text: "+" + g + "G  " + ITEMS[key].name, color: C.gold, t: -0.4 });
+    if (soul.bag.length < INV_MAX) { soul.bag.push(key); gift = "  " + ITEMS[key].name; } else g += 10;
+    soul.gold += g;
+    pops.push({ x: W / 2, y: BOX.y + 126, text: "+" + g + "G" + gift, color: C.gold, t: -0.4 });
     return;
   }
   const list = spareables();
@@ -907,6 +903,15 @@ function doSpare() {
   }
   enemies = enemies.filter(e => !e.dead);
 }
+// おどりの ウェーブを おわらせる（みのがした／じかんぎれ）
+function dismissFormation(color, text, textColor) {
+  const fm = enemies.filter(e => e.fm);
+  for (const e of fm) { e.dead = true; fadeOut(e, color); }
+  enemies = enemies.filter(e => !e.dead);
+  form.peace = 0; soul.hold = false;
+  pops.push({ x: W / 2, y: BOX.y + 110, text, color: textColor, t: 0 });
+  return fm.length;
+}
 function fadeOut(e, color) {
   const m = MON[e.type], s = m.scale || 1;
   frameRows(e).forEach((r, j) => { for (let i = 0; i < r.length; i += 2) if (r[i] === "#") {
@@ -916,6 +921,8 @@ function fadeOut(e, color) {
 
 // ---------------- かいわ（Undertale の ふきだし） ----------------
 function startTalk(lines, who, after) {
+  // メニューや おみせの なかでは はじめない。もどってから はなす
+  if (state === "menu" || state === "shop" || state === "chest") { form.pendingTalk = { lines, who, after }; return; }
   setState("talk");
   ui = { talk: lines, i: 0, who, after };
   say(lines[0]);
@@ -1163,6 +1170,7 @@ const frameOf = e => {
 const frameRows = e => MON[e.type].frames[frameOf(e)];
 
 function updatePlay(dt) {
+  if (form.pendingTalk) { const t = form.pendingTalk; form.pendingTalk = null; startTalk(t.lines, t.who, t.after); return; }
   moveSoulKeys(dt);
   if (soul.inv > 0) soul.inv -= dt;
   // うごいているか（あお・オレンジの はんてい）
@@ -1205,21 +1213,18 @@ function updatePlay(dt) {
   const shooters = enemies.filter(e => e.fm && !e.free);
   if (form.peace > 0) {
     form.peace -= dt;
-    if (form.peace <= 0) { // だれも えらばなかった
-      for (const e of enemies) if (e.fm) { e.dead = true; fadeOut(e, C.white); }
-      enemies = enemies.filter(e => !e.dead); soul.hold = false;
-      pops.push({ x: W / 2, y: BOX.y + 120, text: "モンスターたちは かえっていった", color: C.white, t: 0 });
-      return;
-    }
+    if (form.peace <= 0) { dismissFormation(C.white, "モンスターたちは かえっていった", C.white); return; } // だれも えらばなかった
   } else if (efireT <= 0 && shooters.length) {
     efireT = Math.max(0.3, 1.25 - wave * 0.08) * (0.6 + Math.random() * 0.8) * (form.dark ? 1.3 : 1) * (form.angry ? 0.6 : 1);
     enemyFire(pick(shooters));
   }
 
-  // とくべつな てき
+  // とくべつな てき（おどりの あいだは こない）
+  if (!(form.peace > 0)) {
   if (form.ghostT != null) { form.ghostT -= dt; if (form.ghostT <= 0) { form.ghostT = null; spawnGhost(); } }
   if (form.thiefT != null) { form.thiefT -= dt; if (form.thiefT <= 0) { form.thiefT = null; spawnThief(); } }
   if (form.dummyT != null) { form.dummyT -= dt; if (form.dummyT <= 0) { form.dummyT = null; spawnDummy(); } }
+  }
 
   for (const b of ebul) {
     b.x += b.vx * dt; b.y += b.vy * dt;
@@ -1327,7 +1332,6 @@ function updateFormation(dt) {
   if (form.peace > 0) dy = 0;
   form.ox += dx; form.oy += dy;
   placeFormation();
-  if (form.peace > 0) for (const e of inF) e.y += Math.round(Math.sin(time * 6 + e.fx * 0.2) * 3);
   form.animT += dt;
   if (form.animT > Math.max(0.15, 0.6 - (1 - alive / Math.max(1, form.total)) * 0.4)) { form.animT = 0; form.anim ^= 1; }
   let maxY = -Infinity;
@@ -1344,7 +1348,7 @@ function updateFormation(dt) {
   placeFormation();
   // ツッコミドリが とびだす
   for (const e of inF) {
-    if (MON[e.type].diver && Math.random() < dt * (0.05 + wave * 0.008)) { e.free = true; e.dv = 1; SFX.warn(); }
+    if (MON[e.type].diver && !(form.peace > 0) && Math.random() < dt * (0.05 + wave * 0.008)) { e.free = true; e.dv = 1; SFX.warn(); }
   }
 }
 
@@ -1401,7 +1405,7 @@ function updateFriends(dt) {
   if (!soul.friends.length) return;
   soul.friendT += dt;
   if (soul.friends.includes("bones") && soul.friendT % 10 < dt) {
-    const targets = enemies.filter(e => !e.dead && !e.dying && !MON[e.type].ghost && !MON[e.type].boss);
+    const targets = enemies.filter(e => !e.dead && !e.dying && !e.spare && !MON[e.type].ghost && !MON[e.type].boss);
     if (targets.length) {
       const t = pick(targets), x0 = t.x + t.w / 2;
       for (const dx of [-8, 0, 8]) shots.push({ x: clamp(x0 + dx, BOX.x + 4, BOX.x + BOX.w - 4), y: BOX.y + BOX.h - 6, vx: 0, dmg: atk() + 2, pierce: true, hit: [], ally: true });
@@ -1848,8 +1852,7 @@ function drawTitle() {
       if (sel) spr(SPR.heart, W / 2 - 62, y + 3);
       txt(l, W / 2 - 50, y, 13, sel ? C.yellow : C.white);
     });
-    if (!titleRunInfo) { const r = store.get("run", null); titleRunInfo = r ? "WAVE " + r.wave + "  LV " + r.soul.lv : ""; }
-    txt(titleRunInfo, W / 2 + 22, 265, 9, C.gray);
+    txt(titleRunInfo || "", W / 2 + 22, 265, 9, C.gray);
   } else if (Math.floor(time * 2) % 2 === 0) txt("[ タップで はじめる ]", W / 2, 266, 12, C.yellow, "center");
 
   txt("＊ どこでも ドラッグで いどう", W / 2, 318, 10, C.white, "center");
@@ -1934,7 +1937,8 @@ function drawField() {
       ctx.globalAlpha = state === "intro" ? form.appear : m.ghost ? 0.75 : 1;
       const img = e.flash > 0 ? set.red[fr] : (e.spare ? set.yellow[fr] : set.base[fr]);
       const ox = e.shakeT > 0 ? Math.round(Math.sin(e.shakeT * 60) * 2) : 0;
-      spr(img, e.x + ox, e.y, m.scale || 1);
+      const oy = form.peace > 0 && e.fm && !e.free ? Math.round(Math.sin(time * 6 + e.fx * 0.2) * 3) : 0; // おどり
+      spr(img, e.x + ox, e.y + oy, m.scale || 1);
       if (m.thief) txt(e.loot ? e.loot + "G" : "G", e.x + e.w / 2, e.y - 9, 8, C.gold, "center");
       if (m.boss && !e.dying) {
         // HPバー
