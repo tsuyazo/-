@@ -584,7 +584,7 @@ function newSoul() {
     x: W / 2 - 3.5, y: BOX0.y + BOX0.h - 16, px: W / 2 - 3.5, hp: 20, maxHp: 20, inv: 0, lv: 1, exp: 0, gold: 0,
     bag: ["candy"], weapons: ["stick"], armors: ["bandage"], weapon: "stick", armor: "bandage",
     moveT: 0, hold: false, invert: false, kills: 0, bossKills: 0, spares: 0, revived: false,
-    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false, wUp: {},
+    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false, wUp: {}, tp: 0,
   };
 }
 
@@ -842,6 +842,7 @@ const spareables = () => enemies.filter(e => e.spare && !e.dead && !e.dying);
 
 function pressCmd(i) {
   if (state === "play") {
+    if (i === 0 && !soul.hold && soul.tp >= 100) { ketsuiBlast(); return; }
     if (i === 0) {
       if (soul.hold) { soul.hold = false; SFX.select(); pops.push({ x: soul.x + 3, y: soul.y - 14, text: "！", color: C.red, t: 0 });
         for (const e of enemies) if (MON[e.type].boss && e.spare) { e.spare = false; e.refused = true; }
@@ -857,6 +858,20 @@ function pressCmd(i) {
     else if (i === 3) { closeMenu(); doSpare(); }
     else { const t = i === 1 ? "item" : "equip"; if (ui.tab !== t) { ui.tab = t; ui.cursor = 0; SFX.move(); menuHint(); } }
   }
+}
+
+// ケツイ ブラスト：たまを ぜんぶ けして、てき ぜんいんに ダメージ
+function ketsuiBlast() {
+  soul.tp = 0; ebul = []; beams = []; shake = 8; hurtT = 0;
+  SFX.shatter(); later(80, () => SFX.lvup()); vibrate(80);
+  form.blastT = 0.5;
+  const dmg = atk() * 3 + 2;
+  for (const e of enemies) {
+    if (e.dead || e.dying || e.spare || MON[e.type].ghost) continue;
+    damageEnemy(e, dmg, true);
+  }
+  enemies = enemies.filter(e => !e.dead);
+  pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "ケツイ！", color: C.red, t: 0, big: true });
 }
 
 function confirmTap(p) {
@@ -901,6 +916,7 @@ function drawHelp() {
   };
   sec("うごく", ["どこでも ドラッグ → ソウルが ひだり・みぎ", "こうげきは じどう"]);
   sec("いろの ついた こうげき", ["あお … うごかなければ あたらない", "オレンジ … うごいていれば あたらない"], C.blue);
+  sec("ケツイ", ["たまの すれすれを とおると たまる", "いっぱいで「たたかう」→ ぜんぶ ふきとばす"], C.red);
   sec("したの コマンド", ["アイテム・そうび … ひらくと ときが とまる", "みのがす … ひかったら おせる", "たたかう … みのがさずに たたかう"]);
   sec("おりてくる もの", ["SHOP … かいもの・ぶきを きたえる", "たからばこ … ときどき ミミック", "ひかる ほし … HP まんたん＆セーブ"]);
   sec("ちゅうだん", ["みぎうえの II で いつでも ポーズ", "とじても タイトルの「つづきから」"]);
@@ -1577,6 +1593,17 @@ function updatePlay(dt) {
   // 当たり判定：敵の こうげき → ソウル（見た目より すこし ちいさめ）
   if (soul.inv <= 0) {
     const cx = soul.x + 3.5, cy = soul.y + 2.5, moving = soul.moveT > 0;
+    // かする：あたらずに ちかくを とおると ケツイが たまる
+    for (const b of ebul) {
+      if (b.grazed || b.dead) continue;
+      const gx = Math.abs(b.x - cx) - b.w / 2, gy = Math.abs(b.y - cy) - b.h / 2;
+      if (gx < 9 && gy < 7 && !(gx < 2 && gy < 2)) {
+        b.grazed = true;
+        if (soul.tp < 100) { soul.tp = Math.min(100, soul.tp + 5); tone(1800, 0.02, "square", 0.015);
+          parts.push({ x: b.x, y: b.y, vx: 0, vy: -20, life: 0.2, max: 0.2, delay: 0, color: C.white, s: 1 });
+          if (soul.tp >= 100) { SFX.lvup(); pops.push({ x: soul.x + 3, y: soul.y - 16, text: "ケツイ MAX！", color: C.red, t: 0 }); } }
+      }
+    }
     for (const b of ebul) {
       if (Math.abs(b.x - cx) < b.w / 2 + 2 && Math.abs(b.y - cy) < b.h / 2 + 2) {
         if (b.c === "b" && !moving) continue; // あお：とまっていれば へいき
@@ -2126,6 +2153,7 @@ function draw() {
   else drawGame();
 
   ctx.restore();
+  if (form && form.blastT > 0) { form.blastT -= 1 / 60; ctx.globalAlpha = Math.max(0, form.blastT * 1.5); ctx.fillStyle = C.white; ctx.fillRect(BOX.x, BOX.y, BOX.w, BOX.h); ctx.globalAlpha = 1; }
   if (hurtT > 0) { ctx.globalAlpha = hurtT * 2; rectLine(BOX.x - 2, BOX.y - 2, BOX.w + 4, BOX.h + 4, C.red, 2); ctx.globalAlpha = 1; }
   drawTopButtons();
   if (paused) {
@@ -2574,12 +2602,16 @@ function drawStatus() {
   const canSpare = usable && spareables().length > 0;
   const active = state === "menu" ? (ui.tab === "item" ? 1 : 2) : 0;
   const blink = Math.floor(time * 3) % 2 === 0;
-  CMD.forEach((l, i) => {
+  CMD.forEach((lbl, i) => {
+    let l = lbl;
     const x = CMD_X0 + i * (CMD_W + CMD_GAP);
     let on = i === active, col = !usable ? C.dim : on ? C.yellow : C.orange;
     if (i === 3) col = canSpare ? (blink ? C.yellow : C.orange) : C.dim;
     if (i === 0 && soul.hold && state === "play") { col = blink ? C.yellow : C.orange; on = false; }
+    const full = i === 0 && soul.tp >= 100 && !soul.hold && state === "play";
+    if (full) { col = blink ? C.red : C.yellow; l = "ケツイ！"; }
     rectLine(x, CMD_Y, CMD_W, CMD_H, col, 1);
+    if (i === 0 && soul.tp > 0) { ctx.fillStyle = soul.tp >= 100 ? C.red : C.orange; ctx.fillRect(x + 2, CMD_Y + CMD_H - 4, Math.round((CMD_W - 4) * soul.tp / 100), 2); }
     if (on && usable) spr(SPR.heart, x + 4, CMD_Y + 9);
     txt(l, x + (on && usable ? (CMD_W + 11) / 2 : CMD_W / 2), CMD_Y + 7, 9, col, "center");
   });
