@@ -97,7 +97,7 @@ function checkAch() {
   ACH.forEach(([name, , cond], i) => {
     if (!mem.ach[i] && cond(mem)) {
       mem.ach[i] = 1;
-      if (typeof pops !== "undefined") { pops.push({ x: W / 2, y: BOX0.y + 40, text: "しょうごう「" + name + "」", color: C.yellow, t: -1.2, big: true }); SFX.lvup(); }
+      if (typeof pops !== "undefined") { pops.push({ x: W / 2, y: BOX0.y + BOX0.h - 70, text: "しょうごう「" + name + "」", color: C.yellow, t: -1.2, big: true }); SFX.lvup(); }
     }
   });
 }
@@ -367,6 +367,13 @@ const MON = [
       ".##.#..#.##.", "..##.##.##..", ".#.######.#.", "....####....", ".....##.....", "...#.##.#...", "....###....."]] },
 ];
 const T = { boss: [12, 13, 14, 20], secret: { shadow: 18, poko: 19 }, flower: 21 };
+// モンスターの ひとりごと（ゲームには えいきょう しない）
+const CHAT = {
+  0: ["ふわ〜", "…ねむい", "ふわふわ"], 1: ["かさ みて！", "きのこ！", "じめじめ すき"], 2: ["カタカタ", "ケケッ", "ほね ほね"],
+  3: ["あちち", "じっとしてて", "メラ…"], 4: ["キラーン", "うごいて！", "ピカッ"], 5: ["いくぞ！", "とつげき！", "ピヨ！"],
+  6: ["ぷるん", "ぷるぷる", "わかれるよ"], 7: ["ぷる！", "ちびじゃない"], 8: ["ガード！", "うで いたい", "まもる！"],
+  15: ["ニャ？", "あれ？ ここ どこ", "ワープ！"], 16: ["ゆらゆら", "ぷかぷか", "しびれる？"],
+};
 // ずかんの せつめい
 const LORE = [
   "ふわふわ ただよう。\nなにも かんがえていない。", "かさが じまん。\nあめの ひは きげんが いい。",
@@ -1438,6 +1445,15 @@ function updatePlay(dt) {
     enemyFire(pick(shooters));
   }
 
+  // ひとりごと
+  form.chatT = (form.chatT == null ? 3 : form.chatT) - dt;
+  if (form.chatT <= 0) {
+    form.chatT = 4 + Math.random() * 5;
+    const cands = enemies.filter(e => e.fm && !e.free && CHAT[e.type]);
+    if (cands.length && !form.dark) { const e = pick(cands); e.chat = pick(CHAT[e.type]); e.chatT = 1.8; }
+  }
+  for (const e of enemies) if (e.chatT > 0) e.chatT -= dt;
+
   // とくべつな てき（おどりの あいだは こない）
   if (!(form.peace > 0)) {
   if (form.ghostT != null) { form.ghostT -= dt; if (form.ghostT <= 0) { form.ghostT = null; spawnGhost(); } }
@@ -2264,6 +2280,12 @@ function drawField() {
       const oy = form.peace > 0 && e.fm && !e.free ? Math.round(Math.sin(time * 6 + e.fx * 0.2) * 3) : 0; // おどり
       spr(img, e.x + ox, e.y + oy, m.scale || 1);
       if (m.thief) txt(e.loot ? e.loot + "G" : "G", e.x + e.w / 2, e.y - 9, 8, C.gold, "center");
+      if (e.chatT > 0 && state === "play") {
+        ctx.font = `7px ${FONT}`;
+        const tw = Math.ceil(ctx.measureText(e.chat).width) + 6, bx = Math.round(clamp(e.x + e.w / 2 - tw / 2, BOX.x + 3, BOX.x + BOX.w - tw - 3)), by = Math.round(e.y - 12);
+        ctx.fillStyle = C.white; ctx.fillRect(bx, by, tw, 10);
+        txt(e.chat, bx + 3, by + 1, 7, C.black);
+      }
       if (m.boss && !e.dying) {
         // HPバー
         const bw = 60, bx = e.x + e.w / 2 - bw / 2, by = e.y - 7;
