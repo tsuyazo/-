@@ -7,6 +7,9 @@
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="SOUL INVADERS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
@@ -208,6 +211,7 @@ const SHOP_TENT = [
   "......##......", ".....####.....", "....######....", "...###..###...", "..####..####..", ".#####..#####.",
   "##############", ".#..........#.", ".#.########.#.", ".#.#......#.#.", ".#.#......#.#.", ".############.",
 ];
+const SAVESTAR = ["...#...", "...#...", "..###..", "#######", "..###..", "...#...", "...#..."];
 const CHEST = [
   "............", "............", ".##########.", "#..........#", "############",
   "#....##....#", "#...####...#", "#....##....#", "#..........#", "############",
@@ -328,7 +332,7 @@ for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.sc
 const SPR = {
   heart: makeSprite(HEART, C.red), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
-  chest: makeSprite(CHEST, C.gold), chestOpen: makeSprite(CHEST_OPEN, C.gold), keeper: makeSprite(SHOPKEEPER, C.white),
+  chest: makeSprite(CHEST, C.gold), star: makeSprite(SAVESTAR, C.yellow), starW: makeSprite(SAVESTAR, C.white), chestOpen: makeSprite(CHEST_OPEN, C.gold), keeper: makeSprite(SHOPKEEPER, C.white),
   mon: MON.map(m => ({
     base: m.frames.map(f => makeSprite(f, m.color || C.white)),
     red: m.frames.map(f => makeSprite(f, C.red)),
@@ -604,7 +608,7 @@ function placeFormation() {
 function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null; }
 
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
-const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending"];
+const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept"];
 function saveRun() {
   if (!soul || !SAVEABLE.includes(state)) return;
   store.set("run", {
@@ -724,6 +728,7 @@ function confirmTap(p) {
   else if (state === "chest") chestTap();
   else if (state === "revive") reviveTap();
   else if (state === "ending") endingTap();
+  else if (state === "savept") saveTap();
   else if (state === "over" && stateT > 3.2) { SFX.select(); setState("title"); }
 }
 
@@ -922,7 +927,7 @@ function fadeOut(e, color) {
 // ---------------- かいわ（Undertale の ふきだし） ----------------
 function startTalk(lines, who, after) {
   // メニューや おみせの なかでは はじめない。もどってから はなす
-  if (state === "menu" || state === "shop" || state === "chest") { form.pendingTalk = { lines, who, after }; return; }
+  if (state === "menu" || state === "shop" || state === "chest" || state === "savept") { form.pendingTalk = { lines, who, after }; return; }
   setState("talk");
   ui = { talk: lines, i: 0, who, after };
   say(lines[0]);
@@ -961,9 +966,12 @@ function talkTap() {
 
 // ---------------- フィールドイベント（みせ・たからばこ） ----------------
 function spawnEvent() {
-  const kind = Math.random() < 0.35 ? "shop" : "chest";
-  const w = kind === "shop" ? 14 : 12;
-  events.push({ kind, w, h: kind === "shop" ? 12 : 10, x: BOX.x + 8 + Math.random() * (BOX.w - 16 - w), y: BOX.y + 2, bob: Math.random() * 6,
+  // ボスの まえの ウェーブでは さいしょに セーブポイントが くる
+  const r = Math.random();
+  const kind = (wave % 5 === 4 && !form.savedHere) || r < 0.12 ? "save" : r < 0.42 ? "shop" : "chest";
+  if (kind === "save") form.savedHere = true;
+  const w = kind === "shop" ? 14 : kind === "save" ? 7 : 12;
+  events.push({ kind, w, h: kind === "shop" ? 12 : kind === "save" ? 7 : 10, x: BOX.x + 8 + Math.random() * (BOX.w - 16 - w), y: BOX.y + 2, bob: Math.random() * 6,
     mimic: kind === "chest" && wave >= 3 && Math.random() < 0.2 });
 }
 
@@ -1040,6 +1048,36 @@ function leaveShop() {
   setState("play"); ui = null;
 }
 
+// セーブポイント：HPが まんたんに なり、セーブされる
+function enterSave() {
+  setState("savept"); SFX.revive();
+  soul.hp = soul.maxHp;
+  ui = { t: 0 };
+  const next = (wave + 1) % 5 === 0;
+  say(next ? "＊ つぎの ウェーブから\n　 つよい けはいが する。\n＊ あなたは ケツイで みたされた。"
+    : pick(["＊ ほしの ひかりが\n　 あなたを つつみこむ。\n＊ あなたは ケツイで みたされた。",
+            "＊ ここまで これた ことが\n　 すこし ほこらしい。\n＊ あなたは ケツイで みたされた。",
+            "＊ モンスターたちの こえが\n　 とおくに きこえる。\n＊ あなたは ケツイで みたされた。"]));
+  saveRun();
+}
+function saveTap() {
+  if (!msg.done) { msg.shown = msgLen(); msg.done = true; return; }
+  SFX.select(); soul.inv = Math.max(soul.inv, 1.0);
+  setState("play"); ui = null;
+}
+function drawSavePt() {
+  const s = 4 + Math.round(Math.sin(time * 3));
+  spr(SPR.star, W / 2 - 3.5 * s, BOX0.y + 60 - 3.5 * s + 20, s);
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * Math.PI * 2 + time * 0.8, r = 34 + Math.sin(time * 4 + i) * 4;
+    ctx.fillStyle = i % 2 ? C.yellow : C.white;
+    ctx.fillRect(Math.round(W / 2 + Math.cos(a) * r), Math.round(BOX0.y + 80 + Math.sin(a) * r * 0.6), 1, 1);
+  }
+  txt("HP まんたん！  セーブ しました", W / 2, BOX0.y + 140, 10, C.green, "center");
+  if (msg.done && Math.floor(time * 2) % 2 === 0) txt("[ タップで もどる ]", W / 2, BOX0.y + 168, 11, C.yellow, "center");
+  drawMsgArea();
+}
+
 function enterChest() {
   setState("chest"); SFX.door();
   ui = { opened: false, openT: 0, reward: rollTreasure() };
@@ -1088,7 +1126,7 @@ function update(dt) {
   if (paused) return;
   if (hurtT > 0) hurtT -= dt;
 
-  if (state === "menu" || state === "shop" || state === "chest" || state === "talk" || state === "revive" || state === "ending") {
+  if (state === "menu" || state === "shop" || state === "chest" || state === "talk" || state === "revive" || state === "ending" || state === "savept") {
     updateMsg(dt, state === "talk");
     if (state === "chest" && ui.opened) ui.openT += dt;
     return; // せかいは とまる
@@ -1254,7 +1292,7 @@ function updatePlay(dt) {
   for (const ev of events) {
     if (soul.x + 7 > ev.x && soul.x < ev.x + ev.w && soul.y + 6 > ev.y && soul.y < ev.y + ev.h) {
       events = events.filter(x => x !== ev);
-      if (ev.kind === "shop") enterShop(); else if (ev.mimic) springMimic(ev); else enterChest();
+      if (ev.kind === "shop") enterShop(); else if (ev.kind === "save") enterSave(); else if (ev.mimic) springMimic(ev); else enterChest();
       return;
     }
   }
@@ -1902,13 +1940,14 @@ function drawGame() {
   if (easy) txt("やさしい", 132, 22, 7, C.green, "center");
   txt("WAVE " + wave, W - 50, 10, 10, C.white, "right");
 
-  if (state === "menu" || state === "shop" || state === "chest" || state === "ending") rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
+  if (state === "menu" || state === "shop" || state === "chest" || state === "ending" || state === "savept") rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
   else rectLine(Math.round(BOX.x), BOX.y, Math.round(BOX.w), BOX.h, C.white, 2);
 
   if (state === "menu") drawMenu();
   else if (state === "shop") drawShop();
   else if (state === "chest") drawChest();
   else if (state === "ending") drawEnding();
+  else if (state === "savept") drawSavePt();
   else drawField();
 
   drawStatus();
@@ -1924,6 +1963,8 @@ function drawField() {
       spr(SPR.tent, ev.x, ev.y + bob);
       ctx.fillStyle = C.orange; ctx.fillRect(Math.round(ev.x) + 6, Math.round(ev.y) + bob - 3, 3, 2);
       txt("SHOP", ev.x + ev.w / 2, ev.y + ev.h + 1 + bob, 8, C.orange, "center");
+    } else if (ev.kind === "save") {
+      spr(Math.floor(time * 4) % 2 ? SPR.star : SPR.starW, ev.x, ev.y + bob);
     } else {
       spr(SPR.chest, ev.x, ev.y + bob);
       if (Math.floor(time * 4) % 2) { ctx.fillStyle = C.white; ctx.fillRect(Math.round(ev.x) + 11, Math.round(ev.y) + bob + 1, 1, 1); }
@@ -2212,6 +2253,8 @@ function loop(now) {
   draw();
   requestAnimationFrame(loop);
 }
+// ホーム画面に おいたとき オフラインでも あそべるように
+try { if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {}); } catch (e) {}
 (document.fonts && document.fonts.load ? document.fonts.load(`12px "DotGothic16"`).catch(() => {}) : Promise.resolve())
   .finally(() => requestAnimationFrame(t => { last = t; loop(t); }));
 </script>
