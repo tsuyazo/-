@@ -74,7 +74,7 @@ const store = {
   del(k) { try { localStorage.removeItem("soulinv." + k); } catch (e) {} },
 };
 // ゲームを またいで のこる「きおく」
-const mem = Object.assign({ deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false }, store.get("mem", {}));
+const mem = Object.assign({ deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}, spared: {}, endings: {}, genocide: false, seen: {}, defeated: {} }, store.get("mem", {}));
 const saveMem = () => store.set("mem", mem);
 
 // ---------------- サウンド（WebAudioで合成） ----------------
@@ -327,6 +327,19 @@ const MON = [
   { name: "ポコ", hp: 130, pts: 5000, gold: [150, 150], exp: 40, boss: "poko", scale: 2, frames: [SHOPKEEPER] },
 ];
 const T = { boss: [12, 13, 14], secret: { shadow: 18, poko: 19 } };
+// ずかんの せつめい
+const LORE = [
+  "ふわふわ ただよう。\nなにも かんがえていない。", "かさが じまん。\nあめの ひは きげんが いい。",
+  "カタカタ わらう。\nなにが おかしいのかは ひみつ。", "あおい ほのお。\nじっと している あいてには やさしい。",
+  "オレンジいろの ほし。\nうごかない あいてが きらい。", "とにかく つっこむ。\nブレーキは ついていない。",
+  "ぷるぷる している。\nたたかれると ふえる。", "プルプルの こども。\nまだ ぷるぷるが あまい。",
+  "たてが じまん。\nときどき うでが つかれる。", "ひかる ものが すき。\nとくに あなたの おかね。",
+  "たからばこの ふりが うまい。\nほんとうは さみしがりや。", "かえりみちを さがしている。\nやさしく すると よろこぶ。",
+  "ほねの きし。\nじょうだんが すき。", "あまぐもの せい。\nほんとうは ひとりが にがて。",
+  "かがみの まじょ。\nうつくしい ものが すき。", "きづくと そこに いる。\nきづくと もう いない。",
+  "ふわふわ ただよい\nたまを まきちらす。", "れんしゅうよう。\nうたれるのは すきじゃない。",
+  "あなたの かたちを した\nなにか。", "よろずやの てんしゅ。\nおこると こわい。",
+];
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
 
 const SPR = {
@@ -509,6 +522,7 @@ function isBossWave(w) { return w % 5 === 0; }
 
 function nextWave() {
   wave++;
+  saveMem();
   shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
   fireT = 0; efireT = 1.2; shake = 0; regenT = 0;
   eventT = 6 + Math.random() * 6;
@@ -590,11 +604,13 @@ function buildFormation() {
     }
   });
   form.total = enemies.length;
+  form.oyT = form.oy; form.oy -= 80; // うえから おりてくる
   placeFormation();
 }
 
 function mkEnemy(type, x, y, extra = {}) {
   const m = MON[type];
+  if (!mem.seen[type]) { mem.seen[type] = 1; saveMem(); }
   return Object.assign({
     id: nextId++, type, x, y, w: m.w, h: m.h, hp: m.hp + Math.floor((wave - 1) / 3), flash: 0, shakeT: 0,
     free: !m.fm, fm: !!m.fm, t: Math.random() * 10, fx: 0, fy: 0, dv: 0, guard: false, guardT: Math.random() * 1.2,
@@ -706,7 +722,7 @@ function pressCmd(i) {
 
 function confirmTap(p) {
   if (state === "title") {
-    if (titleView === "records") { titleView = "main"; SFX.cancel(); return; }
+    if (titleView !== "main") { recordsTap(p); return; }
     if (p && p.y >= 376) {
       if (p.x < W / 2) { titleView = "records"; SFX.select(); }
       else { easy = !easy; store.set("easy", easy); SFX.move(); }
@@ -1150,6 +1166,7 @@ function update(dt) {
     updateMsg(dt);
     moveSoulKeys(dt);
     form.appear = Math.min(1, form.appear + dt * 1.5);
+    if (form.oyT != null) { form.oy += (form.oyT - form.oy) * Math.min(1, dt * 3); placeFormation(); }
     if (form.glitch > 0) { form.glitch -= dt; msg.t = 0; msg.shown = 0; }
     if (msg.done) { msg.hold += dt; if (msg.hold > 1.6) beginPlay(); }
   } else if (state === "play") {
@@ -1162,6 +1179,7 @@ function update(dt) {
 }
 
 function beginPlay() {
+  if (form.oyT != null) { form.oy = form.oyT; form.oyT = null; placeFormation(); }
   if (form.bossIntro) { const lines = form.bossIntro; form.bossIntro = null; startTalk(lines, enemies[0].id, "none"); }
   else setState("play");
   saveRun();
@@ -1532,6 +1550,7 @@ function damageEnemy(e, dmg, silent) {
   }
   e.hp -= dmg; e.flash = 0.12; e.shakeT = 0.25;
   pops.push({ x: e.x + e.w / 2, y: e.y - 6, text: String(dmg), color: C.red, t: 0 });
+  for (let i = 0; i < 3; i++) parts.push({ x: e.x + e.w / 2, y: e.y + e.h, vx: (Math.random() - 0.5) * 60, vy: 20 + Math.random() * 40, life: 0.2, max: 0.2, delay: 0, color: C.yellow, s: 1 });
   if (e.hp > 0) { if (!silent) SFX.hit(); return; }
   if (m.boss) { e.hp = 0; e.dying = true; e.spare = false; soul.hold = false; ebul = []; beams = []; startTalk(BOSS[m.boss].killed, e.id, "bossDust"); return; }
   killEnemy(e);
@@ -1550,6 +1569,7 @@ function killEnemy(e) {
   SFX.dust();
   score += m.pts * wave;
   soul.kills++;
+  mem.defeated[e.type] = (mem.defeated[e.type] || 0) + 1;
   let g = rnd(m.gold[0], m.gold[1]) * (armor().goldX || 1);
   if (m.thief) g = e.loot + 10;
   if (g) { soul.gold += g; pops.push({ x: e.x + e.w / 2, y: e.y + 4, text: g + "G", color: C.gold, t: 0 }); }
@@ -1899,16 +1919,52 @@ function drawTitle() {
   txt("HI " + String(hi).padStart(6, "0"), W / 2, 366, 10, C.gray, "center");
   txt("[ きろく ]", W / 2 - 56, 383, 10, C.gray, "center");
   txt("[ " + (easy ? "やさしい" : "ふつう") + " モード ]", W / 2 + 50, 383, 10, easy ? C.green : C.gray, "center");
-  if (titleView === "records") drawRecords();
+  if (titleView !== "main") drawRecords();
 }
 
+let zukanSel = -1;
+function recordsTap(p) {
+  if (!p || p.y > 360) { titleView = "main"; SFX.cancel(); return; }
+  if (p.y < 66 && p.y > 40) { titleView = p.x < W / 2 ? "records" : "zukan"; SFX.move(); return; }
+  if (titleView === "zukan") {
+    const c = Math.floor((p.x - ZK.x) / ZK.cw), r = Math.floor((p.y - ZK.y) / ZK.ch);
+    if (c >= 0 && c < 5 && r >= 0 && r < 4 && r * 5 + c < MON.length) { zukanSel = r * 5 + c; SFX.select(); }
+  }
+}
+const ZK = { x: BOX0.x + 10, y: 74, cw: 40, ch: 34 };
+function drawZukan() {
+  MON.forEach((m, i) => {
+    const c = i % 5, r = Math.floor(i / 5), x = ZK.x + c * ZK.cw, y = ZK.y + r * ZK.ch;
+    rectLine(x + 1, y + 1, ZK.cw - 2, ZK.ch - 2, i === zukanSel ? C.yellow : C.dim, 1);
+    if (mem.seen[i]) {
+      const img = SPR.mon[i].base[0], sc = img.width > 14 ? 1 : 2;
+      spr(img, x + ZK.cw / 2 - img.width * sc / 2, y + ZK.ch / 2 - img.height * sc / 2, sc);
+    } else txt("?", x + ZK.cw / 2, y + 10, 12, C.dim, "center");
+  });
+  const n = Object.keys(mem.seen).length;
+  txt(n + " / " + MON.length, BOX0.x + BOX0.w - 14, 58, 9, C.gray, "right");
+  const y = ZK.y + ZK.ch * 4 + 10;
+  if (zukanSel >= 0) {
+    const i = zukanSel;
+    if (mem.seen[i]) {
+      txt(MON[i].name, BOX0.x + 14, y, 12, C.white);
+      txt("たおした: " + (mem.defeated[i] || 0), BOX0.x + BOX0.w - 14, y + 2, 9, C.gray, "right");
+      LORE[i].split("\n").forEach((l, j) => txt((j ? "　 " : "＊ ") + l, BOX0.x + 14, y + 22 + j * 16, 10, C.white));
+    } else txt("＊ まだ であって いない。", BOX0.x + 14, y, 10, C.gray);
+  } else txt("＊ モンスターを タップ", BOX0.x + 14, y, 10, C.gray);
+}
 function drawRecords() {
   ctx.fillStyle = C.black; ctx.fillRect(0, 0, W, H);
   rectLine(BOX0.x, 40, BOX0.w, 320, C.white, 2);
-  let y = 54;
+  // タブ
+  ["きろく", "ずかん"].forEach((l, i) => {
+    const on = (i === 0) === (titleView === "records");
+    txt((on ? "♥ " : "") + l, BOX0.x + 14 + i * 74, 46, 12, on ? C.yellow : C.gray);
+  });
+  if (titleView === "zukan") { drawZukan(); txt("[ タップで もどる ]", W / 2, 372, 11, C.yellow, "center"); return; }
+  let y = 74;
   const x = BOX0.x + 14;
   const line = (a, b, c = C.white) => { txt(a, x, y, 10, C.gray); txt(String(b), BOX0.x + BOX0.w - 14, y, 10, c, "right"); y += 16; };
-  txt("＊ きろく", x, y, 12); y += 24;
   line("あそんだ かず", mem.runs);
   line("たおれた かず", mem.deaths);
   line("さいこう WAVE", mem.bestWave || 0);
