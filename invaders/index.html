@@ -543,6 +543,7 @@ let parts = [], pops = [], shake = 0;
 let ui = null;       // メニュー・おみせ・たからばこ・かいわ の画面状態
 let titleRunInfo = null;
 const titleVisitor = Math.random() < 0.06; // まれに だれかが のぞいている
+let titleReset = null;
 let titleSel = 0, titleView = "main", welcome = null, hurtT = 0;
 // せってい（タイトル・ポーズから かえられる）
 const SENS = [{ v: 1.0, n: "ゆっくり" }, { v: 1.5, n: "ふつう" }, { v: 2.2, n: "はやい" }];
@@ -585,11 +586,12 @@ function newSoul() {
     x: W / 2 - 3.5, y: BOX0.y + BOX0.h - 16, px: W / 2 - 3.5, hp: 20, maxHp: 20, inv: 0, lv: 1, exp: 0, gold: 0,
     bag: ["candy"], weapons: ["stick"], armors: ["bandage"], weapon: "stick", armor: "bandage",
     moveT: 0, hold: false, invert: false, kills: 0, bossKills: 0, spares: 0, revived: false,
-    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false, wUp: {}, tp: 0,
+    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false, wUp: {}, tp: 0, boons: [], boonHp: 0,
   };
 }
 
 function newGame() {
+  mode = "endless"; adv = null;
   score = 0; wave = 0; nextId = 1;
   soul = newSoul();
   parts = []; pops = [];
@@ -707,20 +709,20 @@ function unlockedTypes(w) {
   return t;
 }
 
-function buildFormation() {
+function buildFormation(poolOverride) {
   const rows = Math.min(3 + Math.floor((wave - 1) / 2), 5), cols = 6;
   const gx = 30, gy = 22, fw = (cols - 1) * gx + 12;
   form.ox = BOX0.x + (BOX0.w - fw) / 2;
-  const pool = unlockedTypes(wave);
+  const pool = poolOverride || unlockedTypes(wave);
   const rowTypes = [];
   for (let r = 0; r < rows; r++) {
-    if (wave <= 1) rowTypes.push(r === 0 ? 2 : (r <= (rows - 1) / 2 ? 1 : 0));
+    if (wave <= 1 && !poolOverride) rowTypes.push(r === 0 ? 2 : (r <= (rows - 1) / 2 ? 1 : 0));
     else rowTypes.push(pick(pool));
   }
-  const nt = NEW_TYPE[wave] && NEW_TYPE[wave].type;
+  const nt = poolOverride ? null : NEW_TYPE[wave] ? NEW_TYPE[wave].type : null;
   if (nt != null && !rowTypes.includes(nt)) rowTypes[Math.floor(rows / 2)] = nt;
   // たいれつの かたち（ウェーブ3から いろいろ）
-  const shape = wave < 3 || NEW_TYPE[wave] ? "grid" : pick(rows >= 4 ? ["grid", "grid", "checker", "v", "pillars", "diamond"] : ["grid", "grid", "checker", "pillars"]);
+  const shape = wave < 3 || nt != null ? "grid" : pick(rows >= 4 ? ["grid", "grid", "checker", "v", "pillars", "diamond"] : ["grid", "grid", "checker", "pillars"]);
   const keep = (r, c) => {
     switch (shape) {
       case "checker": return (r + c) % 2 === 0 || r === rows - 1;
@@ -759,31 +761,529 @@ function placeFormation() {
 
 function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null; }
 
+// ============================================================
+//  ぼうけん モード（ストーリー）
+//  ・ちほう（章）ごとに えだわかれ マップ（Slay the Spire 風）
+//  ・ノード：たたかい／つよい てき／みせ／たきび／？／たから／ボス
+//  ・たおれたら さいごの たきびへ（おとした G は その ばしょで ひろえる：Dark Souls 風）
+//  ・たたかいの あとに かご（ブーン）を 3つから えらぶ（Hades／Vampire Survivors 風）
+// ============================================================
+let mode = "endless", adv = null;
+const ROWS = 12; // ボスの まえの だんすう
+
+const CHAPTERS = [
+  { name: "はじまりの もり", col: "#7d7", bg: "#071207", pool: [0, 1, 2, 5], boss: 12, loop: 0,
+    intro: "＊ もりの においが する。\n＊ とおくで ほねの なる おとが…" },
+  { name: "しずくの どうくつ", col: "#6bf", bg: "#050b16", pool: [1, 3, 6, 16], boss: 13, loop: 0,
+    intro: "＊ ぽたり、ぽたり。\n＊ どこかで だれかが ないている。" },
+  { name: "すなの おうこく", col: "#fd6", bg: "#161005", pool: [4, 5, 8, 15, 9], boss: 14, loop: 0,
+    intro: "＊ すなが きらきら ひかる。\n＊ かがみの ような しろが みえる。" },
+  { name: "とけいの まち", col: "#ccb", bg: "#0e0d0b", pool: [2, 8, 15, 16, 3, 4], boss: 20, loop: 0,
+    intro: "＊ チク、タク。\n＊ まちじゅうの とけいが ずれている。" },
+  { name: "ほのおの やま", col: "#f86", bg: "#180806", pool: [3, 4, 5, 6, 8], boss: 12, loop: 1,
+    intro: "＊ あつい。\n＊ ほねまで とけそうだ。" },
+  { name: "こおりの みずうみ", col: "#9ef", bg: "#06101a", pool: [1, 6, 16, 15, 4], boss: 13, loop: 1,
+    intro: "＊ いきが しろい。\n＊ こおりの したに なにかが いる。" },
+  { name: "ゆめの としょかん", col: "#c9f", bg: "#0e0716", pool: [2, 3, 8, 15, 16], boss: 14, loop: 1,
+    intro: "＊ ほんが ひとりでに めくれる。\n＊ あなたの なまえが かいてある…？" },
+  { name: "ほしの はて", col: "#fff", bg: "#000", pool: [3, 4, 5, 6, 8, 15, 16], boss: 20, loop: 1,
+    intro: "＊ ここが せかいの はて。\n＊ ケツイだけが あなたを うごかす。" },
+];
+
+// ノードの アイコン（7x7）
+const NODE_ICON = {
+  battle:   ["#.....#", ".#...#.", "..#.#..", "...#...", "..#.#..", ".#...#.", "#.....#"],
+  elite:    [".#####.", "#.#.#.#", "#######", "#.###.#", ".#####.", ".#.#.#.", "......."],
+  shop:     ["...#...", "..###..", ".#####.", "#######", ".#...#.", ".#.#.#.", ".#####."],
+  rest:     ["...#...", "..##...", "..###..", ".#####.", ".##.##.", "#.#.#.#", "#######"],
+  event:    [".####..", "#....#.", ".....#.", "...##..", "...#...", ".......", "...#..."],
+  treasure: ["#######", "#.....#", "#######", "#..#..#", "#.###.#", "#.....#", "#######"],
+  boss:     ["#.###.#", "#######", "##.#.##", "#######", ".#####.", "#.#.#.#", "......."],
+};
+const NODE_COL = { battle: "#ddd", elite: "#f55", shop: "#ff7f27", rest: "#fc6", event: "#8cf", treasure: "#fc3", boss: "#f33" };
+const NODE_NAME = { battle: "たたかい", elite: "つよい てき", shop: "みせ", rest: "たきび", event: "なにか ある？", treasure: "たから", boss: "ボス" };
+const SPR_NODE = {}, SPR_NODE_DIM = {};
+for (const k in NODE_ICON) { SPR_NODE[k] = makeSprite(NODE_ICON[k], NODE_COL[k]); SPR_NODE_DIM[k] = makeSprite(NODE_ICON[k], "#444"); }
+
+function rollKind(r) {
+  if (r === 0) return "battle";
+  if (r === ROWS - 1) return "rest";
+  if (r === Math.floor(ROWS / 2)) return "treasure";
+  const x = Math.random();
+  if (x < 0.42) return "battle";
+  if (x < 0.56 && r >= 3) return "elite";
+  if (x < 0.76) return "event";
+  if (x < 0.86) return "shop";
+  if (x < 0.94) return "rest";
+  return "treasure";
+}
+function genMap() {
+  const rows = [];
+  for (let r = 0; r < ROWS; r++) {
+    const n = r === 0 ? 3 : rnd(2, 4), row = [];
+    for (let i = 0; i < n; i++) row.push({ r, i, x: (i + 1) / (n + 1) + (Math.random() - 0.5) * 0.06, kind: rollKind(r), next: [], done: false });
+    rows.push(row);
+  }
+  for (let r = 0; r < ROWS - 1; r++) {
+    const a = rows[r], b = rows[r + 1];
+    for (const nd of a) {
+      const near = b.map((m, j) => [Math.abs(m.x - nd.x), j]).sort((p, q) => p[0] - q[0]);
+      nd.next.push(near[0][1]);
+      if (near[1] && Math.random() < 0.5) nd.next.push(near[1][1]);
+    }
+    b.forEach((m, j) => { // だれからも いけない ノードを なくす
+      if (!a.some(nd => nd.next.includes(j))) a[a.map((nd, q) => [Math.abs(nd.x - m.x), q]).sort((p, q) => p[0] - q[0])[0][1]].next.push(j);
+    });
+  }
+  rows.push([{ r: ROWS, i: 0, x: 0.5, kind: "boss", next: [], done: false }]);
+  for (const nd of rows[ROWS - 1]) nd.next = [0];
+  return rows;
+}
+const chapter = () => CHAPTERS[Math.min(adv.ch, CHAPTERS.length) - 1];
+const advNode = p => p ? adv.map[p[0]][p[1]] : null;
+function reachable() {
+  if (!adv.pos) return adv.map[0].map(nd => [0, nd.i]);
+  const nd = advNode(adv.pos);
+  return nd.next.map(j => [nd.r + 1, j]);
+}
+
+function newAdventure() {
+  mode = "adv"; score = 0; wave = 0; nextId = 1;
+  soul = newSoul();
+  parts = []; pops = [];
+  adv = { ch: 1, unlocked: 1, map: genMap(), pos: null, rest: null, drop: null, cur: null, stage: null, sel: null, deaths: 0 };
+  mem.runs++; saveMem();
+  if (!mem.flower) { flowerScene(); return; }
+  advShowMap(CHAPTERS[0].intro);
+}
+function advShowMap(text) {
+  Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
+  shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
+  soul.hold = false; soul.invert = false;
+  setState("map"); ui = null;
+  adv.sel = null;
+  say(text || "＊ すすむ ばしょを えらぼう。");
+  saveRun();
+}
+// ちほうと すすみぐあいで つよさを きめる（むげんモードの WAVE と おなじ ものさし）
+function advLevel(kind) {
+  const r = adv.cur ? adv.cur[0] : 0;
+  const base = (adv.ch - 1) * 5 + 1 + Math.floor(r * 4 / ROWS);
+  return kind === "boss" ? adv.ch * 5 : kind === "elite" ? base + 1 : base;
+}
+
+function advEnter(p) {
+  const nd = advNode(p);
+  adv.cur = p; adv.sel = null;
+  SFX.select();
+  switch (nd.kind) {
+    case "battle": case "elite": case "boss":
+      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : 2, wi: 0 };
+      advNextWave(); break;
+    case "shop": enterShop(); ui.fromNode = true; break;
+    case "treasure": enterChest(); ui.fromNode = true; break;
+    case "rest": enterRest(); break;
+    case "event": enterEvent(); break;
+  }
+}
+
+function resetWave() {
+  shots = []; ebul = []; beams = []; enemies = []; items = []; events = [];
+  fireT = 0; efireT = 1.2; shake = 0; regenT = 0;
+  Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
+  soul.invert = false; soul.hold = false;
+  soul.mirrorShield = soul.friends.includes("mirror");
+  form = { ox: 0, oy: BOX0.y + 14, dir: 1, total: 0, anim: 0, animT: 0, appear: 0, dark: false, rush: 0,
+    ghostT: null, thiefT: null, bossIntro: null };
+}
+
+function advNextWave() {
+  const st = adv.stage, C0 = chapter();
+  wave = advLevel(st.kind);
+  resetWave();
+  eventT = 5 + Math.random() * 6;
+  let text;
+  if (st.kind === "boss") {
+    const type = C0.boss, m = MON[type], key = m.boss;
+    const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
+    e.maxHp = e.hp = m.hp + C0.loop * 40 + wave * 2;
+    e.cx = W / 2; e.loop = C0.loop;
+    enemies.push(e);
+    form.bossIntro = BOSS[key].intro(mem, soul);
+    mem.met[key] = (mem.met[key] || 0) + 1; saveMem();
+    text = "＊ " + m.name + "が たちはだかった！";
+  } else {
+    buildFormation(C0.pool);
+    if (st.kind === "elite") { // つよい てき：なんたいかが あかく ひかる
+      const list = enemies.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+      for (const e of list) { e.elite = true; e.hp = e.hp * 3 + 2; }
+      text = st.wi === 0 ? "＊ ただならぬ けはい…\n＊ あかく ひかる てきが いる！" : "＊ まだ おわらない！";
+    } else text = st.wi === 0 ? pick(["＊ モンスターが あらわれた！", "＊ " + C0.name + "の まものたちだ。", "＊ みちを ふさがれた！"]) : "＊ つぎの むれが くる！";
+    const ev = Math.random();
+    if (wave >= 4 && ev < 0.15) { form.dark = true; text += "\n＊ あたりが まっくらだ…"; }
+    else if (wave >= 5 && ev < 0.22) { form.wind = (Math.random() < 0.5 ? -1 : 1) * (22 + Math.min(20, wave)); text += "\n＊ かぜが ふいている！"; }
+    if (wave >= 3 && Math.random() < 0.25) form.ghostT = 4 + Math.random() * 10;
+    if (wave >= 3 && Math.random() < 0.25) form.thiefT = 5 + Math.random() * 12;
+  }
+  setState("intro");
+  say(text);
+}
+
+// ウェーブを たおした（ぼうけん モード）
+function advWaveCleared() {
+  const st = adv.stage;
+  st.wi++;
+  if (st.wi < st.waves) { advNextWave(); return; }
+  const nd = advNode(adv.cur);
+  nd.done = true; adv.pos = adv.cur; adv.cur = null; adv.stage = null;
+  let text = "";
+  if (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i) { // おとした G を ひろう
+    soul.gold += adv.drop.g; text = "＊ おとした " + adv.drop.g + "G を とりもどした！\n"; adv.drop = null; SFX.coin();
+  }
+  if (st.kind === "boss") { advChapterClear(); return; }
+  const bonus = st.kind === "elite" ? 20 + wave * 3 : 5 + wave;
+  soul.gold += bonus;
+  openBoons(text + "＊ " + bonus + "G を てにいれた。\n＊ かごを ひとつ えらぼう。", st.kind === "elite");
+}
+
+// ノードを おえた（みせ・たから・たきび・？）
+function advNodeDone(text) {
+  const nd = advNode(adv.cur);
+  if (nd) { nd.done = true; adv.pos = adv.cur; }
+  adv.cur = null;
+  advShowMap(text);
+}
+
+function advChapterClear() {
+  setState("chclear");
+  // ちほうの かごは ここで おしまい
+  removeBoons();
+  ui = { ch: adv.ch };
+  say("＊ " + chapter().name + " を ぬけた！\n＊ ちほう " + adv.ch + " クリア。");
+  SFX.lvup();
+}
+function chclearTap() {
+  if (!msg.done) { msg.shown = msgLen(); msg.done = true; return; }
+  if (adv.ch >= CHAPTERS.length) { // さいごの ちほう：いまは さいしょの ちほうへ もどる（つづきは じゅんびちゅう）
+    adv.ch = CHAPTERS.length;
+  } else adv.ch++;
+  adv.unlocked = Math.max(adv.unlocked, adv.ch);
+  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null;
+  soul.revived = false;
+  advShowMap(chapter().intro);
+}
+
+// たおれた：さいごの たきびへ もどる
+function advDeath() {
+  mem.deaths++; adv.deaths++; checkAch(); saveMem();
+  const where = adv.cur || adv.pos || [0, 0];
+  const g = Math.floor(soul.gold / 2);
+  soul.gold -= g;
+  adv.drop = g > 0 ? { g, r: where[0], i: where[1] } : null;
+  // たきびより さきの みちは やりなおし
+  const restRow = adv.rest ? adv.rest[0] : -1;
+  for (const row of adv.map) for (const nd of row) if (nd.r > restRow) nd.done = false;
+  adv.pos = adv.rest; adv.cur = null; adv.stage = null;
+  soul.hp = soul.maxHp; soul.cracked = false; soul.shattered = false; soul.inv = 0; parts = [];
+  advShowMap("＊ …ケツイが あなたを\n　 " + (adv.rest ? "たきび" : "はじまりの ばしょ") + "へ よびもどした。" + (g ? "\n＊ " + g + "G を おとしてしまった…" : ""));
+}
+
+// ---- たきび（休む or きたえる）----
+function enterRest() {
+  setState("rest"); SFX.door();
+  ui = { cursor: 0, done: false };
+  say("＊ あたたかい たきびだ。\n＊ ここで ひとやすみ できる。");
+}
+function restRows() {
+  const x = BOX0.x + 12, w = BOX0.w - 24, y = BOX0.y + 132;
+  if (ui.done) return [{ x, y, w, h: 17, label: "すすむ", act: () => advNodeDone() }];
+  const up = wUp(soul.weapon);
+  return [
+    { x, y, w, h: 17, label: "やすむ（HP まんたん）", act: () => { soul.hp = soul.maxHp; SFX.heal(); restChosen("＊ ぐっすり ねむった。\n＊ HPが まんたんに なった。"); } },
+    { x, y: y + 20, w, h: 17, label: "きたえる（ぶき +1）", right: up >= 5 ? "MAX" : "", dim: up >= 5,
+      act: () => { if (up >= 5) { SFX.cancel(); return; } soul.wUp[soul.weapon] = up + 1; SFX.equip(); restChosen("＊ ひのこで ぶきを きたえた。\n＊ " + weapon().name + " +" + (up + 1) + "！"); } },
+  ];
+}
+function restChosen(text) {
+  adv.rest = adv.cur; ui.done = true; ui.cursor = 0;
+  say(text + "\n＊ ここが あたらしい たきび に なった。");
+  saveRun();
+}
+function drawRest() {
+  const cx = W / 2, cy = BOX0.y + 70;
+  for (let i = 0; i < 14; i++) {
+    const a = time * 3 + i, h = 10 + Math.sin(a * 1.7) * 6 + (i % 3) * 3;
+    ctx.fillStyle = i % 3 === 0 ? C.yellow : i % 3 === 1 ? C.orange : C.red;
+    ctx.fillRect(Math.round(cx - 12 + i * 1.8), Math.round(cy - h + 14), 2, Math.round(h));
+  }
+  ctx.fillStyle = "#863"; ctx.fillRect(cx - 16, cy + 14, 32, 4); ctx.fillRect(cx - 12, cy + 18, 24, 3);
+  for (let i = 0; i < 6; i++) { ctx.fillStyle = C.yellow; ctx.fillRect(Math.round(cx - 20 + ((i * 13 + time * 9) % 40)), Math.round(cy - 20 - ((time * 20 + i * 17) % 30)), 1, 1); }
+  drawRows(restRows());
+  drawMsgArea();
+}
+
+// ---- ？ イベント（ダイスを ふる：Baldur's Gate 3 風）----
+const EVENTS = [
+  { id: "lostfuwa", title: "まいごの ふわりん",
+    text: "＊ ちいさな ふわりんが ないている。\n＊ おかあさんと はぐれた らしい。",
+    choices: [
+      { label: "いっしょに さがす", dc: 10, stat: "lv", ok: () => { addItem("pie"); return "＊ おかあさんが みつかった！\n＊ おれいに きのこパイを もらった。"; },
+        ng: () => { soul.hp = Math.max(1, soul.hp - 5); return "＊ ふたりとも まいごに なった…\n＊ つかれて HPが 5 へった。"; } },
+      { label: "そっと しておく", ok: () => "＊ ふわりんは そのうち\n　 なきやんだ。" },
+    ] },
+  { id: "pot", title: "あやしい ツボ",
+    text: "＊ ふるい ツボが おいてある。\n＊ なかで なにかが ひかっている。",
+    choices: [
+      { label: "てを いれる", dc: 12, stat: "luck", ok: () => { const g = 25 + wave * 2; soul.gold += g; SFX.coin(); return "＊ " + g + "G を つかんだ！"; },
+        ng: () => { soul.hp = Math.max(1, soul.hp - 6); return "＊ ガブッ！\n＊ ツボの なかに キバが あった。\n＊ HPが 6 へった。"; } },
+      { label: "ける", ok: () => { soul.gold += 5; return "＊ ツボは われた。\n＊ なかから 5G でてきた。\n＊ …すこし かわいそうな ことを した。"; } },
+    ] },
+  { id: "gamble", title: "ほねの ばくちうち",
+    text: "＊ ホネコウモリが サイコロを ふっている。\n＊「カタカタ…20G で しょうぶ しない？」",
+    choices: [
+      { label: "かける（20G）", dc: 11, stat: "luck", need: 20, ok: () => { soul.gold += 20; return "＊ かった！ 20G もうけた。\n＊「カタカタ…くやしい…」"; },
+        ng: () => { soul.gold -= 20; return "＊ まけた… 20G とられた。\n＊「カタカタカタ！」"; } },
+      { label: "やめておく", ok: () => "＊「カタ…つまんないの。」" },
+    ] },
+  { id: "spring", title: "ひかる いずみ",
+    text: "＊ すんだ いずみが わいている。\n＊ そこに コインが しずんでいる。",
+    choices: [
+      { label: "のむ", ok: () => { const h = Math.ceil(soul.maxHp / 2); soul.hp = Math.min(soul.maxHp, soul.hp + h); SFX.heal(); return "＊ からだが かるく なった。\n＊ HPが " + h + " もどった。"; } },
+      { label: "コインを なげる（10G）", dc: 9, stat: "luck", need: 10, ok: () => { soul.gold -= 10; giveRandomBoon(); return "＊ いずみが ひかった！\n＊ かごを ひとつ さずかった。"; },
+        ng: () => { soul.gold -= 10; return "＊ ぽちゃん。\n＊ なにも おきなかった。"; } },
+    ] },
+  { id: "voice", title: "こころの こえ",
+    text: "＊ あたまの なかで こえが する。\n＊「きたえろ。もっと つよく なれる。」",
+    choices: [
+      { label: "こえに したがう", dc: 13, stat: "atk", ok: () => { const up = wUp(soul.weapon); if (up < 5) soul.wUp[soul.weapon] = up + 1; SFX.equip(); return "＊ ちからが みなぎる！\n＊ " + weapon().name + " +" + Math.min(5, up + 1) + "。"; },
+        ng: () => { soul.hp = Math.max(1, soul.hp - 4); return "＊「…まだ はやかったか。」\n＊ ずつうが する。HPが 4 へった。"; } },
+      { label: "むしする", ok: () => "＊ こえは きこえなく なった。\n＊ …ほんとうに？" },
+    ] },
+  { id: "grave", title: "たびびとの はかいし",
+    text: "＊ ちいさな はかいしが ある。\n＊ なにか かいてある。",
+    choices: [
+      { label: "よむ", ok: () => mem.deaths > 0 ? "＊「ここで " + mem.deaths + "かい たおれた ソウルが いた。\n　 それでも まだ あるいている。」\n＊ …あなたの ことだ。" : "＊「さきへ すすめ。\n　 ケツイを わすれるな。」" },
+      { label: "いのる", ok: () => { gainExp(3 + adv.ch * 2); return "＊ しずかに いのった。\n＊ すこし けいけんちを えた。"; } },
+    ] },
+];
+function enterEvent() {
+  setState("event"); SFX.door();
+  const ev = pick(EVENTS);
+  ui = { ev: ev.id, phase: "choose", cursor: 0 };
+  say(ev.text);
+}
+const evData = () => EVENTS.find(e => e.id === ui.ev);
+function statBonus(stat) {
+  switch (stat) {
+    case "lv": return Math.floor(soul.lv / 2);
+    case "atk": return atk();
+    case "def": return def() * 2;
+    default: return Math.floor(soul.lv / 4); // うん
+  }
+}
+function eventRows() {
+  const x = BOX0.x + 12, w = BOX0.w - 24, y = BOX0.y + 140;
+  if (ui.phase === "result") return [{ x, y: y + 20, w, h: 17, label: "すすむ", act: () => advNodeDone() }];
+  if (ui.phase === "roll") return [];
+  return evData().choices.map((c, i) => ({ x, y: y + i * 20, w, h: 17, label: c.label,
+    right: c.dc ? "DC " + c.dc + "（+" + statBonus(c.stat) + "）" : "", dim: c.need && soul.gold < c.need, act: () => chooseEvent(i) }));
+}
+function chooseEvent(i) {
+  const c = evData().choices[i];
+  if (c.need && soul.gold < c.need) { SFX.cancel(); say("＊ おかねが たりない。"); return; }
+  if (!c.dc) { ui.phase = "result"; say(c.ok()); saveRun(); return; }
+  ui.phase = "roll"; ui.rollT = 0; ui.choice = i;
+  ui.die = rnd(1, 20); ui.bonus = statBonus(c.stat);
+  SFX.select();
+}
+function updateEvent(dt) {
+  if (ui.phase !== "roll") return;
+  ui.rollT += dt;
+  if (Math.floor(ui.rollT * 20) !== Math.floor((ui.rollT - dt) * 20)) tone(600 + Math.random() * 400, 0.02, "square", 0.02);
+  if (ui.rollT > 1.1) {
+    const c = evData().choices[ui.choice], total = ui.die + ui.bonus;
+    const ok = ui.die === 20 || (ui.die !== 1 && total >= c.dc);
+    ui.phase = "result"; ui.ok = ok;
+    ok ? SFX.lvup() : SFX.hurt();
+    say((ui.die === 20 ? "＊ クリティカル！\n" : ui.die === 1 ? "＊ ファンブル…\n" : "") + (ok ? c.ok() : c.ng()));
+    saveRun();
+  }
+}
+function drawEvent() {
+  const ev = evData();
+  txt("？ " + ev.title, BOX0.x + 12, BOX0.y + 10, 12, NODE_COL.event);
+  // ダイス
+  if (ui.phase !== "choose") {
+    const n = ui.phase === "roll" ? rnd(1, 20) : ui.die;
+    const cx = W / 2, cy = BOX0.y + 70;
+    ctx.fillStyle = C.white;
+    for (let i = 0; i < 5; i++) { ctx.fillRect(cx - 18 + i * 9, cy - 22 + Math.abs(i - 2) * 3, 1, 1); }
+    rectLine(cx - 20, cy - 20, 40, 40, ui.phase === "result" ? (ui.ok ? C.green : C.red) : C.white, 2);
+    txt(String(n), cx, cy - 10, 18, C.white, "center");
+    if (ui.phase === "result") txt(ui.die + " + " + ui.bonus + " = " + (ui.die + ui.bonus) + (ui.ok ? "  せいこう！" : "  しっぱい…"), cx, cy + 26, 10, ui.ok ? C.green : C.red, "center");
+  } else {
+    // ノードの アイコンを おおきく
+    spr(SPR_NODE.event, W / 2 - 14, BOX0.y + 50 + Math.sin(time * 2) * 2, 4);
+  }
+  drawRows(eventRows());
+  drawMsgArea();
+}
+function addItem(key) { if (soul.bag.length < INV_MAX) soul.bag.push(key); else soul.gold += ITEMS[key].price; }
+
+// ---- かご（ブーン）：ちほうの あいだだけ つよく なる ----
+const BOONS = {
+  rapid:  { name: "すばやい て",     desc: "れんしゃが はやく なる",        col: "#ff7" },
+  sharp:  { name: "するどい たま",   desc: "ATK +1",                        col: "#f77" },
+  side:   { name: "わきの たま",     desc: "ななめにも たまを うつ",        col: "#7ff" },
+  heal:   { name: "いやしの いのり", desc: "たたかいの あと HP 25% かいふく", col: "#7f7" },
+  vital:  { name: "いのちの うつわ", desc: "さいだいHP +10",                col: "#f9c" },
+  guard:  { name: "かたい こころ",   desc: "DEF +2",                        col: "#aaf" },
+  graze:  { name: "かすりの めいじん", desc: "かすると ケツイが 2ばい",      col: "#fff" },
+  greed:  { name: "おかねもち",      desc: "Gが 1.5ばい",                    col: "#fc3" },
+  ghost:  { name: "ゆうれいの ころも", desc: "むてきじかん +0.6びょう",      col: "#ccc" },
+  pierce: { name: "つらぬく いし",   desc: "たまが てきを つらぬく",         col: "#c9f" },
+};
+const hasBoon = k => soul.boons && soul.boons.includes(k);
+const boonCount = k => soul.boons ? soul.boons.filter(b => b === k).length : 0;
+function boonChoices(rare) {
+  const keys = Object.keys(BOONS).filter(k => !(["side", "pierce"].includes(k) && hasBoon(k)));
+  const out = [];
+  while (out.length < 3 && keys.length) out.push(keys.splice(Math.floor(Math.random() * keys.length), 1)[0]);
+  return out;
+}
+function openBoons(text, rare) {
+  setState("boon");
+  ui = { choices: boonChoices(rare), cursor: 0 };
+  say(text);
+  saveRun();
+}
+function boonRows() {
+  const x = BOX0.x + 12, w = BOX0.w - 24;
+  return ui.choices.map((k, i) => ({ x, y: BOX0.y + 70 + i * 44, w, h: 38, boon: k, act: () => takeBoon(k) }));
+}
+function applyBoon(k) {
+  soul.boons = soul.boons || [];
+  soul.boons.push(k);
+  if (k === "vital") { soul.maxHp += 10; soul.hp += 10; soul.boonHp = (soul.boonHp || 0) + 10; }
+}
+function takeBoon(k) {
+  applyBoon(k); SFX.lvup();
+  if (adv && mode === "adv") advShowMap("＊ " + BOONS[k].name + " を てにいれた！\n＊ " + BOONS[k].desc + "。");
+}
+function giveRandomBoon() { applyBoon(pick(Object.keys(BOONS))); }
+function removeBoons() {
+  soul.maxHp -= soul.boonHp || 0; soul.hp = Math.min(soul.hp, soul.maxHp); soul.boonHp = 0;
+  soul.boons = [];
+}
+function drawBoons() {
+  txt("＊ かごを えらぶ", BOX0.x + 12, BOX0.y + 10, 12, C.yellow);
+  txt("（この ちほうの あいだ きく）", BOX0.x + 12, BOX0.y + 28, 9, C.gray);
+  boonRows().forEach((r, i) => {
+    const b = BOONS[r.boon], sel = i === ui.cursor, n = boonCount(r.boon);
+    rectLine(r.x, r.y, r.w, r.h, sel ? C.yellow : b.col, 1);
+    ctx.fillStyle = b.col; ctx.fillRect(r.x + 1, r.y + 1, 4, r.h - 2); // いろの おび
+    txt(b.name + (n ? "  Lv" + (n + 1) : ""), r.x + 12, r.y + 6, 11, sel ? C.yellow : C.white);
+    txt(b.desc, r.x + 12, r.y + 22, 9, C.gray);
+  });
+  drawMsgArea();
+}
+
+// ---- マップ ----
+const MAPG = { top: BOX0.y + 30, bot: BOX0.y + BOX0.h - 72 };
+const nodeXY = nd => ({ x: Math.round(BOX0.x + 18 + nd.x * (BOX0.w - 36)), y: Math.round(MAPG.bot - nd.r * (MAPG.bot - MAPG.top) / ROWS) });
+function mapTap(p) {
+  const reach = reachable();
+  for (const q of reach) {
+    const nd = advNode(q), c = nodeXY(nd);
+    if (Math.abs(p.x - c.x) < 13 && Math.abs(p.y - c.y) < 11) {
+      if (adv.sel && adv.sel[0] === q[0] && adv.sel[1] === q[1]) { advEnter(q); return; }
+      adv.sel = q; SFX.move();
+      say("＊ " + NODE_NAME[nd.kind] + (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i ? "（おとした G が ある）" : "") + "\n＊ もういちど タップで すすむ。");
+      return;
+    }
+  }
+}
+function mapKey(k) {
+  const reach = reachable();
+  const idx = adv.sel ? reach.findIndex(q => q[0] === adv.sel[0] && q[1] === adv.sel[1]) : -1;
+  if (k === "ArrowLeft" || k === "ArrowRight" || k === "ArrowUp" || k === "ArrowDown") {
+    const n = (idx + (k === "ArrowLeft" ? reach.length - 1 : 1)) % reach.length;
+    const q = reach[Math.max(0, n)], nd = advNode(q), c = nodeXY(nd);
+    mapTap({ x: c.x, y: c.y }); if (adv.sel !== q) adv.sel = q;
+  } else if (["z", "Z", "Enter", " "].includes(k) && adv.sel) advEnter(adv.sel);
+}
+function drawMap() {
+  const C0 = chapter();
+  ctx.fillStyle = C0.bg; ctx.fillRect(BOX0.x + 2, BOX0.y + 2, BOX0.w - 4, BOX0.h - 4);
+  txt("ちほう " + adv.ch + "：" + C0.name, BOX0.x + 10, BOX0.y + 8, 11, C0.col);
+  // みち
+  const reach = reachable();
+  const isReach = nd => reach.some(q => q[0] === nd.r && q[1] === nd.i);
+  for (const row of adv.map) for (const nd of row) {
+    const a = nodeXY(nd);
+    for (const j of nd.next) {
+      const b = nodeXY(adv.map[nd.r + 1][j]);
+      const lit = nd.done && (adv.map[nd.r + 1][j].done || isReach(adv.map[nd.r + 1][j]));
+      ctx.fillStyle = lit ? C0.col : "#333";
+      const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 4);
+      for (let s = 1; s < steps; s += 1) { if (s % 2) continue; ctx.fillRect(Math.round(a.x + (b.x - a.x) * s / steps), Math.round(a.y + (b.y - a.y) * s / steps), 1, 1); }
+    }
+  }
+  for (const row of adv.map) for (const nd of row) {
+    const c = nodeXY(nd), rch = isReach(nd), sel = adv.sel && adv.sel[0] === nd.r && adv.sel[1] === nd.i;
+    const s = nd.kind === "boss" ? 2 : 1, half = 3.5 * s;
+    if (rch) { const pulse = 7 + Math.sin(time * 6) * 1.5 + (s - 1) * 4; rectLine(Math.round(c.x - pulse), Math.round(c.y - pulse), Math.round(pulse * 2), Math.round(pulse * 2), sel ? C.yellow : C0.col, 1); }
+    spr(nd.done || (!rch && adv.pos && nd.r <= adv.pos[0]) ? SPR_NODE_DIM[nd.kind] : SPR_NODE[nd.kind], c.x - half, c.y - half, s);
+    if (adv.rest && adv.rest[0] === nd.r && adv.rest[1] === nd.i) { ctx.fillStyle = C.orange; ctx.fillRect(c.x + 5, c.y - 6, 2, 2); }
+    if (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i) txt("G", c.x + 6, c.y - 10, 8, C.gold);
+  }
+  // いまの ばしょ
+  const here = adv.pos ? nodeXY(advNode(adv.pos)) : { x: W / 2, y: MAPG.bot + 16 };
+  spr(SPR.heart, here.x - 3.5, here.y + (adv.pos ? 6 : -3) + Math.round(Math.sin(time * 3)), 1);
+  drawMsgArea();
+}
+function drawChClear() {
+  const C0 = chapter();
+  txt("ちほう " + ui.ch, W / 2, BOX0.y + 60, 14, C0.col, "center");
+  txt("クリア！", W / 2, BOX0.y + 84, 24, C.white, "center");
+  for (let i = 0; i < 16; i++) { ctx.fillStyle = [C.yellow, C0.col, C.white][i % 3]; ctx.fillRect(BOX0.x + ((i * 41 + time * 30) % BOX0.w), BOX0.y + ((i * 67 + time * 50) % 200), 2, 2); }
+  if (msg.done && Math.floor(time * 2) % 2 === 0) txt("[ タップで つぎの ちほうへ ]", W / 2, BOX0.y + 170, 11, C.yellow, "center");
+  drawMsgArea();
+}
+
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
-const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept"];
+const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept", "map", "boon", "rest", "event", "chclear"];
+const FROZEN = ["menu", "shop", "chest", "talk", "revive", "ending", "savept", "map", "boon", "rest", "event", "chclear"];
+const saveKey = m => m === "adv" ? "adv" : "run";
 function saveRun(periodic) {
   if (!soul || !SAVEABLE.includes(state)) return;
   if (!periodic) saveMem(); // ずかんの かずなども いっしょに（2びょうごとの ときは かるく）
-  store.set("run", {
-    v: SAVE_V, savedAt: Date.now(), state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
+  store.set(saveKey(mode), {
+    v: SAVE_V, mode, adv, savedAt: Date.now(), state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
     fireT, efireT, eventT, regenT, nextId, box: { ...BOX }, tbox: { ...TBOX },
     msg: { lines: msg.lines, shown: msg.shown, done: msg.done },
   });
   runCache = null;
 }
 let runCache = null; // タイトルで まいフレーム よまないように
-function hasRun() {
+const runInfo = {};
+function hasRun(m = "run") {
   if (runCache === null) {
-    const r = store.get("run", null);
-    runCache = !!(r && r.v === SAVE_V);
-    titleRunInfo = runCache ? "WAVE " + r.wave + "  LV " + r.soul.lv : "";
+    runCache = {};
+    for (const k of ["run", "adv"]) {
+      const r = store.get(saveKey(k), null);
+      runCache[k] = !!(r && r.v === SAVE_V);
+      runInfo[k] = runCache[k] ? (k === "adv" ? "ちほう " + r.adv.ch + "  LV " + r.soul.lv : "WAVE " + r.wave + "  LV " + r.soul.lv) : "";
+    }
+    titleRunInfo = runInfo.run;
   }
-  return runCache;
+  return runCache[m === "adv" ? "adv" : "run"];
 }
-function clearRun() { store.del("run"); runCache = false; }
-function loadRun() {
-  const r = store.get("run", null);
+function clearRun() { store.del(saveKey(mode)); runCache = null; }
+function loadRun(m = "run") {
+  const r = store.get(saveKey(m), null);
   if (!r || r.v !== SAVE_V) return false;
+  mode = r.mode || "endless"; adv = r.adv || null;
   ({ score, wave, shots, ebul, beams, enemies, items, events, form, ui, fireT, efireT, eventT, regenT, nextId } = r);
   if (wave === 0) for (const e of enemies) if (e.type === 20) e.type = T.flower; // ふるい セーブ
   soul = Object.assign(newSoul(), r.soul);
@@ -813,9 +1313,9 @@ window.addEventListener("pagehide", saveRun);
 const weapon = () => WEAPONS[soul.weapon];
 const armor = () => ARMORS[soul.armor];
 const wUp = k => (soul.wUp && soul.wUp[k]) || 0; // きたえた かず
-const atk = () => weapon().atk + wUp(soul.weapon) + Math.floor((soul.lv - 1) / 4);
+const atk = () => weapon().atk + wUp(soul.weapon) + Math.floor((soul.lv - 1) / 4) + boonCount("sharp");
 const forgePrice = () => 50 * (wUp(soul.weapon) + 1) + wave * 2;
-const def = () => armor().def + Math.floor((soul.lv - 1) / 5);
+const def = () => armor().def + Math.floor((soul.lv - 1) / 5) + 2 * boonCount("guard");
 const needExp = lv => 4 * lv * lv; // 次のLVまでの累計EXP
 
 // ---------------- 入力（片手：どこでもドラッグ＋タップ） ----------------
@@ -842,6 +1342,7 @@ function cmdAt(p) {
 const spareables = () => enemies.filter(e => e.spare && !e.dead && !e.dying);
 
 function pressCmd(i) {
+  if (state === "map") { if (i === 1 || i === 2) openMenu(i === 1 ? "item" : "equip"); return; }
   if (state === "play") {
     if (i === 0 && !soul.hold && soul.tp >= 100) { ketsuiBlast(); return; }
     if (i === 0) {
@@ -863,7 +1364,7 @@ function pressCmd(i) {
 
 function graze(b) {
   if (soul.tp >= 100) return;
-  soul.tp = Math.min(100, soul.tp + 5); SFX.graze();
+  soul.tp = Math.min(100, soul.tp + 5 * (1 + boonCount("graze"))); SFX.graze();
   parts.push({ x: b.x, y: b.y, vx: 0, vy: -20, life: 0.2, max: 0.2, delay: 0, color: C.white, s: 1 });
   if (soul.tp >= 100) { SFX.lvup(); pops.push({ x: soul.x + 3, y: soul.y - 16, text: "ケツイ MAX！", color: C.red, t: 0 }); }
 }
@@ -887,13 +1388,17 @@ function confirmTap(p) {
       else { cycleDiff(); SFX.move(); }
       return;
     }
-    if (hasRun()) {
-      // ぎょうを ちょくせつ タップした ときだけ（うっかり「はじめから」で セーブを けさない）
-      const sel = p ? (p.y >= 254 && p.y < 280 ? 0 : p.y >= 280 && p.y < 306 ? 1 : -1) : titleSel;
-      if (sel < 0) return;
-      SFX.select();
-      if (sel === 0) loadRun(); else { clearRun(); newGame(); }
-    } else { SFX.select(); newGame(); }
+    // 0: ぼうけん / 1: むげん。みぎはしの「はじめから」は 2かい タップで
+    const sel = p ? (p.y >= 254 && p.y < 280 ? 0 : p.y >= 280 && p.y < 306 ? 1 : -1) : titleSel;
+    if (sel < 0) return;
+    const m = sel === 0 ? "adv" : "run";
+    if (p && p.x >= W - 64 && hasRun(m)) {
+      if (titleReset === m) { store.del(saveKey(m)); runCache = null; titleReset = null; SFX.cancel(); }
+      else { titleReset = m; SFX.move(); }
+      return;
+    }
+    titleReset = null; SFX.select();
+    if (hasRun(m)) loadRun(m); else if (m === "adv") newAdventure(); else newGame();
   }
   else if (state === "intro") {
     if (!msg.done) { msg.shown = msgLen(); msg.done = true; }
@@ -904,6 +1409,7 @@ function confirmTap(p) {
   else if (state === "revive") reviveTap();
   else if (state === "ending") endingTap();
   else if (state === "savept") saveTap();
+  else if (state === "chclear") chclearTap();
   else if (state === "over" && stateT > 3.2) { SFX.select(); setState("title"); }
 }
 
@@ -943,8 +1449,9 @@ cv.addEventListener("pointerdown", e => {
   if (paused) { pausedTap(p); return; }
   if (inPauseBtn(p) && SAVEABLE.includes(state)) { pauseGame(); return; }
   const ci = cmdAt(p);
-  if (ci >= 0 && (state === "play" || state === "menu")) { pressCmd(ci); return; }
-  if (state === "menu" || state === "shop") { tapRows(p); return; }
+  if (ci >= 0 && (state === "play" || state === "menu" || state === "map")) { pressCmd(ci); return; }
+  if (state === "menu" || state === "shop" || state === "rest" || state === "event" || state === "boon") { tapRows(p); return; }
+  if (state === "map") { mapTap(p); return; }
   drag = { id: e.pointerId, x: p.x };
   try { cv.setPointerCapture(e.pointerId); } catch (_) {}
   confirmTap(p);
@@ -984,9 +1491,10 @@ window.addEventListener("keydown", e => {
     } else if (ok || back) { titleView = "main"; SFX.cancel(); }
     return;
   }
-  if (state === "title" && hasRun() && (k === "ArrowUp" || k === "ArrowDown")) { titleSel ^= 1; SFX.move(); return; }
-  if (/^[1-4]$/.test(k) && (state === "play" || state === "menu")) { pressCmd(+k - 1); return; }
-  if (state === "menu" || state === "shop") {
+  if (state === "title" && (k === "ArrowUp" || k === "ArrowDown")) { titleSel ^= 1; SFX.move(); return; }
+  if (/^[1-4]$/.test(k) && (state === "play" || state === "menu" || state === "map")) { pressCmd(+k - 1); return; }
+  if (state === "map") { mapKey(k); return; }
+  if (state === "menu" || state === "shop" || state === "rest" || state === "event" || state === "boon") {
     const rows = layoutRows().filter(r => r.act);
     if (k === "ArrowUp" || k === "ArrowDown") {
       if (rows.length) { ui.cursor = (ui.cursor + (k === "ArrowUp" ? -1 : 1) + rows.length) % rows.length; SFX.move(); menuHint(); }
@@ -995,7 +1503,7 @@ window.addEventListener("keydown", e => {
     } else if (ok) {
       if (rows[ui.cursor]) rows[ui.cursor].act();
     } else if (back || k === "c" || k === "C") {
-      state === "menu" ? closeMenu() : leaveShop();
+      if (state === "menu") closeMenu(); else if (state === "shop") leaveShop();
     }
     return;
   }
@@ -1008,13 +1516,16 @@ function clampSoul(x) { return clamp(x, BOX.x + 4, BOX.x + BOX.w - 4 - 7); }
 
 // ---------------- メニュー（いつでも ひらける。せかいは とまる） ----------------
 function openMenu(tab) {
+  const ret = state === "map" ? "map" : "play";
+  const keepMsg = ret === "map" ? msg.lines.join("\n") : null;
   setState("menu"); SFX.select();
-  ui = { tab, cursor: 0, sub: "weapon" };
+  ui = { tab, cursor: 0, sub: "weapon", ret, keepMsg };
   menuHint();
 }
 function closeMenu() {
   SFX.cancel();
   soul.inv = Math.max(soul.inv, 0.5);
+  if (ui && ui.ret === "map") { const t = ui.keepMsg; setState("map"); ui = null; say(t || "＊ すすむ ばしょを えらぼう。"); msg.shown = msgLen(); msg.done = true; return; }
   setState("play"); ui = null;
 }
 function menuHint() {
@@ -1025,6 +1536,9 @@ function menuHint() {
 
 // 画面ごとの「えらべる行」（描画と タップ判定で 共通）
 function layoutRows() {
+  if (state === "rest") return restRows();
+  if (state === "event") return eventRows();
+  if (state === "boon") return boonRows();
   const rows = [];
   const x = BOX0.x + 12, w = BOX0.w - 24;
   if (state === "menu" && ui.tab === "item") {
@@ -1162,7 +1676,7 @@ function talkTap() {
     enemies = enemies.filter(x => !x.dead);
     mem.flower = true; saveMem();
     soul.hold = false; soul.hp = soul.maxHp; form.flower = 0;
-    nextWave();
+    if (mode === "adv") advShowMap(CHAPTERS[0].intro); else nextWave();
     return;
   }
   if (after === "phase2") bossPhase2(e);
@@ -1288,6 +1802,7 @@ function shopTalk() {
 function leaveShop() {
   SFX.door();
   soul.inv = Math.max(soul.inv, 1.0);
+  if (ui && ui.fromNode) { advNodeDone("＊ またね！"); return; }
   setState("play"); ui = null;
 }
 
@@ -1353,6 +1868,7 @@ function chestTap() {
   }
   SFX.cancel();
   soul.inv = Math.max(soul.inv, 1.0);
+  if (ui && ui.fromNode) { advNodeDone(); return; }
   setState("play"); ui = null;
 }
 
@@ -1372,7 +1888,8 @@ function update(dt) {
   if (hurtT > 0) hurtT -= dt;
   if (form && form.blastT > 0) form.blastT -= dt;
 
-  if (state === "menu" || state === "shop" || state === "chest" || state === "talk" || state === "revive" || state === "ending" || state === "savept") {
+  if (FROZEN.includes(state)) {
+    if (state === "event") updateEvent(dt);
     updateMsg(dt, state === "talk");
     if (state === "chest" && ui.opened) ui.openT += dt;
     return; // せかいは とまる
@@ -1438,10 +1955,11 @@ function moveSoulKeys(dt) {
 function fire() {
   const w = weapon(), dmg = atk();
   const x = soul.x + 3, y = soul.y - 2;
-  const mk = (dx, vx) => ({ x: x + dx, y, vx, dmg, pierce: !!w.pierce, hit: [] });
+  const mk = (dx, vx) => ({ x: x + dx, y, vx, dmg, pierce: !!w.pierce || hasBoon("pierce"), hit: [] });
   if (w.shot === "twin") shots.push(mk(-2, 0), mk(2, 0));
   else if (w.shot === "spread") shots.push(mk(0, -60), mk(0, 0), mk(0, 60));
   else shots.push(mk(0, 0));
+  if (hasBoon("side")) shots.push(mk(0, -45), mk(0, 45));
   SFX.shot();
 }
 
@@ -1474,7 +1992,7 @@ function updatePlay(dt) {
   // 自動射撃（ボスが みのがしを まっている あいだは とまる）
   fireT -= dt;
   if (fireT <= 0 && !soul.hold) {
-    fireT = Math.max(0.13, 0.3 - (soul.lv - 1) * 0.02) * (weapon().rate || 1);
+    fireT = Math.max(0.13, 0.3 - (soul.lv - 1) * 0.02) * (weapon().rate || 1) * Math.pow(0.85, boonCount("rapid"));
     fire();
   }
   for (const s of shots) { s.y -= 240 * dt; s.x += (s.vx + (form.wind || 0) * 0.6) * dt; }
@@ -1637,6 +2155,7 @@ function updatePlay(dt) {
     if (form.rush !== -1) pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "WAVE CLEAR", color: C.yellow, t: 0, big: true });
     score += wave * 50;
     // のこった ゴースト・ネズミは どこかへ いく
+    if (mode === "adv") { if (soul.boons && hasBoon("heal") && adv.stage && adv.stage.wi + 1 >= adv.stage.waves) soul.hp = Math.min(soul.maxHp, soul.hp + Math.ceil(soul.maxHp * 0.25) * boonCount("heal")); advWaveCleared(); return; }
     if (wave >= 15 && !soul.endingDone && Object.keys(soul.route).length >= 3) { startEnding(); return; }
     nextWave();
   }
@@ -1841,7 +2360,7 @@ function killEnemy(e) {
   score += m.pts * wave * (hard ? 2 : 1);
   soul.kills++; mem.totalKills = (mem.totalKills || 0) + 1;
   mem.defeated[e.type] = (mem.defeated[e.type] || 0) + 1;
-  let g = rnd(m.gold[0], m.gold[1]) * (armor().goldX || 1);
+  let g = Math.round(rnd(m.gold[0], m.gold[1]) * (armor().goldX || 1) * (hasBoon("greed") ? 1.5 : 1) * (e.elite ? 3 : 1));
   if (m.thief) g = e.loot + 10;
   if (g) { soul.gold += g; pops.push({ x: e.x + e.w / 2, y: e.y + 4, text: g + "G", color: C.gold, t: 0 }); }
   gainExp(m.exp);
@@ -1881,7 +2400,7 @@ function hurt(dmg, raw) {
   if (hard) d = Math.ceil(d * 1.3);
   if (form && form.flower) { form.flowerHit = true; d = Math.min(d, soul.hp - 1); } // はじめは しなない
   soul.hp = Math.max(0, soul.hp - d);
-  soul.inv = armor().inv || 1.0; shake = 4;
+  soul.inv = (armor().inv || 1.0) + 0.6 * boonCount("ghost"); shake = 4;
   SFX.hurt();
   if (soul.hp <= 0) die();
 }
@@ -2129,6 +2648,7 @@ function updateDying() {
       say("＊ …だめだ。\n＊ まだ たおれる わけには\n　 いかない！");
       return;
     }
+    if (mode === "adv") { advDeath(); return; }
     mem.deaths++; checkAch(); saveMem();
     clearRun();
     setState("over");
@@ -2218,14 +2738,14 @@ function drawTitle() {
     mem.deaths >= 10 ? "＊ ずっと みているよ。" : mem.deaths >= 3 ? "＊ なんど でも、ケツイを。" : mem.deaths >= 1 ? "＊ また きたんだね。" : "";
   if (greet) txt(greet, W / 2, 240, 9, mem.genocide ? C.red : C.dim, "center");
 
-  if (hasRun()) {
-    ["つづきから", "はじめから"].forEach((l, i) => {
-      const y = 262 + i * 24, sel = i === titleSel;
-      if (sel) spr(SPR.heart, W / 2 - 62, y + 3);
-      txt(l, W / 2 - 50, y, 13, sel ? C.yellow : C.white);
-    });
-    txt(titleRunInfo || "", W / 2 + 22, 265, 9, C.gray);
-  } else if (Math.floor(time * 2) % 2 === 0) txt("[ タップで はじめる ]", W / 2, 266, 12, C.yellow, "center");
+  hasRun();
+  [["ぼうけん", "adv"], ["むげん", "run"]].forEach(([l, m], i) => {
+    const y = 262 + i * 24, sel = i === titleSel;
+    if (sel) spr(SPR.heart, 22, y + 3);
+    txt(l, 34, y, 13, sel ? C.yellow : C.white);
+    txt(runInfo[m] || (m === "adv" ? "ストーリー" : "どこまで いける？"), 98, y + 3, 9, C.gray);
+    if (runInfo[m]) txt(titleReset === m ? "ほんとう？" : "はじめから", W - 14, y + 3, 9, titleReset === m ? C.red : C.dim, "right");
+  });
 
   txt("＊ どこでも ドラッグで いどう", W / 2, 318, 10, C.white, "center");
   txt("＊ こうげきは じどう", W / 2, 333, 10, C.white, "center");
@@ -2321,9 +2841,10 @@ function drawGame() {
   txt("SCORE " + String(score).padStart(6, "0"), 10, 10, 10);
   txt(soul.gold + "G", 132, 10, 10, C.gold, "center");
   if (diff !== 1) txt(DIFF_NAME[diff], 132, 22, 7, DIFF_COL(), "center");
-  txt("WAVE " + wave, W - 50, 10, 10, C.white, "right");
+  if (mode === "adv") txt("ちほう " + adv.ch, W - 50, 10, 10, chapter().col, "right");
+  else txt("WAVE " + wave, W - 50, 10, 10, C.white, "right");
 
-  if (state === "menu" || state === "shop" || state === "chest" || state === "ending" || state === "savept") rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
+  if (["menu", "shop", "chest", "ending", "savept", "map", "rest", "event", "boon", "chclear"].includes(state)) rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
   else rectLine(Math.round(BOX.x), BOX.y, Math.round(BOX.w), BOX.h, C.white, 2);
 
   if (state === "menu") drawMenu();
@@ -2331,6 +2852,11 @@ function drawGame() {
   else if (state === "chest") drawChest();
   else if (state === "ending") drawEnding();
   else if (state === "savept") drawSavePt();
+  else if (state === "map") drawMap();
+  else if (state === "rest") drawRest();
+  else if (state === "event") drawEvent();
+  else if (state === "boon") drawBoons();
+  else if (state === "chclear") drawChClear();
   else drawField();
 
   drawStatus();
@@ -2363,6 +2889,7 @@ function drawField() {
       const ox = e.shakeT > 0 ? Math.round(Math.sin(e.shakeT * 60) * 2) : 0;
       const oy = form.peace > 0 && e.fm && !e.free ? Math.round(Math.sin(time * 6 + e.fx * 0.2) * 3) : 0; // おどり
       spr(img, e.x + ox, e.y + oy, m.scale || 1);
+      if (e.elite && Math.floor(time * 4) % 2) { ctx.globalAlpha = 0.45; spr(set.red[fr], e.x + ox, e.y + oy, m.scale || 1); ctx.globalAlpha = state === "intro" ? form.appear : 1; }
       if (m.thief) txt(e.loot ? e.loot + "G" : "G", e.x + e.w / 2, e.y - 9, 8, C.gold, "center");
       if (e.chatT > 0 && state === "play") {
         ctx.font = `7px ${FONT}`;
@@ -2606,15 +3133,16 @@ function drawStatus() {
   ctx.fillStyle = C.yellow; ctx.fillRect(106, y + 1, filled, 9);
   txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10, soul.hp <= soul.maxHp * 0.25 ? C.red : C.white);
 
-  const usable = state === "play" || state === "menu";
+  const usable = state === "play" || state === "menu" || state === "map";
   const canSpare = usable && spareables().length > 0;
-  const active = state === "menu" ? (ui.tab === "item" ? 1 : 2) : 0;
+  const active = state === "menu" ? (ui.tab === "item" ? 1 : 2) : state === "map" ? -1 : 0;
   const blink = Math.floor(time * 3) % 2 === 0;
   CMD.forEach((lbl, i) => {
     let l = lbl;
     const x = CMD_X0 + i * (CMD_W + CMD_GAP);
     let on = i === active, col = !usable ? C.dim : on ? C.yellow : C.orange;
     if (i === 3) col = canSpare ? (blink ? C.yellow : C.orange) : C.dim;
+    if (i === 0 && state === "map") col = C.dim;
     if (i === 0 && soul.hold && state === "play") { col = blink ? C.yellow : C.orange; on = false; }
     const full = i === 0 && soul.tp >= 100 && !soul.hold && state === "play";
     if (full) { col = blink ? C.red : C.yellow; l = "ケツイ！"; }
