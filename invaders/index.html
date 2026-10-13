@@ -538,6 +538,7 @@ let form = null, fireT = 0, efireT = 0, eventT = 0, regenT = 0, saveT = 0, nextI
 let parts = [], pops = [], shake = 0;
 let ui = null;       // メニュー・おみせ・たからばこ・かいわ の画面状態
 let titleRunInfo = null;
+const titleVisitor = Math.random() < 0.06; // まれに だれかが のぞいている
 let titleSel = 0, titleView = "main", welcome = null, hurtT = 0;
 // せってい（タイトル・ポーズから かえられる）
 const SENS = [{ v: 1.0, n: "ゆっくり" }, { v: 1.5, n: "ふつう" }, { v: 2.2, n: "はやい" }];
@@ -1000,13 +1001,13 @@ function layoutRows() {
       rows.push({ x, y, w, h: 17, label: d.name, right: s.sold ? "うりきれ" : price ? price + "G" : "タダ", dim: s.sold, act: () => buy(i) });
       y += 18;
     });
-    if (ui.mood !== "empty") {
+    if (ui.mood !== "empty" && ui.mood !== "asleep") {
       const up = wUp(soul.weapon), price = Math.ceil(forgePrice() * ui.mult);
       rows.push({ x, y, w, h: 17, label: up >= 5 ? "ぶきを きたえる" : "ぶきを きたえる +" + (up + 1), right: up >= 5 ? "MAX" : price + "G", dim: up >= 5, act: forge });
       y += 18;
       rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "はなす", act: shopTalk });
     }
-    rows.push({ x: ui.mood !== "empty" ? x + w / 2 + 6 : x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
+    rows.push({ x: ui.mood !== "empty" && ui.mood !== "asleep" ? x + w / 2 + 6 : x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
   }
   return rows;
 }
@@ -1156,13 +1157,15 @@ function enterShop() {
   setState("shop"); SFX.door();
   const cons = Object.keys(ITEMS).filter(k => !ITEMS[k].unique).sort(() => Math.random() - 0.5).slice(0, 2).map(k => ({ type: "item", key: k }));
   const gear = gearPool().sort(() => Math.random() - 0.5).slice(0, 2);
-  const mood = shopMood();
-  ui = { stock: [...cons, ...gear], cursor: 0, mood, mult: { empty: 0, scared: 1.3, friendly: 0.8, normal: 1 }[mood] };
+  let mood = shopMood();
+  if (mood === "normal" && Math.random() < 0.07) mood = "asleep"; // まれに ねている
+  ui = { stock: [...cons, ...gear], cursor: 0, mood, mult: { empty: 0, scared: 1.3, friendly: 0.8, normal: 1, asleep: 0 }[mood] };
   say({
     normal: pick(["＊ いらっしゃい！\n　 ゆっくり みていってね。", "＊ おや、ソウルの おきゃくさん。\n　 なにを かう？", "＊ ここは よろずや ポコ。\n　 たたかいの おともに どうぞ。"]),
     friendly: "＊ うわさは きいてるよ。\n　 やさしい ソウル だってね。\n　 おまけ しておくよ！",
     scared: "＊ …い、いらっしゃい。\n　 あんた、チリの においが\n　 するね…。",
     empty: "＊ だれも いない。\n＊ しなものだけが のこっている。",
+    asleep: "＊ ポコは ねむっている。\n＊ Zzz…\n＊ …ひとつ くらい いいかな？",
   }[mood]);
 }
 function gearPool() {
@@ -1178,7 +1181,13 @@ function buy(i) {
   if (soul.gold < price) { SFX.cancel(); say(ui.mood === "scared" ? "＊ …お、おかねが たりないよ。" : "＊ おかねが たりないみたい…"); return; }
   if (s.type === "item" && soul.bag.length >= INV_MAX) { SFX.cancel(); say("＊ もちものが いっぱいだよ。"); return; }
   soul.gold -= price; SFX.buy();
-  const verb = ui.mood === "empty" ? "を もっていった。" : "を かった。";
+  const verb = ui.mood === "empty" || ui.mood === "asleep" ? "を もっていった。" : "を かった。";
+  if (ui.mood === "asleep") { // ひとつ とったら おきる
+    ui.mood = "normal"; ui.mult = 1;
+    if (s.type === "item") soul.bag.push(s.key); else { s.sold = true; (s.type === "weapon" ? soul.weapons : soul.armors).push(s.key); }
+    say("＊ " + d.name + " " + verb + "\n＊ …ポコが おきた！\n＊「…まあ、いいけどね。」");
+    return;
+  }
   if (s.type === "item") { soul.bag.push(s.key); say("＊ " + d.name + " " + verb + "\n＊ " + d.desc); }
   else {
     s.sold = true;
@@ -1267,6 +1276,7 @@ function enterChest() {
 }
 function rollTreasure() {
   const r = Math.random(), gear = gearPool();
+  if (Math.random() < 0.05) return { type: "dust" };
   if (r < 0.35 && gear.length) return pick(gear);
   if (r < 0.75) return { type: "item", key: pick(Object.keys(ITEMS).filter(k => !ITEMS[k].unique)) };
   return { type: "gold", n: rnd(8, 20) + wave * 3 };
@@ -1276,7 +1286,8 @@ function chestTap() {
   if (!ui.opened) {
     ui.opened = true; ui.openT = 0; SFX.open();
     const rw = ui.reward;
-    if (rw.type === "gold") { soul.gold += rw.n; say("＊ なかには " + rw.n + "G が はいっていた！"); }
+    if (rw.type === "dust") { soul.gold += 1; say("＊ なかには ほこりが はいっていた。\n＊ ほこりの したに 1G あった。\n＊ ほこりは だいじ。"); }
+    else if (rw.type === "gold") { soul.gold += rw.n; say("＊ なかには " + rw.n + "G が はいっていた！"); }
     else if (rw.type === "item") {
       const d = ITEMS[rw.key];
       if (soul.bag.length < INV_MAX) { soul.bag.push(rw.key); say("＊ " + d.name + " を てにいれた！\n＊ " + d.desc); }
@@ -2124,6 +2135,10 @@ function drawTitle() {
     const fr = Math.floor(time * 2 + i) % 2;
     spr(SPR.mon.at(i).base[fr], 60 + i * 50 - 12, 82 + Math.sin(time * 2 + i) * 3, 2);
   }
+  if (titleVisitor && mem.flower) {
+    const peek = Math.max(0, Math.sin(time * 0.7)) * 22;
+    spr(SPR.mon[T.flower].base[0], W - 6 - peek, 300, 2);
+  }
   txt("SOUL", W / 2, 128, 28, C.white, "center");
   txt("INVADERS", W / 2, 158, 28, C.white, "center");
   txt("ソウル・インベーダー", W / 2, 194, 10, C.gray, "center");
@@ -2481,6 +2496,7 @@ function drawMenu() {
 function drawShop() {
   if (ui.mood !== "empty") {
     const shiver = ui.mood === "scared" ? Math.round(Math.sin(time * 40)) : 0;
+    if (ui.mood === "asleep") txt("Z", W / 2 + 26 + Math.sin(time * 2) * 3, BOX0.y + 14 - (time * 6 % 10), 10, C.gray);
     spr(SPR.keeper, W / 2 - 24 + shiver, BOX0.y + 12 + Math.round(Math.sin(time * 2)), 3);
     txt("よろずや ポコ", W / 2, BOX0.y + 64, 10, C.gray, "center");
   } else {
