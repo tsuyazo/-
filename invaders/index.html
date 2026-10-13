@@ -75,7 +75,9 @@ const mem = Object.assign({ deaths: 0, runs: 0, bestWave: 0, met: {}, killed: {}
 const saveMem = () => store.set("mem", mem);
 
 // ---------------- サウンド（WebAudioで合成） ----------------
-let AC = null, muted = store.get("muted", false);
+// おと: 0=ぜんぶ / 1=こうかおんだけ / 2=けす
+let AC = null, snd = store.get("snd", store.get("muted", false) ? 2 : 0), muted = snd === 2;
+function cycleSound() { snd = (snd + 1) % 3; muted = snd === 2; store.set("snd", snd); }
 function audio() {
   if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
   if (AC && AC.state === "suspended") AC.resume();
@@ -129,6 +131,62 @@ const SFX = {
   shatter(){ noise(0.6, 0.12, 1200); tone(200, 0.5, "sawtooth", 0.05, 40); },
   revive() { [262, 330, 392, 523, 659, 784].forEach((f, i) => later(i * 90, () => tone(f, 0.18, "triangle", 0.06))); },
 };
+
+// ---------------- BGM（オリジナルの チップチューン） ----------------
+const R = 0;
+const SONGS = {
+  field: { bpm: 132, lead: "square", mv: 0.014, bv: 0.04,
+    mel: [69,R,72,R,76,R,74,72, 71,R,R,R,67,R,69,R, 69,R,72,R,76,R,79,77, 76,R,74,R,72,R,71,R,
+          72,R,71,R,69,R,67,R, 65,R,67,69,71,R,R,R, 72,R,74,R,76,R,74,72, 71,R,68,R,69,R,R,R],
+    bass: [45,R,57,R,45,R,57,R, 43,R,55,R,43,R,55,R, 41,R,53,R,41,R,53,R, 40,R,52,R,40,R,52,R,
+           41,R,53,R,41,R,53,R, 43,R,55,R,43,R,55,R, 40,R,52,R,40,R,52,R, 45,R,57,R,45,R,57,R] },
+  boss: { bpm: 168, lead: "square", mv: 0.015, bv: 0.045,
+    mel: [62,R,65,R,69,R,65,R, 70,R,69,R,65,R,62,R, 60,R,64,R,67,R,64,R, 69,R,67,R,64,R,61,R,
+          74,R,72,R,70,R,69,R, 70,R,72,R,74,R,77,R, 76,R,74,R,72,R,70,R, 69,R,R,R,61,R,64,R],
+    bass: [38,38,50,38,38,50,38,50, 38,38,50,38,38,50,38,50, 36,36,48,36,36,48,36,48, 36,36,48,36,36,48,36,48,
+           34,34,46,34,34,46,34,46, 34,34,46,34,34,46,34,46, 33,33,45,33,33,45,33,45, 33,33,45,33,33,45,33,45] },
+  shop: { bpm: 120, lead: "square", mv: 0.013, bv: 0.04,
+    mel: [72,R,76,79,R,76,72,R, 74,R,77,81,R,77,74,R, 72,R,76,79,R,84,R,79, 77,76,74,R,72,R,R,R],
+    bass: [48,R,55,R,48,R,55,R, 50,R,57,R,50,R,57,R, 48,R,55,R,52,R,55,R, 43,R,50,R,48,R,R,R] },
+  title: { bpm: 96, lead: "triangle", mv: 0.05, bv: 0.035,
+    mel: [76,R,R,R,74,R,72,R, 71,R,R,R,R,R,R,R, 72,R,R,R,71,R,69,R, 67,R,R,R,R,R,R,R],
+    bass: [45,R,R,R,52,R,R,R, 43,R,R,R,50,R,R,R, 41,R,R,R,48,R,R,R, 40,R,R,R,47,R,R,R] },
+  happy: { bpm: 112, lead: "square", mv: 0.014, bv: 0.04,
+    mel: [72,74,76,R,79,R,76,R, 77,76,74,R,72,R,R,R, 74,76,77,R,81,R,77,R, 79,R,R,R,R,R,R,R],
+    bass: [48,R,55,R,53,R,57,R, 53,R,57,R,48,R,55,R, 50,R,57,R,53,R,57,R, 55,R,59,R,55,R,R,R] },
+};
+const bgm = { song: null, step: 0, next: 0 };
+function noteAt(t, n, d, type, v) {
+  if (!n) return;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = 440 * Math.pow(2, (n - 69) / 12);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d + 0.02);
+}
+function wantSong() {
+  if (snd > 0 || paused || document.hidden) return null;
+  switch (state) {
+    case "title": return "title";
+    case "shop": return ui && ui.mood === "empty" ? null : "shop";
+    case "ending": return ui && ui.ending === "genocide" ? null : "happy";
+    case "dying": case "over": case "revive": case "chest": return null;
+  }
+  if (enemies.some(e => MON[e.type].boss && !e.dead)) return "boss";
+  return "field";
+}
+setInterval(() => {
+  if (!AC) return;
+  const want = wantSong();
+  if (want !== bgm.song) { bgm.song = want; bgm.step = 0; bgm.next = AC.currentTime + 0.08; }
+  if (!want) return;
+  const S = SONGS[want], dur = 60 / S.bpm / 2;
+  if (bgm.next < AC.currentTime - 0.5) bgm.next = AC.currentTime + 0.05; // ながく とまっていたら やりなおす
+  while (bgm.next < AC.currentTime + 0.25) {
+    noteAt(bgm.next, S.mel[bgm.step % S.mel.length], dur * 0.9, S.lead, S.mv);
+    noteAt(bgm.next, S.bass[bgm.step % S.bass.length], dur * 0.95, "triangle", S.bv);
+    bgm.next += dur; bgm.step++;
+  }
+}, 50);
 
 // ---------------- スプライト ----------------
 function makeSprite(rows, color) {
@@ -241,6 +299,22 @@ const MON = [
       "..#..##....##..#..", "..#............#..", "..#....####....#..", "..##..........##..",
       "...###......###...", "....##########....", "......######......", "........##........",
       "........##........", ".......####.......", "........##........", ".......####......."]] },
+  // ---- あとから ふえた てき ----
+  { name: "ワープネコ", hp: 2, pts: 30, gold: [2, 4], exp: 3, fire: "aimed", fm: true, warp: true, frames: [[
+      "#..........#", "##........##", "###.####.###", "############", "##..####..##",
+      "############", "####.##.####", ".##########.", "..##....##..", "..#......#.."],
+    ["#..........#", "##........##", "###.####.###", "############", "############",
+      "##.######.##", "####.##.####", ".##########.", "..##....##..", "...#....#..."]] },
+  { name: "クラゲール", hp: 3, pts: 35, gold: [3, 5], exp: 3, fire: "ring", fm: true, frames: [[
+      "...######...", "..########..", ".##.####.##.", ".##########.", "############",
+      "#.#.#..#.#.#", "#.#.#..#.#.#", "..#.#..#.#..", "..#..#.#..#.", "...#.....#.."],
+    ["............", "...######...", "..########..", ".##.####.##.", "############",
+      "############", ".#.#.##.#.#.", ".#.#.##.#.#.", "#..#....#..#", "#...#..#...#"]] },
+  { name: "わらにんぎょう", hp: 12, pts: 100, gold: [30, 40], exp: 4, dummy: true, frames: [[
+      "....####....", "...#.##.#...", "...######...", "....####....", "############", "#..######..#",
+      "....####....", "....####....", "...##..##...", "...#....#...", "....####....", ".....##....."],
+    ["#...####...#", "#..#.##.#..#", ".#.######.#.", "..########..", "....####....", "....####....",
+      "....####....", "....####....", "...##..##...", "...#....#...", "....####....", ".....##....."]] },
 ];
 const T = { boss: [12, 13, 14] };
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
@@ -374,6 +448,8 @@ const NEW_TYPE = {
   4: { type: 6, text: "＊ プルプルが ぷるぷるしている。\n＊ たおすと ぶんれつ するらしい。" },
   6: { type: 4, text: "＊ ミカンボシが ひかっている。\n＊ オレンジの こうげきは\n　 うごいていれば あたらない。" },
   7: { type: 8, text: "＊ タテガイコツが たてを かまえた。\n＊ たてを おろした すきを ねらおう。" },
+  8: { type: 15, text: "＊ ワープネコが あくびを した。\n＊ きづくと いちが かわっている。" },
+  9: { type: 16, text: "＊ クラゲールが ただよっている。\n＊ まわりに たまを まきちらす らしい。" },
 };
 
 function newSoul() {
@@ -433,6 +509,7 @@ function nextWave() {
     }
     if (wave >= 3 && Math.random() < 0.3) form.ghostT = 4 + Math.random() * 10;
     if (wave >= 3 && Math.random() < 0.3) form.thiefT = 5 + Math.random() * 12;
+    if (wave >= 6 && Math.random() < 0.2) form.dummyT = 3 + Math.random() * 6;
   }
   setState("intro");
   say(text);
@@ -445,6 +522,8 @@ function unlockedTypes(w) {
   if (w >= 4) t.push(6);
   if (w >= 6) t.push(4);
   if (w >= 7) t.push(8);
+  if (w >= 8) t.push(15);
+  if (w >= 9) t.push(16);
   return t;
 }
 
@@ -592,7 +671,7 @@ function pausedTap(p) {
 cv.addEventListener("pointerdown", e => {
   e.preventDefault(); audio();
   const p = toLogical(e);
-  if (inMuteBtn(p)) { muted = !muted; store.set("muted", muted); return; }
+  if (inMuteBtn(p)) { cycleSound(); return; }
   if (paused) { pausedTap(p); return; }
   if (inPauseBtn(p) && SAVEABLE.includes(state)) { pauseGame(); return; }
   const ci = cmdAt(p);
@@ -620,7 +699,7 @@ window.addEventListener("keydown", e => {
   keys[e.key] = true;
   const k = e.key;
   if (k.startsWith("Arrow") || k === " ") e.preventDefault();
-  if (k === "m" || k === "M") { muted = !muted; store.set("muted", muted); return; }
+  if (k === "m" || k === "M") { cycleSound(); return; }
   if (e.repeat && !k.startsWith("Arrow")) return;
   const ok = ["z", "Z", "Enter", " "].includes(k), back = ["x", "X", "Escape"].includes(k);
   if (paused) { if (ok || k === "p" || k === "P") pausedTap(null); return; }
@@ -737,7 +816,8 @@ function doSpare() {
   for (const e of list) {
     const m = MON[e.type];
     if (m.boss) { e.dying = true; soul.hold = false; startTalk(BOSS[m.boss].spared, e.id, "bossSpared"); return; }
-    // まよいゴースト
+    // まよいゴースト・わらにんぎょう
+    if (m.dummy) pops.push({ x: e.x + 6, y: e.y - 22, text: "わらにんぎょうは ほっとした", color: C.white, t: -0.4 });
     e.dead = true; soul.spares++; SFX.spare();
     fadeOut(e, C.yellow);
     const key = pick(["candy", "pie", "smoke"]);
@@ -967,6 +1047,7 @@ const frameOf = e => {
   const m = MON[e.type];
   if (m.frames.length === 1) return 0;
   if (m.shield) return e.guard ? 0 : 1;
+  if (m.dummy) return e.angry ? Math.floor(e.t * 6) % 2 : 0;
   if (e.free) return Math.floor(e.t * 4) % 2;
   return form.anim;
 };
@@ -1021,6 +1102,7 @@ function updatePlay(dt) {
   // とくべつな てき
   if (form.ghostT != null) { form.ghostT -= dt; if (form.ghostT <= 0) { form.ghostT = null; spawnGhost(); } }
   if (form.thiefT != null) { form.thiefT -= dt; if (form.thiefT <= 0) { form.thiefT = null; spawnThief(); } }
+  if (form.dummyT != null) { form.dummyT -= dt; if (form.dummyT <= 0) { form.dummyT = null; spawnDummy(); } }
 
   for (const b of ebul) {
     b.x += b.vx * dt; b.y += b.vy * dt;
@@ -1132,6 +1214,15 @@ function updateFormation(dt) {
   let maxY = -Infinity;
   for (const e of inF) maxY = Math.max(maxY, e.y + e.h);
   if (maxY >= soul.y - 2) { soul.hp = 0; die(); return; }
+  // ワープネコが ばしょを いれかえる
+  for (const e of inF) {
+    if (MON[e.type].warp && Math.random() < dt * 0.35) {
+      const o = pick(inF);
+      if (o !== e) { [e.fx, o.fx] = [o.fx, e.fx]; [e.fy, o.fy] = [o.fy, e.fy]; e.flash = 0.08; SFX.warn();
+        for (let i = 0; i < 6; i++) parts.push({ x: e.x + 6, y: e.y + 5, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60, life: 0.25, max: 0.25, delay: 0, color: C.yellow, s: 1 }); }
+    }
+  }
+  placeFormation();
   // ツッコミドリが とびだす
   for (const e of inF) {
     if (MON[e.type].diver && Math.random() < dt * (0.05 + wave * 0.008)) { e.free = true; e.dv = 1; SFX.warn(); }
@@ -1169,6 +1260,16 @@ function updateFree(e, m, dt) {
       }
       SFX.chomp();
     }
+  } else if (m.dummy) {
+    if (!e.angry) { e.y = e.baseY + Math.sin(e.t * 2) * 1; return; }
+    e.x += Math.sin(e.t * 1.3) * 40 * dt; e.x = clamp(e.x, BOX.x + 4, BOX.x + BOX.w - e.w - 4);
+    e.y = e.baseY + Math.sin(e.t * 2) * 4;
+    e.atkT -= dt;
+    if (e.atkT <= 0) {
+      e.atkT = 1.1;
+      const bx = e.x + e.w / 2, by = e.y + e.h;
+      for (const a of [-0.5, -0.25, 0, 0.25, 0.5]) ebul.push({ x: bx, y: by, vx: Math.sin(a) * 80, vy: Math.cos(a) * 80, dmg: 4, c: "w", shape: "dot", w: 3, h: 3 });
+    }
   } else if (m.ghost) {
     e.x = e.cx + Math.sin(e.t * 0.8) * 70; e.y = BOX.y + 120 + Math.sin(e.t * 1.7) * 10;
     e.life -= dt;
@@ -1200,6 +1301,12 @@ function spawnGhost() {
   const e = mkEnemy(11, W / 2, BOX.y + 120, { free: true, fm: false, spare: true, cx: W / 2 - 6, life: 16 });
   enemies.push(e);
   pops.push({ x: W / 2, y: BOX.y + 100, text: "まよいゴーストが あらわれた", color: C.yellow, t: -0.6 });
+}
+function spawnDummy() {
+  const e = mkEnemy(17, BOX.x + 30 + Math.random() * (BOX.w - 72), BOX.y + 150, { free: true, fm: false, spare: true, hits: 0, atkT: 1 });
+  e.hp = 12 + wave; e.baseY = e.y;
+  enemies.push(e);
+  pops.push({ x: e.x + 6, y: e.y - 14, text: "わらにんぎょうは なにも しない", color: C.yellow, t: -0.3 });
 }
 function spawnThief() {
   const e = mkEnemy(9, BOX.x + 20 + Math.random() * (BOX.w - 50), BOX.y + 2, { free: true, fm: false, loot: 0 });
@@ -1241,10 +1348,19 @@ function enemyFire(e) {
   } else if (m.fire === "spread") for (const a of [-0.35, 0, 0.35]) dot(Math.sin(a) * sp, Math.cos(a) * sp);
   else if (m.fire === "blue") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.8, dmg, c: "b", shape: "bone", w: 3, h: 12 });
   else if (m.fire === "orange") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.8, dmg, c: "o", shape: "bone", w: 3, h: 12 });
+  else if (m.fire === "ring") for (let i = 0; i < 6; i++) { const a = 0.35 + i * (Math.PI - 0.7) / 5; dot(Math.cos(a) * 45, Math.sin(a) * 45); }
 }
 
 function damageEnemy(e, dmg, silent) {
   const m = MON[e.type];
+  if (m.dummy && e.spare) {
+    e.hits++; e.flash = 0.12; e.shakeT = 0.25; SFX.hit();
+    if (e.hits >= 4) {
+      e.spare = false; e.angry = true; shake = 4; SFX.chomp();
+      pops.push({ x: e.x + 6, y: e.y - 14, text: "わらにんぎょうは おこった！", color: C.red, t: 0 });
+    }
+    return;
+  }
   if (m.boss && !e.offered && !e.refused && e.hp - dmg <= Math.floor(e.maxHp * 0.2)) {
     // ボスは たおれる まえに みのがしを もとめる
     e.hp = Math.floor(e.maxHp * 0.2); e.flash = 0.12; e.shakeT = 0.25;
@@ -1540,6 +1656,7 @@ function drawTopButtons() {
   ctx.fillStyle = muted ? C.dim : C.gray;
   ctx.fillRect(x, y + 3, 3, 4); ctx.fillRect(x + 3, y + 2, 1, 6); ctx.fillRect(x + 4, y + 1, 1, 8); ctx.fillRect(x + 5, y, 1, 10);
   if (muted) { for (let i = 0; i < 4; i++) { ctx.fillRect(x + 8 + i, y + 2 + i, 1, 1); ctx.fillRect(x + 11 - i, y + 2 + i, 1, 1); } }
+  else if (snd === 1) { ctx.fillRect(x + 8, y + 3, 1, 4); txt("SE", x + 6, y + 10, 7, C.gray, "center"); }
   else { ctx.fillRect(x + 8, y + 3, 1, 4); ctx.fillRect(x + 10, y + 1, 1, 8); }
   // ポーズ
   if (SAVEABLE.includes(state) && !paused) {
