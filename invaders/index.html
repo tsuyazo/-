@@ -425,7 +425,7 @@ let score = 0, wave = 0, soul = null, shots = [], ebul = [], beams = [], enemies
 let form = null, fireT = 0, efireT = 0, eventT = 0, regenT = 0, saveT = 0, nextId = 1;
 let parts = [], pops = [], shake = 0;
 let ui = null;       // メニュー・おみせ・たからばこ・かいわ の画面状態
-let titleSel = 0, titleView = "main";
+let titleSel = 0, titleView = "main", welcome = null, hurtT = 0;
 
 const msg = { lines: [], shown: 0, t: 0, done: false, hold: 0 };
 function say(text) { msg.lines = text.split("\n"); msg.shown = 0; msg.t = 0; msg.done = false; msg.hold = 0; }
@@ -569,7 +569,7 @@ const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending"];
 function saveRun() {
   if (!soul || !SAVEABLE.includes(state)) return;
   store.set("run", {
-    v: SAVE_V, state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
+    v: SAVE_V, savedAt: Date.now(), state, score, wave, soul, shots, ebul, beams, enemies, items, events, form, ui,
     fireT, efireT, eventT, regenT, nextId, box: { ...BOX }, tbox: { ...TBOX },
     msg: { lines: msg.lines, shown: msg.shown, done: msg.done },
   });
@@ -586,6 +586,14 @@ function loadRun() {
   setState(r.state);
   msg.lines = r.msg.lines; msg.shown = r.msg.shown; msg.done = r.msg.done; msg.t = msg.shown / 28; msg.hold = 0;
   paused = true; // もどってきたら まず ポーズ
+  // ひさしぶりに もどってきたら すこし かいふく
+  const mins = r.savedAt ? (Date.now() - r.savedAt) / 60000 : 0;
+  welcome = null;
+  if (mins >= 10) {
+    const heal = Math.min(soul.maxHp - soul.hp, Math.ceil(soul.maxHp * 0.25));
+    soul.hp += heal;
+    welcome = { heal, text: mins >= 60 * 24 ? "ずいぶん ひさしぶり だね。" : mins >= 60 ? "ゆっくり やすめた？" : "ひとやすみ できた？" };
+  }
   return true;
 }
 function pauseGame() {
@@ -665,7 +673,7 @@ function confirmTap(p) {
 function pausedTap(p) {
   // ポーズ画面：「タイトルへ」以外は どこを タップしても さいかい
   if (p && p.y > H / 2 + 26 && p.y < H / 2 + 52) { saveRun(); paused = false; setState("title"); SFX.cancel(); return; }
-  paused = false; SFX.select();
+  paused = false; welcome = null; SFX.select();
 }
 
 cv.addEventListener("pointerdown", e => {
@@ -771,7 +779,8 @@ function layoutRows() {
       rows.push({ x, y, w, h: 17, label: d.name, right: s.sold ? "うりきれ" : price ? price + "G" : "タダ", dim: s.sold, act: () => buy(i) });
       y += 18;
     });
-    rows.push({ x, y: y + 4, w, h: 17, label: "でる", act: leaveShop });
+    if (ui.mood !== "empty") rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "はなす", act: shopTalk });
+    rows.push({ x: ui.mood !== "empty" ? x + w / 2 + 6 : x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
   }
   return rows;
 }
@@ -919,6 +928,33 @@ function buy(i) {
     say("＊ " + d.name + " " + verb + "\n＊ したの「そうび」で そうびできる。");
   }
 }
+// ポコの はなし（ヒントと うわさ）
+function shopTalk() {
+  SFX.select();
+  const lines = {
+    normal: [
+      "＊ あおい こうげきは\n　 じっと していれば\n　 すりぬけるんだって。",
+      "＊ オレンジの こうげきは\n　 そのぎゃく。\n　 うごきつづけるのが コツさ。",
+      "＊ ボスが「みのがして」って\n　 いったら、したの\n　「みのがす」を おしてごらん。",
+      "＊ みのがした あいては\n　 あとで てを かして\n　 くれるかもね。",
+      "＊ たからばこに キバが\n　 はえてたら…\n　 にげたほうが いいよ。",
+      "＊ わらにんぎょうは\n　 うたなければ なにもしない。\n　 ほんとだよ。",
+      "＊ つかれたら いつでも\n　 みぎうえの II で\n　 やすんでいいからね。",
+    ],
+    friendly: [
+      "＊ ボーンズが あんたの\n　 はなしを してたよ。\n　「あいつは いいやつだ」って。",
+      "＊ やさしい ソウルは\n　 めずらしいんだ。\n　 だいじに しなよ。",
+      "＊ みんなを みのがしたら\n　 なにか いいこと\n　 あるかもね。",
+    ],
+    scared: [
+      "＊ …な、なんでもないよ。\n　 はやく かって\n　 でていって くれる？",
+      "＊ …まえに ここに きた\n　 モンスターが\n　 もどって こないんだ。",
+      "＊ …あんたの LV、\n　 どうして そんなに\n　 たかいの…？",
+    ],
+  }[ui.mood] || [];
+  ui.talkI = ((ui.talkI == null ? -1 : ui.talkI) + 1) % lines.length;
+  say(lines[ui.talkI]);
+}
 function leaveShop() {
   SFX.door();
   soul.inv = Math.max(soul.inv, 1.0);
@@ -971,6 +1007,7 @@ function springMimic(ev) {
 function update(dt) {
   time += dt; stateT += dt;
   if (paused) return;
+  if (hurtT > 0) hurtT -= dt;
 
   if (state === "menu" || state === "shop" || state === "chest" || state === "talk" || state === "revive" || state === "ending") {
     updateMsg(dt, state === "talk");
@@ -1423,7 +1460,7 @@ function hurt(dmg, raw) {
     pops.push({ x: soul.x + 3, y: soul.y - 14, text: "かがみが まもった！", color: C.yellow, t: 0 });
     return;
   }
-  vibrate(40);
+  vibrate(40); hurtT = 0.25;
   const d = raw ? dmg : Math.max(1, dmg - def());
   soul.hp = Math.max(0, soul.hp - d);
   soul.inv = armor().inv || 1.0; shake = 4;
@@ -1638,10 +1675,15 @@ function draw() {
   else drawGame();
 
   ctx.restore();
+  if (hurtT > 0) { ctx.globalAlpha = hurtT * 2; rectLine(BOX.x - 2, BOX.y - 2, BOX.w + 4, BOX.h + 4, C.red, 2); ctx.globalAlpha = 1; }
   drawTopButtons();
   if (paused) {
     ctx.fillStyle = "rgba(0,0,0,.82)"; ctx.fillRect(0, 0, W, H);
     txt("PAUSE", W / 2, H / 2 - 44, 20, C.white, "center");
+    if (welcome) {
+      txt("＊ おかえり！ " + welcome.text, W / 2, H / 2 - 92, 10, C.white, "center");
+      if (welcome.heal) txt("HPが " + welcome.heal + " もどった", W / 2, H / 2 - 76, 10, C.green, "center");
+    }
     spr(SPR.heart, W / 2 - 3.5, H / 2 - 14);
     txt("[ タップで つづける ]", W / 2, H / 2 + 2, 12, C.yellow, "center");
     rectLine(W / 2 - 60, H / 2 + 26, 120, 26, C.gray, 1);
