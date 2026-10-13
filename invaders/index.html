@@ -1561,8 +1561,10 @@ function updatePlay(dt) {
 
   // みせ・たからばこ が おりてくる
   eventT -= dt;
-  if (eventT <= 0 && !form.flower && !events.length && !form.rush && !enemies.some(e => MON[e.type].boss)) { spawnEvent(); eventT = 16 + Math.random() * 12; }
-  for (const ev of events) ev.y += 16 * dt;
+  const fighting = enemies.some(e => e.fm || MON[e.type].mimic);
+  if (eventT <= 0 && fighting && !form.flower && !events.length && !form.rush && !enemies.some(e => MON[e.type].boss)) { spawnEvent(); eventT = 16 + Math.random() * 12; }
+  // たからばこは はやく とおりすぎる（とるのが むずかしい）
+  for (const ev of events) ev.y += (ev.kind === "chest" ? 34 : ev.kind === "save" ? 22 : 16) * dt;
   events = events.filter(ev => ev.y < BOX.y + BOX.h - 4);
   for (const ev of events) {
     if (soul.x + 7 > ev.x && soul.x < ev.x + ev.w && soul.y + 6 > ev.y && soul.y < ev.y + ev.h) {
@@ -1626,7 +1628,12 @@ function updatePlay(dt) {
   }
 
   const blocking = enemies.filter(e => e.fm || MON[e.type].boss || MON[e.type].mimic);
-  if (!blocking.length && state === "play" && form.rush <= 0 && !form.bossIntro && !form.flower) {
+  // てきを たおしても、みせ・たからばこが とおりすぎるまでは おわらない
+  if (!blocking.length && events.length && !form.waitPop && state === "play") {
+    form.waitPop = true;
+    pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "＊ まだ なにか おりてくる…", color: C.white, t: 0 });
+  }
+  if (!blocking.length && !events.length && state === "play" && form.rush <= 0 && !form.bossIntro && !form.flower) {
     if (form.rush !== -1) pops.push({ x: W / 2, y: BOX.y + BOX.h / 2, text: "WAVE CLEAR", color: C.yellow, t: 0, big: true });
     score += wave * 50;
     // のこった ゴースト・ネズミは どこかへ いく
