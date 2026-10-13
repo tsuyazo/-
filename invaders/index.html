@@ -518,7 +518,7 @@ function newSoul() {
     x: W / 2 - 3.5, y: BOX0.y + BOX0.h - 16, px: W / 2 - 3.5, hp: 20, maxHp: 20, inv: 0, lv: 1, exp: 0, gold: 0,
     bag: ["candy"], weapons: ["stick"], armors: ["bandage"], weapon: "stick", armor: "bandage",
     moveT: 0, hold: false, invert: false, kills: 0, bossKills: 0, spares: 0, revived: false,
-    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false,
+    route: {}, friends: [], friendT: 0, mirrorShield: false, endingDone: false, wUp: {},
   };
 }
 
@@ -721,7 +721,9 @@ window.addEventListener("pagehide", saveRun);
 // ---------------- ステータス計算 ----------------
 const weapon = () => WEAPONS[soul.weapon];
 const armor = () => ARMORS[soul.armor];
-const atk = () => weapon().atk + Math.floor((soul.lv - 1) / 4);
+const wUp = k => (soul.wUp && soul.wUp[k]) || 0; // きたえた かず
+const atk = () => weapon().atk + wUp(soul.weapon) + Math.floor((soul.lv - 1) / 4);
+const forgePrice = () => 50 * (wUp(soul.weapon) + 1) + wave * 2;
 const def = () => armor().def + Math.floor((soul.lv - 1) / 5);
 const needExp = lv => 4 * lv * lv; // 次のLVまでの累計EXP
 
@@ -904,7 +906,7 @@ function layoutRows() {
     for (const key of list) {
       const d = ui.sub === "weapon" ? WEAPONS[key] : ARMORS[key];
       const cur = soul[ui.sub] === key;
-      rows.push({ x, y, w, h: 15, label: (cur ? "E " : "") + d.name, right: ui.sub === "weapon" ? "ATK" + d.atk : "DEF" + d.def,
+      rows.push({ x, y, w, h: 15, label: (cur ? "E " : "") + d.name + (ui.sub === "weapon" && wUp(key) ? " +" + wUp(key) : ""), right: ui.sub === "weapon" ? "ATK" + (d.atk + wUp(key)) : "DEF" + d.def,
         cur, act: () => equip(ui.sub, key) });
       y += 15;
     }
@@ -915,7 +917,12 @@ function layoutRows() {
       rows.push({ x, y, w, h: 17, label: d.name, right: s.sold ? "うりきれ" : price ? price + "G" : "タダ", dim: s.sold, act: () => buy(i) });
       y += 18;
     });
-    if (ui.mood !== "empty") rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "はなす", act: shopTalk });
+    if (ui.mood !== "empty") {
+      const up = wUp(soul.weapon), price = Math.ceil(forgePrice() * ui.mult);
+      rows.push({ x, y, w, h: 17, label: up >= 5 ? "ぶきを きたえる" : "ぶきを きたえる +" + (up + 1), right: up >= 5 ? "MAX" : price + "G", dim: up >= 5, act: forge });
+      y += 18;
+      rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "はなす", act: shopTalk });
+    }
     rows.push({ x: ui.mood !== "empty" ? x + w / 2 + 6 : x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
   }
   return rows;
@@ -1096,6 +1103,16 @@ function buy(i) {
     say("＊ " + d.name + " " + verb + "\n＊ したの「そうび」で そうびできる。");
   }
 }
+// ぶきを きたえる（G の つかいみち）
+function forge() {
+  const up = wUp(soul.weapon), price = Math.ceil(forgePrice() * ui.mult), name = weapon().name;
+  if (up >= 5) { SFX.cancel(); say("＊ " + name + " は もう\n　 これいじょう きたえられないよ。"); return; }
+  if (soul.gold < price) { SFX.cancel(); say("＊ おかねが たりないみたい…"); return; }
+  soul.gold -= price; soul.wUp = soul.wUp || {}; soul.wUp[soul.weapon] = up + 1;
+  SFX.guard(); later(120, () => SFX.guard()); later(260, () => SFX.lvup());
+  say("＊ まかせな！ カンカン…\n＊ " + name + " が +" + (up + 1) + " に なった！\n　 (ATK " + atk() + ")");
+}
+
 // ポコの はなし（ヒントと うわさ）
 function shopTalk() {
   SFX.select();
@@ -1108,6 +1125,7 @@ function shopTalk() {
       "＊ たからばこに キバが\n　 はえてたら…\n　 にげたほうが いいよ。",
       "＊ わらにんぎょうは\n　 うたなければ なにもしない。\n　 ほんとだよ。",
       "＊ つかれたら いつでも\n　 みぎうえの II で\n　 やすんでいいからね。",
+      "＊ おかねが あまったら\n　 ぶきを きたえて いきな。\n　 カンカン やってあげるよ。",
     ],
     friendly: [
       "＊ ボーンズが あんたの\n　 はなしを してたよ。\n　「あいつは いいやつだ」って。",
