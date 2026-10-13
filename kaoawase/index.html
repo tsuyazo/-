@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>両家顔合わせの栞</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#E9E4DA; --paper:#FCFAF5; --ink:#2B2522; --inkSoft:#7A6F66;
+  --beni:#B5413A; --kin:#B08D4A; --kinSoft:#E9DFC8; --rule:#D9CFBE;
+  --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",YuMincho,serif;
+  --sans:"Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --desk:#24211E; }
+}
+:root[data-theme="dark"]{ --desk:#24211E; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--mincho);
+  padding:24px 16px calc(110px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+
+/* ---------- 紙面（A5縦） ---------- */
+.page{width:min(100%,148mm);aspect-ratio:148/210;margin:0 auto 24px;background:var(--paper);
+  position:relative;overflow:hidden;container-type:inline-size;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.in{position:absolute;inset:6cqw 6cqw 8.5cqw;display:flex;flex-direction:column}
+.frame{position:absolute;inset:3.2cqw;border:.25cqw solid var(--kin);pointer-events:none}
+.frame::after{content:"";position:absolute;inset:.9cqw;border:.12cqw solid var(--kinSoft)}
+.pno{position:absolute;bottom:4.6cqw;left:0;right:0;text-align:center;font-size:2cqw;color:var(--inkSoft);letter-spacing:.3em}
+
+h2{font-size:4.4cqw;font-weight:600;letter-spacing:.35em;text-align:center;margin:1cqw 0 .5cqw}
+.en{font-size:1.9cqw;letter-spacing:.4em;color:var(--kin);text-align:center;margin-bottom:3.5cqw;font-family:var(--sans)}
+.knot{display:block;margin:0 auto;width:16cqw;height:auto}
+p,li,dd,dt,td{font-size:3cqw;line-height:1.9}
+
+/* ---------- 表紙 ---------- */
+.cover .in{align-items:center;justify-content:space-between;padding:4cqw 0 2cqw}
+.cover .vt{writing-mode:vertical-rl;font-size:8.2cqw;font-weight:700;letter-spacing:.25em;margin-top:2cqw;line-height:1}
+.cover .vt small{display:block;font-size:4cqw;font-weight:400;letter-spacing:.5em;color:var(--inkSoft);margin-left:3cqw}
+.cover .names{display:flex;align-items:center;gap:4cqw;font-size:4.4cqw;letter-spacing:.15em}
+.cover .names .and{color:var(--beni);font-size:3.4cqw}
+.cover .when{text-align:center;font-size:2.9cqw;line-height:2;color:var(--inkSoft)}
+.cover .houses{font-size:3.6cqw;letter-spacing:.4em}
+
+/* ---------- 流れ ---------- */
+.greet{font-size:2.8cqw;line-height:1.95;text-align:left;margin:0 2cqw 3.5cqw}
+.flow{list-style:none;padding:0;margin:0 3cqw;border-left:.3cqw solid var(--kinSoft)}
+.flow li{position:relative;padding:0 0 .6cqw 5cqw;line-height:1.7;display:flex;gap:3cqw}
+.flow li::before{content:"";position:absolute;left:-1.25cqw;top:1.6cqw;width:2.2cqw;height:2.2cqw;border-radius:50%;
+  background:var(--paper);border:.3cqw solid var(--beni)}
+.flow time{font-family:var(--sans);font-size:2.6cqw;color:var(--beni);min-width:9cqw;padding-top:.3cqw;flex-shrink:0}
+.flow .who{display:block;font-size:2.3cqw;color:var(--inkSoft);line-height:1.5}
+
+/* ---------- 家族紹介 ---------- */
+.fams{display:grid;grid-template-columns:1fr 1fr;gap:4cqw;flex:1}
+.fam h3{font-size:4cqw;font-weight:600;letter-spacing:.3em;text-align:center;margin:0 0 3cqw;
+  padding-bottom:1.5cqw;border-bottom:.2cqw solid var(--kin)}
+.fam ul{list-style:none;padding:0;margin:0}
+.fam li{margin-bottom:2.6cqw;line-height:1.6}
+.fam li b{display:block;font-weight:600;font-size:3.3cqw}
+.fam li b i{font-style:normal;font-size:2.3cqw;color:var(--beni);margin-right:1.5cqw;font-weight:400}
+.fam li span{display:block;font-size:2.4cqw;color:var(--inkSoft);line-height:1.6}
+
+/* ---------- ふたり ---------- */
+.prof{display:grid;grid-template-columns:1fr 1fr;gap:4cqw;margin-bottom:4cqw}
+.prof h3{font-size:4cqw;font-weight:600;text-align:center;letter-spacing:.2em;margin:0 0 2cqw}
+.prof h3 small{display:block;font-size:2.2cqw;color:var(--inkSoft);letter-spacing:.1em;font-weight:400}
+.prof dl{margin:0}
+.prof dt{font-size:2.1cqw;color:var(--kin);letter-spacing:.2em;font-family:var(--sans);line-height:1.4}
+.prof dd{margin:0 0 1.5cqw;font-size:2.8cqw;line-height:1.6}
+.ayumi{border-top:.2cqw solid var(--kinSoft);padding-top:3cqw}
+.ayumi h4{font-size:3.2cqw;letter-spacing:.3em;text-align:center;margin:0 0 2cqw;font-weight:600}
+.ayumi table{width:100%;border-collapse:collapse}
+.ayumi td{font-size:2.7cqw;line-height:1.7;vertical-align:top;padding:.3cqw 0}
+.ayumi td:first-child{font-family:var(--sans);font-size:2.4cqw;color:var(--beni);width:20cqw;white-space:nowrap}
+
+/* ---------- お品書き・結び ---------- */
+.menu{list-style:none;padding:0;margin:0 0 4cqw;text-align:center}
+.menu li{font-size:2.9cqw;line-height:2}
+.menu li i{font-style:normal;font-size:2.2cqw;color:var(--kin);letter-spacing:.3em;margin-right:2cqw;font-family:var(--sans)}
+.musubi{margin-top:auto;text-align:center;font-size:2.8cqw;line-height:2}
+.sign{text-align:center;margin-top:2cqw;font-size:3.4cqw;letter-spacing:.25em}
+
+/* ---------- 編集 ---------- */
+body.edit [data-k]{outline:1px dashed var(--beni);outline-offset:2px;border-radius:2px;cursor:text}
+body.edit [data-k]:focus{outline-style:solid;background:#FFF6EE}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(252,250,245,.96);
+  border-top:1px solid var(--rule);font-family:var(--sans);z-index:10}
+.bar button{font:inherit;font-size:14px;padding:10px 16px;border-radius:4px;border:1px solid var(--rule);background:#fff;color:var(--ink)}
+.bar button.main{background:var(--beni);border-color:var(--beni);color:#fff}
+.hint{max-width:148mm;margin:0 auto 20px;font-family:var(--sans);font-size:13px;line-height:1.8;color:var(--inkSoft)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .hint{color:#B9AFA3} }
+:root[data-theme="dark"] .hint{color:#B9AFA3}
+
+@page{size:A5 portrait;margin:0}
+@media print{
+  body{background:none;padding:0}
+  .bar,.hint{display:none}
+  .page{width:148mm;height:210mm;margin:0;box-shadow:none;break-after:page;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page:last-child{break-after:auto}
+  body.edit [data-k]{outline:none;background:none}
+}
+</style>
+</head>
+<body>
+
+<p class="hint">「編集する」を押すと、点線の箇所をタップして書き換えられます（内容はこの端末のブラウザに自動保存）。<br>印刷はA5用紙、またはA4に「2ページ/枚」で印刷すると二つ折りの栞になります。</p>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="knot" viewBox="0 0 120 40">
+    <g fill="none" stroke-width="1.6" stroke-linecap="round">
+      <path d="M2 20 H38 C46 20 48 8 60 8 C72 8 74 20 82 20 H118" stroke="#B5413A"/>
+      <path d="M2 23 H38 C46 23 48 32 60 32 C72 32 74 23 82 23 H118" stroke="#B08D4A"/>
+      <ellipse cx="48" cy="20" rx="10" ry="7" stroke="#B5413A"/>
+      <ellipse cx="72" cy="20" rx="10" ry="7" stroke="#B08D4A"/>
+    </g>
+  </symbol>
+</svg>
+
+<!-- 1 表紙 -->
+<section class="page cover">
+  <div class="frame"></div>
+  <div class="in">
+    <svg class="knot" viewBox="0 0 120 40"><use href="#knot"/></svg>
+    <div class="vt">両家顔合わせ<small data-k="c_sub">お食事会</small></div>
+    <div class="names">
+      <span data-k="c_him">太郎</span><span class="and">&amp;</span><span data-k="c_her">花子</span>
+    </div>
+    <div class="when" data-k="c_when">令和八年十一月二十二日（日）正午より<br>於　料亭 ○○　桜の間</div>
+    <div class="houses" data-k="c_houses">山田家・佐藤家</div>
+  </div>
+</section>
+
+<!-- 2 ごあいさつ・本日の流れ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="in">
+    <h2>ごあいさつ</h2>
+    <div class="en">GREETING</div>
+    <p class="greet" data-k="greet">本日はお忙しいなか、私たちのためにお集まりいただき誠にありがとうございます。これまで大切に育ててくれた家族に、互いの家族を紹介できる日を迎えられたことを心より嬉しく思います。ささやかではございますが、どうぞごゆっくりお過ごしください。</p>
+    <h2>本日の流れ</h2>
+    <div class="en">PROGRAM</div>
+    <ol class="flow" data-k="flow">
+      <li><time>12:00</time><div>はじめのご挨拶<span class="who">太郎</span></div></li>
+      <li><time>12:05</time><div>家族紹介<span class="who">太郎より山田家／花子より佐藤家</span></div></li>
+      <li><time>12:20</time><div>婚約記念品の披露</div></li>
+      <li><time>12:30</time><div>乾杯<span class="who">山田 一郎（太郎 父）</span></div></li>
+      <li><time>12:35</time><div>会食・ご歓談</div></li>
+      <li><time>14:10</time><div>結びのご挨拶<span class="who">佐藤 健二（花子 父）</span></div></li>
+      <li><time>14:20</time><div>記念撮影</div></li>
+    </ol>
+  </div>
+  <div class="pno">― 一 ―</div>
+</section>
+
+<!-- 3 家族紹介 -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="in">
+    <svg class="knot" viewBox="0 0 120 40"><use href="#knot"/></svg>
+    <h2>家族紹介</h2>
+    <div class="en">FAMILY</div>
+    <div class="fams">
+      <div class="fam">
+        <h3 data-k="f1_name">山田家</h3>
+        <ul data-k="f1">
+          <li><b><i>父</i>山田 一郎</b><span>釣りが趣味。週末は海へ。</span></li>
+          <li><b><i>母</i>山田 恵子</b><span>料理上手。得意料理は筑前煮。</span></li>
+          <li><b><i>本人</i>山田 太郎</b><span>会社員。休日はカメラを片手に散歩。</span></li>
+          <li><b><i>妹</i>山田 美咲</b><span>大学生。家族のムードメーカー。</span></li>
+        </ul>
+      </div>
+      <div class="fam">
+        <h3 data-k="f2_name">佐藤家</h3>
+        <ul data-k="f2">
+          <li><b><i>父</i>佐藤 健二</b><span>ゴルフと日本酒が好き。</span></li>
+          <li><b><i>母</i>佐藤 和子</b><span>園芸が趣味。庭のバラが自慢。</span></li>
+          <li><b><i>兄</i>佐藤 大輔</b><span>二児の父。子煩悩。</span></li>
+          <li><b><i>本人</i>佐藤 花子</b><span>看護師。パン作りが好き。</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pno">― 二 ―</div>
+</section>
+
+<!-- 4 ふたりのこと -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="in">
+    <h2>ふたりのこと</h2>
+    <div class="en">PROFILE</div>
+    <div class="prof">
+      <div>
+        <h3 data-k="p1_name">山田 太郎<small>やまだ たろう</small></h3>
+        <dl data-k="p1">
+          <dt>生年月日</dt><dd>平成八年五月五日</dd>
+          <dt>出身</dt><dd>神奈川県横浜市</dd>
+          <dt>お仕事</dt><dd>メーカー勤務</dd>
+          <dt>趣味</dt><dd>写真・キャンプ</dd>
+          <dt>相手の好きなところ</dt><dd>いつも笑顔で前向きなところ</dd>
+        </dl>
+      </div>
+      <div>
+        <h3 data-k="p2_name">佐藤 花子<small>さとう はなこ</small></h3>
+        <dl data-k="p2">
+          <dt>生年月日</dt><dd>平成九年九月九日</dd>
+          <dt>出身</dt><dd>静岡県静岡市</dd>
+          <dt>お仕事</dt><dd>看護師</dd>
+          <dt>趣味</dt><dd>パン作り・旅行</dd>
+          <dt>相手の好きなところ</dt><dd>穏やかで頼りになるところ</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="ayumi">
+      <h4>ふたりのあゆみ</h4>
+      <table><tbody data-k="ayumi">
+        <tr><td>2022年4月</td><td>友人の紹介で出会う</td></tr>
+        <tr><td>2022年7月</td><td>交際スタート</td></tr>
+        <tr><td>2026年6月</td><td>プロポーズ</td></tr>
+        <tr><td>2027年春</td><td>入籍・挙式予定</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="pno">― 三 ―</div>
+</section>
+
+<!-- 5 お品書き・結び -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="in">
+    <h2>お品書き</h2>
+    <div class="en">MENU</div>
+    <ul class="menu" data-k="menu">
+      <li><i>先附</i>胡麻豆腐　旨出汁</li>
+      <li><i>前菜</i>季節の八寸</li>
+      <li><i>御椀</i>松茸の土瓶蒸し</li>
+      <li><i>造里</i>本日の鮮魚三種盛り</li>
+      <li><i>焼物</i>鯛の祝い焼き</li>
+      <li><i>食事</i>鯛めし　香の物　留椀</li>
+      <li><i>水菓子</i>季節の果物</li>
+    </ul>
+    <svg class="knot" viewBox="0 0 120 40"><use href="#knot"/></svg>
+    <p class="musubi" data-k="musubi">未熟なふたりではございますが<br>互いを思いやり、笑顔あふれる家庭を<br>築いてまいります。<br>今後とも末永くよろしくお願い申し上げます。</p>
+    <div class="sign" data-k="sign">太郎・花子</div>
+  </div>
+  <div class="pno">― 四 ―</div>
+</section>
+
+<div class="bar">
+  <button class="main" id="editBtn">編集する</button>
+  <button id="printBtn">印刷する</button>
+  <button id="resetBtn">見本に戻す</button>
+</div>
+
+<script>
+const KEY = "kaoawase-shiori-v1";
+const els = [...document.querySelectorAll("[data-k]")];
+const defaults = Object.fromEntries(els.map(e => [e.dataset.k, e.innerHTML]));
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(_){ return {}; }
+}
+function save(){
+  const data = Object.fromEntries(els.map(e => [e.dataset.k, e.innerHTML]));
+  try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(_){}
+}
+const saved = load();
+els.forEach(e => { if (saved[e.dataset.k] != null) e.innerHTML = saved[e.dataset.k]; });
+
+let editing = false;
+const editBtn = document.getElementById("editBtn");
+editBtn.onclick = () => {
+  editing = !editing;
+  document.body.classList.toggle("edit", editing);
+  els.forEach(e => e.contentEditable = editing ? "true" : "false");
+  editBtn.textContent = editing ? "編集をおわる" : "編集する";
+  if (!editing) save();
+};
+els.forEach(e => e.addEventListener("input", save));
+// 貼り付けは書式を落としてテキストのみ
+els.forEach(e => e.addEventListener("paste", ev => {
+  ev.preventDefault();
+  document.execCommand("insertText", false, (ev.clipboardData || window.clipboardData).getData("text"));
+}));
+
+document.getElementById("printBtn").onclick = () => window.print();
+document.getElementById("resetBtn").onclick = () => {
+  if (!confirm("入力した内容を消して見本の文面に戻しますか？")) return;
+  try{ localStorage.removeItem(KEY); }catch(_){}
+  els.forEach(e => e.innerHTML = defaults[e.dataset.k]);
+};
+</script>
+</body>
+</html>
