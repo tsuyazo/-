@@ -419,6 +419,38 @@ T.giant = GIANT_BASE.map((pair, i) => pair.map((b, j) => {
   m.w = Math.max(...m.frames[0].map(r => r.length)) * 3; m.h = m.frames[0].length * 3;
   return MON.length - 1;
 }));
+// ---- 5〜8しょうの まもの（ばんごうが ずれないよう ヌシの あとに ついか）----
+function addMon(def) {
+  MON.push(def);
+  def.w = Math.max(...def.frames[0].map(r => r.length)) * (def.scale || 1); def.h = def.frames[0].length * (def.scale || 1);
+  return MON.length - 1;
+}
+T.n = {
+  magman: addMon({ name: "マグマン", hp: 4, pts: 40, gold: [3, 5], exp: 4, fire: "magma", fm: true, color: "#fa8", frames: [[
+    "............", "....####....", "..##.##.##..", ".##########.", "###.####.###", "############", "##.##..##.##", "############", ".#.######.#.", "#..#.##.#..#"],
+    ["....####....", "..##.##.##..", ".##########.", "###.####.###", "############", "##.##..##.##", "############", ".##########.", "..#.####.#..", "..#..##..#.."]] }),
+  hibana: addMon({ name: "ヒバナドリ", hp: 3, pts: 40, gold: [3, 5], exp: 4, fire: "straight", fm: true, diver: true, trail: true, color: "#fc8", frames: [[
+    "#..........#", ".#...##...#.", "..#.####.#..", "...######...", "..##.##.##..", ".#.######.#.", "#...####...#", ".....##.....", "....#..#....", "...#....#..."],
+    ["............", ".....##.....", "#...####...#", ".#.######.#.", "..##.##.##..", "...######...", "..#.####.#..", ".#...##...#.", "....#..#....", "...#....#..."]] }),
+  yuki: addMon({ name: "ユキダルマン", hp: 5, pts: 45, gold: [3, 6], exp: 5, fire: "snowball", fm: true, color: "#eef", frames: [[
+    "....####....", "...######...", "...#.##.#...", "...######...", "....####....", "..########..", ".####..####.", ".##########.", ".##########.", "..########.."],
+    ["....####....", "...######...", "...######...", "...#.##.#...", "....####....", "..########..", ".##########.", ".####..####.", ".##########.", "..########.."]] }),
+  tsurara: addMon({ name: "ツララン", hp: 4, pts: 45, gold: [3, 6], exp: 5, fire: "icicle", fm: true, color: "#bdf", frames: [[
+    "############", ".##########.", ".###.##.###.", "..########..", "..##.##.##..", "...######...", "...######...", "....####....", "....####....", ".....##....."],
+    ["############", ".##########.", ".##.####.##.", "..########..", "..#.####.#..", "...######...", "....####....", "....####....", ".....##.....", ".....##....."]] }),
+  honno: addMon({ name: "ホンノムシ", hp: 5, pts: 50, gold: [4, 6], exp: 5, fire: "letters", fm: true, color: "#edc", frames: [[
+    "............", "#####..#####", "#...#..#...#", "#.#.#..#.#.#", "#...#..#...#", "#.#.####.#.#", "#...####...#", "############", "....#..#....", "...##..##..."],
+    ["............", "............", "############", "#..#.##.#..#", "#.##.##.##.#", "#..#.##.#..#", "############", "............", "....#..#....", "...##..##..."]] }),
+  ink: addMon({ name: "インクツボ", hp: 5, pts: 50, gold: [4, 6], exp: 5, fire: "ink", fm: true, color: "#b9f", frames: [[
+    "....####....", ".....##.....", "...######...", "..########..", ".##.####.##.", ".##########.", ".###....###.", ".##########.", "..########..", "...######..."],
+    ["...#.##.#...", ".....##.....", "...######...", "..########..", ".##.####.##.", ".##########.", ".####..####.", ".##########.", "..########..", "...######..."]] }),
+  hoshikuzu: addMon({ name: "ホシクズ", hp: 5, pts: 55, gold: [4, 7], exp: 6, fire: "aimed", fm: true, burst: true, color: "#ffd", frames: [[
+    ".....##.....", "....####....", "############", ".##.####.##.", "..########..", "..###..###..", ".###....###.", ".##......##.", "##........##", "............"],
+    ["............", ".....##.....", "....####....", "############", "..#.####.#..", "..########..", "..###..###..", ".###....###.", "##........##", "............"]] }),
+  blackhole: addMon({ name: "ブラックホールン", hp: 7, pts: 60, gold: [5, 8], exp: 7, fire: "straight", fm: true, gravity: true, color: "#99b", frames: [[
+    "...######...", "..#......#..", ".#..####..#.", "#..#....#..#", "#.#..##..#.#", "#.#..##..#.#", "#..#....#..#", ".#..####..#.", "..#......#..", "...######..."],
+    ["...######...", "..##....##..", ".#...##...#.", "#..##..##..#", "#.#..##..#.#", "#.#..##..#.#", "#..##..##..#", ".#...##...#.", "..##....##..", "...######..."]] }),
+};
 const SPR = {
   heart: makeSprite(HEART, C.red), heartW: makeSprite(HEART, "#fbb"), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
@@ -523,7 +555,27 @@ const RECIPES = [
   { out: ["armor", "kingmail"],    need: { nusi: 4, kiba: 2, tate: 8 }, g: 300 },
   { out: ["weapon", "starblade"],  need: { kioku: 4, nusi: 6, suna: 10 }, g: 500 },
   { out: ["armor", "metalmail"],   need: { metal: 3, nusi: 4 }, g: 400 },
+  { out: ["weapon", "magmahammer"], need: { magma: 8, nusi: 3 }, g: 300 },
+  { out: ["weapon", "icebow"],     need: { yuki: 8, kurage: 4 }, g: 300 },
+  { out: ["weapon", "grimoire"],   need: { page: 8, ink: 4 }, g: 350 },
+  { out: ["armor", "starcloak"],   need: { hoshi: 8, kuro: 4 }, g: 400 },
 ];
+Object.assign(MATS, { magma: "マグマの かけら", yuki: "とけない ゆき", page: "ふるい ページ", ink: "まほうの インク", hoshi: "ほしくず", kuro: "くろい ちり" });
+Object.assign(WEAPONS, {
+  magmahammer: { name: "マグマの ハンマー", atk: 6, price: 0, craft: true, el: "fire", pierce: true, rate: 1.15, desc: "ATK6。ほのお。おもくて つよい。" },
+  icebow:      { name: "こおりの ゆみ",     atk: 5, price: 0, craft: true, el: "water", shot: "twin", desc: "ATK5。みず。2れつ。" },
+  grimoire:    { name: "まどうしょ",        atk: 5, price: 0, craft: true, el: "light", shot: "spread", pierce: true, desc: "ATK5。ひかり。3ほうこうで つらぬく。" },
+});
+ARMORS.starcloak = { name: "ほしくずの マント", def: 10, price: 0, craft: true, inv: 1.8, desc: "DEF10。きらきら ひかる。" };
+const N = T.n;
+Object.assign(WEAK, { [N.magman]: "water", [N.hibana]: "water", [N.yuki]: "fire", [N.tsurara]: "fire", [N.honno]: "fire", [N.ink]: "light", [N.hoshikuzu]: "dark", [N.blackhole]: "light" });
+Object.assign(DROP, { [N.magman]: "magma", [N.hibana]: "hane", [N.yuki]: "yuki", [N.tsurara]: "yuki", [N.honno]: "page", [N.ink]: "ink", [N.hoshikuzu]: "hoshi", [N.blackhole]: "kuro" });
+Object.assign(CHAT, { [N.magman]: ["ぐつぐつ", "あつい？", "とけちゃう"], [N.hibana]: ["パチパチ！", "とつげき！"], [N.yuki]: ["さむい？", "ゆきがっせん！"], [N.tsurara]: ["ポタ…", "おちるよ"],
+  [N.honno]: ["もぐもぐ", "この ほん おいしい"], [N.ink]: ["べちゃ", "まっくろ！"], [N.hoshikuzu]: ["キラッ", "われるよ"], [N.blackhole]: ["こっち おいで", "すいこむよ"] });
+LORE[N.magman] = "やまの マグマから うまれた。\nあつい ものが すき。"; LORE[N.hibana] = "ひのこを まきちらす とり。\nとまるのが にがて。";
+LORE[N.yuki] = "みずうみの ゆきだるま。\nなげる ゆきだまは われる。"; LORE[N.tsurara] = "つららの まもの。\nふるえたら ちゅうい。";
+LORE[N.honno] = "ほんを たべる むし。\nもじを はきだす。"; LORE[N.ink] = "まほうの インクつぼ。\nしかいを まっくろに する。";
+LORE[N.hoshikuzu] = "ほしの かけら。\nたおすと はじける。"; LORE[N.blackhole] = "ちいさな ブラックホール。\nソウルを すいよせる。";
 
 // ---------------- ボスの せりふ・こうげき ----------------
 const BOSS = {
@@ -868,15 +920,15 @@ const CHAPTERS = [
     intro: "＊ ぽたり、ぽたり。\n＊ どこかで だれかが ないている。" },
   { name: "すなの おうこく", col: "#fd6", bg: "#161005", pool: [4, 5, 8, 15, 9], boss: 14, loop: 0,
     intro: "＊ すなが きらきら ひかる。\n＊ かがみの ような しろが みえる。" },
-  { name: "とけいの まち", col: "#ccb", bg: "#0e0d0b", pool: [2, 8, 15, 16, 3, 4], boss: 20, loop: 0,
+  { name: "とけいの まち", col: "#ccb", bg: "#0e0d0b", pool: [2, 8, 15, 16, 3, 4], boss: 21, loop: 0,
     intro: "＊ チク、タク。\n＊ まちじゅうの とけいが ずれている。" },
-  { name: "ほのおの やま", col: "#f86", bg: "#180806", pool: [3, 4, 5, 6, 8], boss: 12, loop: 1,
+  { name: "ほのおの やま", col: "#f86", bg: "#180806", pool: [T.n.magman, T.n.hibana, 3, 5, 6], boss: 12, loop: 1,
     intro: "＊ あつい。\n＊ ほねまで とけそうだ。" },
-  { name: "こおりの みずうみ", col: "#9ef", bg: "#06101a", pool: [1, 6, 16, 15, 4], boss: 13, loop: 1,
+  { name: "こおりの みずうみ", col: "#9ef", bg: "#06101a", pool: [T.n.yuki, T.n.tsurara, 1, 16, 15], boss: 13, loop: 1,
     intro: "＊ いきが しろい。\n＊ こおりの したに なにかが いる。" },
-  { name: "ゆめの としょかん", col: "#c9f", bg: "#0e0716", pool: [2, 3, 8, 15, 16], boss: 14, loop: 1,
+  { name: "ゆめの としょかん", col: "#c9f", bg: "#0e0716", pool: [T.n.honno, T.n.ink, 8, 15, 2], boss: 14, loop: 1,
     intro: "＊ ほんが ひとりでに めくれる。\n＊ あなたの なまえが かいてある…？" },
-  { name: "ほしの はて", col: "#fff", bg: "#000", pool: [3, 4, 5, 6, 8, 15, 16], boss: 20, loop: 1,
+  { name: "ほしの はて", col: "#fff", bg: "#000", pool: [T.n.hoshikuzu, T.n.blackhole, 4, 3, 16, 6], boss: 21, loop: 1,
     intro: "＊ ここが せかいの はて。\n＊ ケツイだけが あなたを うごかす。" },
 ];
 
@@ -1567,6 +1619,59 @@ function drawJournal() {
     if (i === ui.cursor) spr(SPR.heart, r.x, r.y + 4);
   });
   drawMsgArea();
+}
+
+// ---- ちほうの けしき（Hollow Knight／Octopath 風：うっすら とおくの けしき＋ふちを くらく）----
+function drawScenery() {
+  if (mode !== "adv" || !adv) return;
+  const C0 = chapter(), ch = Math.min(adv.ch, CHAPTERS.length);
+  const L = BOX.x + 2, T0 = BOX.y + 2, Wd = BOX.w - 4, Hd = BOX.h - 4;
+  ctx.fillStyle = C0.bg; ctx.fillRect(L, T0, Wd, Hd);
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = C0.col;
+  const seed = i => (Math.sin(i * 127.1 + ch * 31.7) * 43758.5453) % 1;
+  const rnd01 = i => Math.abs(seed(i));
+  switch (ch) {
+    case 1: // もり：き の シルエット
+      for (let i = 0; i < 9; i++) {
+        const x = L + rnd01(i) * Wd, h = 40 + rnd01(i + 9) * 60, y = T0 + Hd - h;
+        ctx.fillRect(Math.round(x), Math.round(y), 3, Math.round(h));
+        for (let k = 0; k < 4; k++) ctx.fillRect(Math.round(x - 8 + k * 2), Math.round(y + k * 6), 19 - k * 4, 3);
+      }
+      break;
+    case 2: // どうくつ：つらら と しずく
+      for (let i = 0; i < 12; i++) { const x = L + rnd01(i) * Wd, h = 10 + rnd01(i + 3) * 30; for (let k = 0; k < h; k += 2) ctx.fillRect(Math.round(x + k / 6), T0 + k, Math.max(1, 5 - k / 8), 2); }
+      for (let i = 0; i < 6; i++) { const x = L + rnd01(i + 40) * Wd, y = T0 + ((time * 50 + i * 47) % Hd); ctx.fillRect(Math.round(x), Math.round(y), 1, 3); }
+      break;
+    case 3: // さばく：さきゅう と たいよう
+      for (let x = 0; x < Wd; x += 2) { const y = T0 + Hd - 30 - Math.sin(x / 30) * 10 - Math.sin(x / 13 + 1) * 4; ctx.fillRect(L + x, Math.round(y), 2, Math.round(T0 + Hd - y)); }
+      for (let a = 0; a < 6.28; a += 0.4) ctx.fillRect(Math.round(L + Wd - 40 + Math.cos(a) * 14), Math.round(T0 + 40 + Math.sin(a) * 14), 2, 2);
+      break;
+    case 4: // とけいの まち：はぐるま
+      for (let i = 0; i < 4; i++) {
+        const cx = L + 30 + i * 55, cy = T0 + 60 + (i % 2) * 120, r = 16 + (i % 3) * 6, rot = time * (i % 2 ? 0.5 : -0.4);
+        for (let k = 0; k < 10; k++) { const a = rot + k * 0.628; ctx.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), 3, 3); }
+      }
+      break;
+    case 5: // ほのおの やま：のぼる ひのこ
+      for (let x = 0; x < Wd; x += 3) { const y = T0 + Hd - 20 - Math.abs(Math.sin(x / 40)) * 40; ctx.fillRect(L + x, Math.round(y), 3, Math.round(T0 + Hd - y)); }
+      for (let i = 0; i < 14; i++) { const x = L + rnd01(i) * Wd + Math.sin(time + i) * 6, y = T0 + Hd - ((time * 30 + i * 37) % Hd); ctx.fillRect(Math.round(x), Math.round(y), 2, 2); }
+      break;
+    case 6: // こおりの みずうみ：ゆき
+      for (let i = 0; i < 24; i++) { const x = L + ((rnd01(i) * Wd + time * 8 + Math.sin(time + i) * 10) % Wd), y = T0 + ((time * 18 + i * 29) % Hd); ctx.fillRect(Math.round(x), Math.round(y), 2, 2); }
+      ctx.fillRect(L, T0 + Hd - 12, Wd, 2);
+      break;
+    case 7: // ゆめの としょかん：うかぶ ほん
+      for (let i = 0; i < 7; i++) { const x = L + rnd01(i) * (Wd - 16), y = T0 + 20 + rnd01(i + 7) * (Hd - 60) + Math.sin(time * 1.3 + i) * 6; ctx.fillRect(Math.round(x), Math.round(y), 14, 10); ctx.fillStyle = C0.bg; ctx.fillRect(Math.round(x + 6), Math.round(y), 2, 10); ctx.fillStyle = C0.col; }
+      break;
+    default: // ほしの はて：またたく ほし
+      for (let i = 0; i < 40; i++) { if ((Math.sin(time * 3 + i) + 1) > 1.2) ctx.fillRect(Math.round(L + rnd01(i) * Wd), Math.round(T0 + rnd01(i + 50) * Hd), 1, 1); }
+  }
+  ctx.globalAlpha = 1;
+  // ふちを くらく（ビネット）
+  const g = ctx.createRadialGradient(BOX.x + BOX.w / 2, BOX.y + BOX.h / 2, BOX.h * 0.3, BOX.x + BOX.w / 2, BOX.y + BOX.h / 2, BOX.h * 0.75);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.55)");
+  ctx.fillStyle = g; ctx.fillRect(L, T0, Wd, Hd);
 }
 
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
@@ -2432,6 +2537,8 @@ function updatePlay(dt) {
   for (const b of ebul) {
     b.x += (b.vx + (form.wind || 0)) * edt; b.y += b.vy * edt;
     if (b.ay) b.vy += b.ay * edt;
+    if (b.waitT != null) { b.waitT -= edt; if (b.waitT <= 0) { b.vy = b.goVy; b.waitT = null; } }
+    if (b.ink && b.y > b.ink) { b.dead = true; form.inks = form.inks || []; form.inks.push({ x: b.x, y: b.y, t: 3.5 }); } // インクが とびちる
     if (b.stopT != null) { // ときが とまる → うごきだす
       b.stopT -= edt;
       if (b.stopT <= 0 && !b.stopped) { b.stopped = true; b.vx = 0; b.vy = 0; }
@@ -2452,6 +2559,9 @@ function updatePlay(dt) {
     if (!bm.fired && bm.t >= bm.warn) { bm.fired = true; SFX.beam(); shake = 3; }
   }
   beams = beams.filter(bm => bm.t < bm.warn + bm.dur);
+  if (form.inks) { for (const k of form.inks) k.t -= dt; form.inks = form.inks.filter(k => k.t > 0); }
+  // ブラックホールン：ソウルを すいよせる
+  for (const e of enemies) if (MON[e.type].gravity && !e.dead && !(e.breakT > 0)) soul.x = clampSoul(soul.x + clamp(e.x + e.w / 2 - (soul.x + 3.5), -1, 1) * 13 * edt);
 
   // おちてくる もの
   for (const it of items) {
@@ -2586,6 +2696,7 @@ function updateFormation(dt) {
 function updateFree(e, m, dt) {
   if (m.diver) {
     if (e.dv === 1) {
+      if (m.trail && Math.random() < dt * 5) ebul.push({ x: e.x + e.w / 2, y: e.y + e.h, vx: 0, vy: 60, dmg: 3, c: "o", shape: "dot", w: 3, h: 3 });
       e.y += 100 * dt;
       e.x += clamp(soul.x + 3 - (e.x + e.w / 2), -55 * dt, 55 * dt);
       if (e.y > BOX.y + BOX.h) { e.y = BOX.y - 12; e.dv = 2; }
@@ -2717,6 +2828,11 @@ function enemyFire(e) {
   else if (m.fire === "blue") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.8, dmg, c: "b", shape: "bone", w: 3, h: 12 });
   else if (m.fire === "orange") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.8, dmg, c: "o", shape: "bone", w: 3, h: 12 });
   else if (m.fire === "ring") for (let i = 0; i < 6; i++) { const a = 0.35 + i * (Math.PI - 0.7) / 5; dot(Math.cos(a) * 45, Math.sin(a) * 45); }
+  else if (m.fire === "magma") ebul.push({ x: bx, y: by, vx: (Math.random() - 0.5) * 30, vy: sp * 0.6, dmg, c: "o", shape: "bubble", w: 7, h: 7 });
+  else if (m.fire === "snowball") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.5, dmg, c: "w", shape: "bubble", w: 7, h: 7, split: BOX.y + 140 + Math.random() * 50, sp: 0.9, sd: dmg - 1 });
+  else if (m.fire === "icicle") { e.shakeT = 0.4; ebul.push({ x: bx, y: by, vx: 0, vy: 0, dmg, c: "w", shape: "bone", w: 2, h: 12, waitT: 0.45, goVy: sp * 2 }); }
+  else if (m.fire === "letters") for (let i = -2; i <= 2; i++) dot(i * 30, sp * 0.7);
+  else if (m.fire === "ink") ebul.push({ x: bx, y: by, vx: 0, vy: sp * 0.7, dmg: 1, c: "w", shape: "ink", w: 6, h: 6, ink: BOX.y + 150 + Math.random() * 60 });
 }
 
 function damageEnemy(e, dmg, silent, el) {
@@ -2781,6 +2897,7 @@ function killEnemy(e) {
   if (g) { soul.gold += g; pops.push({ x: e.x + e.w / 2, y: e.y + 4, text: g + "G", color: C.gold, t: 0 }); }
   gainExp(m.metal ? 25 + wave * 4 : m.exp);
   if (m.metal) { pops.push({ x: e.x + 6, y: e.y - 16, text: "メタル たおした！ EXP +" + (25 + wave * 4), color: "#ccd", t: 0 }); soul.mats = soul.mats || {}; soul.mats.metal = (soul.mats.metal || 0) + 1; }
+  if (m.burst) for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.3; ebul.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 + 20, dmg: 3, c: "w", shape: "dot", w: 3, h: 3 }); }
   if (m.splits) {
     for (const off of [-5, 7]) {
       const c = mkEnemy(7, e.x + off, e.y + 3, { fx: e.fx + off, fy: e.fy + 3, free: e.free, dv: 0 });
@@ -3302,6 +3419,7 @@ function drawGame() {
 function drawField() {
   ctx.save();
   ctx.beginPath(); ctx.rect(BOX.x + 2, BOX.y + 2, BOX.w - 4, BOX.h - 4); ctx.clip();
+  drawScenery();
 
   for (const ev of events) {
     const bob = Math.round(Math.sin(time * 3 + ev.bob) * 1);
@@ -3355,6 +3473,13 @@ function drawField() {
     ctx.globalAlpha = 1;
   }
 
+  // インクの しみ（しかいを ふさぐ）
+  if (form.inks) for (const k of form.inks) {
+    ctx.globalAlpha = Math.min(1, k.t) * 0.95; ctx.fillStyle = "#101";
+    ctx.beginPath(); ctx.arc(k.x, k.y, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#326"; ctx.fillRect(Math.round(k.x - 10), Math.round(k.y - 2), 4, 2); ctx.fillRect(Math.round(k.x + 6), Math.round(k.y + 4), 3, 2);
+    ctx.globalAlpha = 1;
+  }
   // まっくら：ソウルの まわり だけ みえる
   if (form.dark && state !== "intro") {
     ctx.fillStyle = "rgba(0,0,0,0.97)";
@@ -3455,6 +3580,7 @@ function drawBullet(b) {
     case "tooth": ctx.fillRect(x - 1, y - 2, 3, 2); ctx.fillRect(x, y, 1, 2); break;
     case "heart": ctx.fillRect(x - 2, y - 2, 2, 1); ctx.fillRect(x + 1, y - 2, 2, 1); ctx.fillRect(x - 2, y - 1, 5, 1); ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y + 1, 1, 1); break;
     case "coin": spr(SPR.coin, x - 2, y - 2); break;
+    case "ink": ctx.fillStyle = "#86c"; ctx.fillRect(x - 3, y - 2, 6, 4); ctx.fillRect(x - 2, y - 3, 4, 6); break;
     case "candy": spr(SPR.candy, x - 3, y - 1); break;
     default: ctx.fillRect(x - 1, y - 1, 3, 3);
   }
