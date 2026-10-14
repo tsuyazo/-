@@ -952,7 +952,7 @@ function mkEnemy(type, x, y, extra = {}) {
   const m = MON[type];
   if (!mem.seen[type]) { mem.seen[type] = 1; saveMem(); }
   const en = Object.assign({
-    id: nextId++, type, x, y, w: m.w, h: m.h, hp: Math.round((m.hp + Math.floor((wave - 1) / (mode === "adv" ? 7 : 3))) * (mode === "adv" ? advHpMul() : 1)), flash: 0, shakeT: 0,
+    id: nextId++, type, x, y, w: m.w, h: m.h, hp: Math.round((m.hp + Math.floor((wave - 1) / (mode === "adv" ? 7 : 3))) * (mode === "adv" ? advHpMul() * advFallMul() : 1)), flash: 0, shakeT: 0,
     free: !m.fm, fm: !!m.fm, t: Math.random() * 10, fx: 0, fy: 0, dv: 0, guard: false, guardT: Math.random() * 1.2,
   }, extra);
   en.maxHp0 = en.hp;
@@ -1075,8 +1075,9 @@ function advShowMap(text) {
 }
 // ちほうと すすみぐあいで つよさを きめる（むげんモードの WAVE と おなじ ものさし）
 // てきの かたさ（ちほうが すすむほど かたい）
-function advHpMul() { return (4.5 + 0.5 * (adv.ch - 1) + (adv.part - 1) * 0.25) * (1 + 0.6 * (adv.ng || 0)); }
+function advHpMul() { return (6 + 0.7 * Math.min(adv.ch - 1, 6) + (adv.part - 1) * 0.35) * (1 + 0.6 * (adv.ng || 0)); }
 const PARTS = 3; // ちほうは 3つの マップ（ヌシ → ヌシ → ボス）
+const advFallMul = () => adv && adv.fall ? 1 - 0.08 * Math.min(adv.fall.n - 1, 6) : 1;
 function advLevel(kind) {
   const r = adv.cur ? adv.cur[0] : 0;
   const base = (adv.ch - 1) * 5 + 1 + Math.floor(((adv.part - 1) * ROWS + r) * 4 / (ROWS * PARTS));
@@ -1090,7 +1091,7 @@ function advEnter(p) {
   SFX.select();
   switch (nd.kind) {
     case "battle": case "elite": case "boss":
-      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : nd.kind === "elite" ? 3 : adv.ch >= 3 ? 3 : 2, wi: 0 };
+      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : nd.kind === "elite" ? 4 : adv.ch >= 3 ? 4 : 3, wi: 0 };
       advNextWave(); break;
     case "shop": enterShop(); ui.fromNode = true; break;
     case "treasure": enterChest(); ui.fromNode = true; break;
@@ -1164,7 +1165,7 @@ function advWaveCleared() {
     soul.gold += adv.drop.g; text = "＊ おとした " + adv.drop.g + "G を とりもどした！\n"; adv.drop = null; SFX.coin();
   }
   if (st.kind === "boss" && adv.part < PARTS) { // ヌシを たおした → おくへ
-    adv.part++; adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null;
+    adv.part++; adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.fall = null;
     removeBoonsKeep();
     openBoons(text + "＊ ヌシを こえた！\n＊ さらに おくへ すすもう。", true);
     return;
@@ -1179,7 +1180,7 @@ function advWaveCleared() {
 function advNodeDone(text) {
   dailyProgress("node");
   const nd = advNode(adv.cur);
-  if (nd) { nd.done = true; adv.pos = adv.cur; }
+  if (nd) { nd.done = true; adv.pos = adv.cur; if (adv.fall && nd.r >= adv.fall.r) adv.fall = null; }
   adv.cur = null;
   advShowMap(text);
 }
@@ -1198,7 +1199,7 @@ function chclearTap() {
   if (adv.ch >= 9) { startTrueEnding(); return; }   // うらがわ → ほんとうの エンディング
   adv.ch++;
   adv.unlocked = Math.max(adv.unlocked, adv.ch);
-  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null; adv.part = 1;
+  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.fall = null; adv.cur = null; adv.part = 1;
   soul.revived = false;
   showStory(adv.ch, chapter().intro);
 }
@@ -1213,9 +1214,11 @@ function advDeath() {
   // たきびより さきの みちは やりなおし
   const restRow = adv.rest ? adv.rest[0] : -1;
   for (const row of adv.map) for (const nd of row) if (nd.r > restRow) nd.done = false;
+  // たおれる たびに まものが すこし ひるむ（その ばしょを こえるまで）
+  adv.fall = { n: ((adv.fall && adv.fall.n) || 0) + 1, r: Math.max(where[0], (adv.fall && adv.fall.r) || 0) };
   adv.pos = adv.rest; adv.cur = null; adv.stage = null;
   soul.hp = soul.maxHp; soul.cracked = false; soul.shattered = false; soul.inv = 0; parts = [];
-  advShowMap("＊ …ケツイが あなたを\n　 " + (adv.rest ? "たきび" : "はじまりの ばしょ") + "へ よびもどした。" + (g ? "\n＊ " + g + "G を おとしてしまった…" : ""));
+  advShowMap("＊ …ケツイが あなたを\n　 " + (adv.rest ? "たきび" : "はじまりの ばしょ") + "へ よびもどした。" + (g ? "\n＊ " + g + "G を おとしてしまった…" : "") + (adv.fall.n >= 2 ? "\n＊ まものたちは あなたの ケツイに\n　 すこし ひるんでいる。" : ""));
 }
 
 // ---- たきび（休む or きたえる）----
@@ -1840,7 +1843,7 @@ function aendingTap() {
   const after = ui.after; ui = null;
   if (after === "post") adv.ch = 9; // うらがわへ
   else { adv.ng = (adv.ng || 0) + 1; adv.ch = 1; } // 2しゅうめ
-  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null; adv.part = 1;
+  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.fall = null; adv.cur = null; adv.part = 1;
   soul.revived = false;
   showStory(adv.ch, chapter().intro);
 }
@@ -1926,7 +1929,9 @@ const wUp = k => (soul.wUp && soul.wUp[k]) || 0; // きたえた かず
 const atk = () => weapon().atk + wUp(soul.weapon) + Math.floor((soul.lv - 1) / 4) + boonCount("sharp");
 const forgePrice = () => 50 * (wUp(soul.weapon) + 1) + wave * 2;
 const def = () => armor().def + Math.floor((soul.lv - 1) / 5) + 2 * boonCount("guard");
-const needExp = lv => (mode === "adv" ? 7 : 4) * lv * lv; // 次のLVまでの累計EXP（ぼうけんは ゆっくり）
+// ぼうけんでは はやさの のびを 28 で とめる（あとの ちほうは HP と しくみで むずかしく する）
+const dWave = () => mode === "adv" ? Math.min(wave, 28) : wave;
+const needExp = lv => (mode === "adv" ? 16 : 4) * lv * lv; // 次のLVまでの累計EXP（ぼうけんは ゆっくり）
 
 // ---------------- 入力（片手：どこでもドラッグ＋タップ） ----------------
 let drag = null;
@@ -2704,7 +2709,7 @@ function updatePlay(dt) {
     form.peace -= dt;
     if (form.peace <= 0) { dismissFormation(C.white, "モンスターたちは かえっていった", C.white); return; } // だれも えらばなかった
   } else if (efireT <= 0 && shooters.length) {
-    efireT = Math.max(0.3, 1.25 - wave * 0.08) * (0.6 + Math.random() * 0.8) * (form.dark ? 1.3 : 1) * (form.angry ? 0.6 : 1) * (hard ? 0.8 : 1);
+    efireT = Math.max(0.3, 1.25 - dWave() * 0.08) * (0.6 + Math.random() * 0.8) * (form.dark ? 1.3 : 1) * (form.angry ? 0.6 : 1) * (hard ? 0.8 : 1);
     enemyFire(pick(shooters));
   }
 
@@ -2758,7 +2763,10 @@ function updatePlay(dt) {
   beams = beams.filter(bm => bm.t < bm.warn + bm.dur);
   if (form.inks) { for (const k of form.inks) k.t -= dt; form.inks = form.inks.filter(k => k.t > 0); }
   // ブラックホールン：ソウルを すいよせる
-  for (const e of enemies) if (MON[e.type].gravity && !e.dead && !(e.breakT > 0)) soul.x = clampSoul(soul.x + clamp(e.x + e.w / 2 - (soul.x + 3.5), -1, 1) * 13 * edt);
+  // （なんびき いても ひっぱる つよさは ひとつぶん まで）
+  let pull = 0;
+  for (const e of enemies) if (MON[e.type].gravity && !e.dead && !e.dying && !(e.breakT > 0)) pull += clamp((e.x + e.w / 2 - (soul.x + 3.5)) / 20, -1, 1);
+  if (pull) soul.x = clampSoul(soul.x + clamp(pull, -1, 1) * 13 * edt);
 
   // おちてくる もの
   for (const it of items) {
@@ -2860,7 +2868,7 @@ function updateFormation(dt) {
   if (!fmE.length) return;
   const inF = fmE.filter(e => !e.free);
   const alive = fmE.length;
-  const speed = 10 + wave * 2 + (1 - alive / Math.max(1, form.total)) * 45;
+  const speed = 10 + dWave() * 2 + (1 - alive / Math.max(1, form.total)) * 45;
   let dx = form.dir * speed * dt, dy = 0;
   if (inF.length) {
     let minX = Infinity, maxX = -Infinity;
@@ -2886,7 +2894,7 @@ function updateFormation(dt) {
   placeFormation();
   // ツッコミドリが とびだす
   for (const e of inF) {
-    if (MON[e.type].diver && !(form.peace > 0) && Math.random() < dt * (0.05 + wave * 0.008)) { e.free = true; e.dv = 1; SFX.warn(); }
+    if (MON[e.type].diver && !(form.peace > 0) && Math.random() < dt * (0.05 + dWave() * 0.008)) { e.free = true; e.dv = 1; SFX.warn(); }
   }
 }
 
@@ -2910,7 +2918,17 @@ function updateFree(e, m, dt) {
     }
   } else if (m.mimic) {
     e.y += ((BOX.y + 60) - e.y) * Math.min(1, dt * 2);
-    e.x += clamp(soul.x + 3 - (e.x + e.w / 2), -32 * dt, 32 * dt);
+    // かぜで たまが ながされる ぶん ずれた ところに いる（まうえだと ぜったいに あたらない）
+    const drift = (form.wind || 0) * 0.6 * Math.max(0, soul.y - (e.y + e.h)) / 240;
+    e.x += clamp(soul.x + 3 + drift - (e.x + e.w / 2), -32 * dt, 32 * dt);
+    e.x = clamp(e.x, BOX.x + 2, BOX.x + BOX.w - e.w - 2);
+    // ながく いすわらない（つかれて かえる）
+    e.mimicT = (e.mimicT || 0) + dt;
+    if (e.mimicT > 30) {
+      e.dead = true; fadeOut(e, C.gold);
+      pops.push({ x: e.x + 6, y: e.y - 8, text: "ミミックは あきて かえった", color: C.gray, t: 0 });
+      return;
+    }
     e.atkT -= dt;
     if (e.atkT <= 0) {
       e.atkT = Math.max(0.6, 1.1 - wave * 0.02);
@@ -3014,7 +3032,7 @@ function pickup(it) {
 function enemyFire(e) {
   const m = MON[e.type];
   const bx = e.x + e.w / 2, by = e.y + e.h;
-  const sp = (70 + wave * 4) * (easy ? 0.8 : hard ? 1.2 : 1);
+  const sp = (70 + dWave() * 4) * (easy ? 0.8 : hard ? 1.2 : 1);
   const dmg = mode === "adv" ? 3 + Math.min(2, Math.floor(e.type / 6)) + Math.floor(wave / 9) : 3 + Math.min(3, Math.floor(e.type / 2)) + Math.floor(wave / 4);
   const dot = (vx, vy, c = "w") => ebul.push({ x: bx, y: by, vx, vy, dmg, c, shape: "dot", w: 3, h: 3 });
   if (m.fire === "straight" || wave < 2) dot(0, sp);
