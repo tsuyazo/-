@@ -395,6 +395,17 @@ const LORE = [
 ];
 for (const m of MON) { m.w = Math.max(...m.frames[0].map(r => r.length)) * (m.scale || 1); m.h = m.frames[0].length * (m.scale || 1); }
 
+// ---- ちほうの ヌシ（その ちほうの まものが おおきく なった すがた）----
+// ちほうごとに 2たい（1-1 と 1-2 の さいごに でる）
+const GIANT_BASE = [[0, 1], [6, 16], [4, 8], [15, 2], [3, 5], [16, 6], [8, 15], [2, 4]];
+const GIANT_COL = [["#9e9", "#cfa"], ["#8cf", "#adf"], ["#fd7", "#eb6"], ["#ddc", "#bba"], ["#f97", "#fb7"], ["#bef", "#dff"], ["#dbf", "#b9f"], ["#fff", "#ffd"]];
+T.giant = GIANT_BASE.map((pair, i) => pair.map((b, j) => {
+  const src = MON[b];
+  MON.push({ name: "ヌシ・" + src.name, hp: 60, pts: 1500, gold: [40, 40], exp: 15, boss: "giant", scale: 3, color: GIANT_COL[i][j], frames: src.frames });
+  const m = MON[MON.length - 1];
+  m.w = Math.max(...m.frames[0].map(r => r.length)) * 3; m.h = m.frames[0].length * 3;
+  return MON.length - 1;
+}));
 const SPR = {
   heart: makeSprite(HEART, C.red), heartW: makeSprite(HEART, "#fbb"), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
@@ -482,6 +493,14 @@ const BOSS = {
     spared: ["ふふ。", "わたしの まけね。", "これを。\nかがみの かけらよ。"],
     gift: { type: "weapon", key: "shard" },
     patterns: ["spiral", "invert", "reflect", "mirrorRain"], extra: ["crossBeams"],
+  },
+  giant: {
+    intro: (m, s, mon) => ["……", "（" + mon.name + "が\nみちを ふさいでいる）", "（この ちほうの ヌシ らしい）"],
+    mid: ["（ヌシは おこっている！）"],
+    spare: ["（ヌシは つかれて\nすわりこんだ）", "（もう たたかう きは\nない ようだ）"],
+    killed: ["（ヌシは しずかに\nチリに なった）"],
+    spared: ["（ヌシは うれしそうに\nすみかへ かえっていった）"],
+    patterns: ["boneRain", "spiral", "bubbles"],
   },
   clock: {
     intro: m => m.killed.clock ? ["…ホー。", "きみの ことは\nきろくに のこっている。", "こんどは じかんを\nまちがえない。"]
@@ -750,7 +769,7 @@ function mkEnemy(type, x, y, extra = {}) {
   const m = MON[type];
   if (!mem.seen[type]) { mem.seen[type] = 1; saveMem(); }
   return Object.assign({
-    id: nextId++, type, x, y, w: m.w, h: m.h, hp: m.hp + Math.floor((wave - 1) / 3), flash: 0, shakeT: 0,
+    id: nextId++, type, x, y, w: m.w, h: m.h, hp: Math.round((m.hp + Math.floor((wave - 1) / 3)) * (mode === "adv" ? advHpMul() : 1)), flash: 0, shakeT: 0,
     free: !m.fm, fm: !!m.fm, t: Math.random() * 10, fx: 0, fy: 0, dv: 0, guard: false, guardT: Math.random() * 1.2,
   }, extra);
 }
@@ -802,6 +821,7 @@ const NODE_ICON = {
 };
 const NODE_COL = { battle: "#ddd", elite: "#f55", shop: "#ff7f27", rest: "#fc6", event: "#8cf", treasure: "#fc3", boss: "#f33" };
 const NODE_NAME = { battle: "たたかい", elite: "つよい てき", shop: "みせ", rest: "たきび", event: "なにか ある？", treasure: "たから", boss: "ボス" };
+const nodeName = nd => nd.kind === "boss" && adv.part < PARTS ? "ちほうの ヌシ" : NODE_NAME[nd.kind];
 const SPR_NODE = {}, SPR_NODE_DIM = {};
 for (const k in NODE_ICON) { SPR_NODE[k] = makeSprite(NODE_ICON[k], NODE_COL[k]); SPR_NODE_DIM[k] = makeSprite(NODE_ICON[k], "#444"); }
 
@@ -851,7 +871,7 @@ function newAdventure() {
   mode = "adv"; score = 0; wave = 0; nextId = 1;
   soul = newSoul();
   parts = []; pops = [];
-  adv = { ch: 1, unlocked: 1, map: genMap(), pos: null, rest: null, drop: null, cur: null, stage: null, sel: null, deaths: 0 };
+  adv = { ch: 1, part: 1, unlocked: 1, map: genMap(), pos: null, rest: null, drop: null, cur: null, stage: null, sel: null, deaths: 0 };
   mem.runs++; saveMem();
   if (!mem.flower) { flowerScene(); return; }
   advShowMap(CHAPTERS[0].intro);
@@ -866,9 +886,12 @@ function advShowMap(text) {
   saveRun();
 }
 // ちほうと すすみぐあいで つよさを きめる（むげんモードの WAVE と おなじ ものさし）
+// てきの かたさ（ちほうが すすむほど かたい）
+function advHpMul() { return 3.6 + 0.7 * (adv.ch - 1) + (adv.part - 1) * 0.3; }
+const PARTS = 3; // ちほうは 3つの マップ（ヌシ → ヌシ → ボス）
 function advLevel(kind) {
   const r = adv.cur ? adv.cur[0] : 0;
-  const base = (adv.ch - 1) * 5 + 1 + Math.floor(r * 4 / ROWS);
+  const base = (adv.ch - 1) * 5 + 1 + Math.floor(((adv.part - 1) * ROWS + r) * 4 / (ROWS * PARTS));
   return kind === "boss" ? adv.ch * 5 : kind === "elite" ? base + 1 : base;
 }
 
@@ -878,7 +901,7 @@ function advEnter(p) {
   SFX.select();
   switch (nd.kind) {
     case "battle": case "elite": case "boss":
-      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : 2, wi: 0 };
+      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : nd.kind === "elite" ? 3 : 2, wi: 0 };
       advNextWave(); break;
     case "shop": enterShop(); ui.fromNode = true; break;
     case "treasure": enterChest(); ui.fromNode = true; break;
@@ -904,12 +927,17 @@ function advNextWave() {
   eventT = 5 + Math.random() * 6;
   let text;
   if (st.kind === "boss") {
-    const type = C0.boss, m = MON[type], key = m.boss;
+    const giant = adv.part < PARTS;
+    const type = giant ? T.giant[adv.ch - 1][adv.part - 1] : C0.boss, m = MON[type], key = m.boss;
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
-    e.maxHp = e.hp = m.hp + C0.loop * 40 + wave * 2;
+    e.maxHp = e.hp = Math.round((m.hp + C0.loop * 40 + wave * 2) * (1 + 0.3 * (adv.ch - 1)));
     e.cx = W / 2; e.loop = C0.loop;
+    if (giant) { // ヌシの こうげきは ちほうごとに ちがう
+      const all = ["boneRain", "spiral", "bubbles", "gapWall", "rain", "pendulum", "hail", "tickRain", "mirrorRain", "heartRing"];
+      e.pats = [0, 3, 6].map(k => all[(adv.ch * 2 + adv.part - 3 + k) % all.length]);
+    }
     enemies.push(e);
-    form.bossIntro = BOSS[key].intro(mem, soul);
+    form.bossIntro = BOSS[key].intro(mem, soul, m);
     mem.met[key] = (mem.met[key] || 0) + 1; saveMem();
     text = "＊ " + m.name + "が たちはだかった！";
   } else {
@@ -940,6 +968,12 @@ function advWaveCleared() {
   if (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i) { // おとした G を ひろう
     soul.gold += adv.drop.g; text = "＊ おとした " + adv.drop.g + "G を とりもどした！\n"; adv.drop = null; SFX.coin();
   }
+  if (st.kind === "boss" && adv.part < PARTS) { // ヌシを たおした → おくへ
+    adv.part++; adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null;
+    removeBoonsKeep();
+    openBoons(text + "＊ ヌシを こえた！\n＊ さらに おくへ すすもう。", true);
+    return;
+  }
   if (st.kind === "boss") { advChapterClear(); return; }
   const bonus = st.kind === "elite" ? 20 + wave * 3 : 5 + wave;
   soul.gold += bonus;
@@ -968,7 +1002,7 @@ function chclearTap() {
     adv.ch = CHAPTERS.length;
   } else adv.ch++;
   adv.unlocked = Math.max(adv.unlocked, adv.ch);
-  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null;
+  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null; adv.part = 1;
   soul.revived = false;
   advShowMap(chapter().intro);
 }
@@ -1170,6 +1204,7 @@ function takeBoon(k) {
   applyBoon(k); SFX.lvup();
   if (adv && mode === "adv") advShowMap("＊ " + BOONS[k].name + " を てにいれた！\n＊ " + BOONS[k].desc + "。");
 }
+function removeBoonsKeep() { /* ちほうの とちゅうでは かごは のこす */ }
 function giveRandomBoon() { applyBoon(pick(Object.keys(BOONS))); }
 function removeBoons() {
   soul.maxHp -= soul.boonHp || 0; soul.hp = Math.min(soul.hp, soul.maxHp); soul.boonHp = 0;
@@ -1198,7 +1233,7 @@ function mapTap(p) {
     if (Math.abs(p.x - c.x) < 13 && Math.abs(p.y - c.y) < 11) {
       if (adv.sel && adv.sel[0] === q[0] && adv.sel[1] === q[1]) { advEnter(q); return; }
       adv.sel = q; SFX.move();
-      say("＊ " + NODE_NAME[nd.kind] + (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i ? "（おとした G が ある）" : "") + "\n＊ もういちど タップで すすむ。");
+      say("＊ " + nodeName(nd) + (adv.drop && adv.drop.r === nd.r && adv.drop.i === nd.i ? "（おとした G が ある）" : "") + "\n＊ もういちど タップで すすむ。");
       return;
     }
   }
@@ -1215,7 +1250,7 @@ function mapKey(k) {
 function drawMap() {
   const C0 = chapter();
   ctx.fillStyle = C0.bg; ctx.fillRect(BOX0.x + 2, BOX0.y + 2, BOX0.w - 4, BOX0.h - 4);
-  txt("ちほう " + adv.ch + "：" + C0.name, BOX0.x + 10, BOX0.y + 8, 11, C0.col);
+  txt("ちほう " + adv.ch + "-" + adv.part + "：" + C0.name, BOX0.x + 10, BOX0.y + 8, 11, C0.col);
   // みち
   const reach = reachable();
   const isReach = nd => reach.some(q => q[0] === nd.r && q[1] === nd.i);
@@ -1284,6 +1319,7 @@ function loadRun(m = "run") {
   const r = store.get(saveKey(m), null);
   if (!r || r.v !== SAVE_V) return false;
   mode = r.mode || "endless"; adv = r.adv || null;
+  if (adv && !adv.part) adv.part = 1;
   ({ score, wave, shots, ebul, beams, enemies, items, events, form, ui, fireT, efireT, eventT, regenT, nextId } = r);
   if (wave === 0) for (const e of enemies) if (e.type === 20) e.type = T.flower; // ふるい セーブ
   soul = Object.assign(newSoul(), r.soul);
@@ -1316,7 +1352,7 @@ const wUp = k => (soul.wUp && soul.wUp[k]) || 0; // きたえた かず
 const atk = () => weapon().atk + wUp(soul.weapon) + Math.floor((soul.lv - 1) / 4) + boonCount("sharp");
 const forgePrice = () => 50 * (wUp(soul.weapon) + 1) + wave * 2;
 const def = () => armor().def + Math.floor((soul.lv - 1) / 5) + 2 * boonCount("guard");
-const needExp = lv => 4 * lv * lv; // 次のLVまでの累計EXP
+const needExp = lv => (mode === "adv" ? 7 : 4) * lv * lv; // 次のLVまでの累計EXP（ぼうけんは ゆっくり）
 
 // ---------------- 入力（片手：どこでもドラッグ＋タップ） ----------------
 let drag = null;
@@ -1681,22 +1717,24 @@ function talkTap() {
   }
   if (after === "phase2") bossPhase2(e);
   else if (after === "bossDust") {
-    killEnemy(e); soul.bossKills++; soul.route[key] = "killed";
+    killEnemy(e); soul.bossKills++; if (key !== "giant") soul.route[key] = "killed";
     mem.killed[key] = (mem.killed[key] || 0) + 1; saveMem();
     enemies = enemies.filter(x => !x.dead);
     Object.assign(TBOX, BOX0); soul.invert = false; form.dark = false;
   } else if (after === "bossSpared") {
     e.dead = true; soul.spares++; mem.totalSpares = (mem.totalSpares || 0) + 1; SFX.spare(); fadeOut(e, C.yellow);
-    soul.route[key] = "spared"; if (!soul.friends.includes(key)) soul.friends.push(key);
+    if (key !== "giant") { soul.route[key] = "spared"; if (!soul.friends.includes(key)) soul.friends.push(key); }
     mem.spared[key] = (mem.spared[key] || 0) + 1; checkAch(); saveMem();
     const g = BOSS[key].gift, gold = 40 + wave * 2;
     soul.gold += gold;
-    const list = g.type === "weapon" ? soul.weapons : soul.armors;
-    if (!list.includes(g.key)) list.push(g.key);
+    if (g) {
+      const list = g.type === "weapon" ? soul.weapons : soul.armors;
+      if (!list.includes(g.key)) list.push(g.key);
+      const d = g.type === "weapon" ? WEAPONS[g.key] : ARMORS[g.key];
+      pops.push({ x: W / 2, y: BOX0.y + 70, text: d.name + " +" + gold + "G", color: C.yellow, t: -0.8 });
+      pops.push({ x: W / 2, y: BOX0.y + 90, text: m.name + "が みかたに なった", color: C.white, t: -1.6 });
+    } else pops.push({ x: W / 2, y: BOX0.y + 70, text: "+" + gold + "G", color: C.gold, t: -0.8 });
     if (key === "cloud" && soul.bag.length < INV_MAX) soul.bag.push("cotton");
-    const d = g.type === "weapon" ? WEAPONS[g.key] : ARMORS[g.key];
-    pops.push({ x: W / 2, y: BOX0.y + 70, text: d.name + " +" + gold + "G", color: C.yellow, t: -0.8 });
-    pops.push({ x: W / 2, y: BOX0.y + 90, text: m.name + "が みかたに なった", color: C.white, t: -1.6 });
     enemies = enemies.filter(x => !x.dead);
     Object.assign(TBOX, BOX0); soul.invert = false; form.dark = false;
   }
@@ -2428,7 +2466,7 @@ function updateBoss(e, m, dt) {
   if (!e.pat || e.patT <= 0) {
     if (e.pat === "invert") soul.invert = false;
     e.reflect = false;
-    const pats = (e.loop || 0) >= 1 && B.extra ? B.patterns.concat(B.extra) : B.patterns; // 2しゅうめからの あたらしい こうげき
+    const pats = e.pats || ((e.loop || 0) >= 1 && B.extra ? B.patterns.concat(B.extra) : B.patterns); // 2しゅうめからの あたらしい こうげき
     e.pi = ((e.pi == null ? -1 : e.pi) + 1) % pats.length;
     e.pat = pats[e.pi]; e.patT = 4.5; e.pt = 0; e.pa = 0;
     if (m.boss === "shadow" || m.boss === "poko") { // ボックスを もとに もどす
