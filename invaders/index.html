@@ -451,6 +451,21 @@ T.n = {
     "...######...", "..#......#..", ".#..####..#.", "#..#....#..#", "#.#..##..#.#", "#.#..##..#.#", "#..#....#..#", ".#..####..#.", "..#......#..", "...######..."],
     ["...######...", "..##....##..", ".#...##...#.", "#..##..##..#", "#.#..##..#.#", "#.#..##..#.#", "#..##..##..#", ".#...##...#.", "..##....##..", "...######..."]] }),
 };
+// ---- 5〜8しょうの ボス ----
+T.b = {
+  magdon: addMon({ name: "マグドン", hp: 100, pts: 4000, gold: [100, 100], exp: 40, boss: "magdon", scale: 2, color: "#fa7", frames: [[
+    "..#.....##.....#..", ".###...####...###.", "..##############..", ".################.", "####..######..####", "####..######..####", "##################",
+    "###.##########.###", "####.########.####", "#####........#####", ".################.", "..##############..", "...####....####...", "..####......####.."]] }),
+  freezia: addMon({ name: "フリージア", hp: 110, pts: 4500, gold: [110, 110], exp: 45, boss: "freezia", scale: 2, color: "#cef", frames: [[
+    "....#..#..#..#....", "....##########....", ".....########.....", "....##########....", "...###..##..###...", "...############...", "....###....###....",
+    ".....########.....", "....##########....", "...############...", "..##############..", ".################.", "##################", "..##..######..##.."]] }),
+  page: addMon({ name: "ページ", hp: 120, pts: 5000, gold: [120, 120], exp: 50, boss: "page", scale: 2, color: "#dcf", frames: [[
+    ".......####.......", "......######......", ".....########.....", "..##############..", "....##########....", "....#..####..#....", "....##########....",
+    ".....#.####.#.....", "..##############..", ".#######..#######.", ".#....#....#....#.", ".#.##.#....#.##.#.", ".#....#....#....#.", ".#######..#######."]] }),
+  nul: addMon({ name: "ヌル", hp: 160, pts: 9999, gold: [200, 200], exp: 80, boss: "nul", scale: 2, color: "#ddd", frames: [[
+    "......######......", "....##########....", "..######..######..", ".####........####.", "###....####....###", "##...########...##", "#...####..####...#",
+    "#...###.##.###...#", "#...###.##.###...#", "#...####..####...#", "##...########...##", "###....####....###", ".####........####.", "..######..######..", "....##########....", "......######......"]] }),
+};
 const SPR = {
   heart: makeSprite(HEART, C.red), heartW: makeSprite(HEART, "#fbb"), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
@@ -568,6 +583,17 @@ Object.assign(WEAPONS, {
 });
 ARMORS.starcloak = { name: "ほしくずの マント", def: 10, price: 0, craft: true, inv: 1.8, desc: "DEF10。きらきら ひかる。" };
 const N = T.n;
+Object.assign(WEAK, { [T.b.magdon]: "water", [T.b.freezia]: "fire", [T.b.page]: "fire", [T.b.nul]: "light" });
+LORE[T.b.magdon] = "ほのおの やまの おう。\nあつくるしいが わるくない。"; LORE[T.b.freezia] = "こおりの みずうみの じょおう。\nほんとうは さみしい。";
+LORE[T.b.page] = "としょかんの まじょ。\nテストが だいすき。"; LORE[T.b.nul] = "なにも ない もの。\nケツイを ほしがっている。";
+ARMORS.tiara = { name: "こおりの ティアラ", def: 7, price: 0, unique: true, inv: 1.8, desc: "DEF7。フリージアの おくりもの。" };
+// ページと ヌルの ○× クイズ（この ゲームの こと）
+const QUIZ = [
+  ["ふわりんの よわてんは ひかり？", "o"], ["あおい こうげきは うごくと あたる？", "o"], ["オレンジの こうげきは\nとまっていても あたらない？", "x"],
+  ["ポコは よろずやの てんしゅ？", "o"], ["メタルふわりんは すぐ にげる？", "o"], ["たきびで ぶきを きたえられる？", "o"],
+  ["OS チップは はずしても へいき？", "x"], ["この ゲームは りょうてで あそぶ？", "x"], ["ホーホークロックは ねこ？", "x"],
+  ["ヒマワリンは しんせつ？", "x"], ["かすると ケツイが たまる？", "o"], ["ゆっくりどけいは じぶんも おそくなる？", "x"],
+];
 Object.assign(WEAK, { [N.magman]: "water", [N.hibana]: "water", [N.yuki]: "fire", [N.tsurara]: "fire", [N.honno]: "fire", [N.ink]: "light", [N.hoshikuzu]: "dark", [N.blackhole]: "light" });
 Object.assign(DROP, { [N.magman]: "magma", [N.hibana]: "hane", [N.yuki]: "yuki", [N.tsurara]: "yuki", [N.honno]: "page", [N.ink]: "ink", [N.hoshikuzu]: "hoshi", [N.blackhole]: "kuro" });
 Object.assign(CHAT, { [N.magman]: ["ぐつぐつ", "あつい？", "とけちゃう"], [N.hibana]: ["パチパチ！", "とつげき！"], [N.yuki]: ["さむい？", "ゆきがっせん！"], [N.tsurara]: ["ポタ…", "おちるよ"],
@@ -611,6 +637,42 @@ const BOSS = {
     spared: ["ふふ。", "わたしの まけね。", "これを。\nかがみの かけらよ。"],
     gift: { type: "weapon", key: "shard" },
     patterns: ["spiral", "invert", "reflect", "mirrorRain"], extra: ["crossBeams"],
+  },
+  magdon: {
+    intro: m => m.killed.magdon ? ["…また きやがったか。", "こんどは まけねえ。"] : ["グハハハ！", "ここは おれの やまだ。", "もえつきて しまえ！"],
+    mid: ["あつく なってきたぜ！", "じめんから\nふきだすぞ！"],
+    spare: ["…あつすぎて\nつかれた…", "みのがして\nくれねえか…"],
+    killed: ["…ひが…\nきえる…"],
+    spared: ["へっ…\nおまえ あつい やつだな。", "これ もってけ。"],
+    gift: { type: "weapon", key: "magmahammer" },
+    patterns: ["magmaRain", "eruption", "gapWall", "beam"],
+  },
+  freezia: {
+    intro: m => m.killed.freezia ? ["……また あなた。", "こんどは とけない。"] : ["……ようこそ。", "こおりの みずうみへ。", "あなたも こおらせて\nあげる。"],
+    mid: ["……さむいでしょう？", "うごけなく\nしてあげる。"],
+    spare: ["……", "あたたかい…\nこれが ソウル？"],
+    killed: ["……とけて…\nしまう…"],
+    spared: ["……ありがとう。", "はるが くる\nきがするわ。"],
+    gift: { type: "armor", key: "tiara" },
+    patterns: ["snowStorm", "iceWall", "freeze", "hail"],
+  },
+  page: {
+    intro: m => m.killed.page ? ["…しずかに。", "まえにも あなたを\nテストしましたね。"] : ["しずかに。", "ここは としょかん。", "…テストを\nはじめます。"],
+    mid: ["では だい2もん。", "こたえは\nひだり か みぎ。"],
+    spare: ["…ごうかく です。", "もう やめに\nしましょう。"],
+    killed: ["…らくだい…\nです…"],
+    spared: ["よく できました。", "この ほんを\nあげましょう。"],
+    gift: { type: "weapon", key: "grimoire" },
+    patterns: ["letterRain", "quiz", "invert", "mirrorRain"],
+  },
+  nul: {
+    intro: m => ["……", "ここまで きたのね。", "わたしは ヌル。\nなにも ない もの。", "あなたの ケツイ…\nたべさせて。"],
+    mid: ["……まだ たりない。", "ぜんぶ\nおもいだして。"],
+    spare: ["……どうして。", "どうして\nこうげき しないの？", "……わたしにも\nケツイが ほしかった。"],
+    killed: ["……そう。", "それで いい。"],
+    spared: ["……ありがとう。", "わたしは もう\nなにも ない もの\nじゃない。"],
+    gift: { type: "weapon", key: "starblade" },
+    patterns: ["memory", "quiz", "heartRing", "squeeze", "echo"],
   },
   giant: {
     intro: (m, s, mon) => ["……", "（" + mon.name + "が\nみちを ふさいでいる）", "（この ちほうの ヌシ らしい）"],
@@ -922,13 +984,13 @@ const CHAPTERS = [
     intro: "＊ すなが きらきら ひかる。\n＊ かがみの ような しろが みえる。" },
   { name: "とけいの まち", col: "#ccb", bg: "#0e0d0b", pool: [2, 8, 15, 16, 3, 4], boss: 21, loop: 0,
     intro: "＊ チク、タク。\n＊ まちじゅうの とけいが ずれている。" },
-  { name: "ほのおの やま", col: "#f86", bg: "#180806", pool: [T.n.magman, T.n.hibana, 3, 5, 6], boss: 12, loop: 1,
+  { name: "ほのおの やま", col: "#f86", bg: "#180806", pool: [T.n.magman, T.n.hibana, 3, 5, 6], boss: T.b.magdon, loop: 0,
     intro: "＊ あつい。\n＊ ほねまで とけそうだ。" },
-  { name: "こおりの みずうみ", col: "#9ef", bg: "#06101a", pool: [T.n.yuki, T.n.tsurara, 1, 16, 15], boss: 13, loop: 1,
+  { name: "こおりの みずうみ", col: "#9ef", bg: "#06101a", pool: [T.n.yuki, T.n.tsurara, 1, 16, 15], boss: T.b.freezia, loop: 0,
     intro: "＊ いきが しろい。\n＊ こおりの したに なにかが いる。" },
-  { name: "ゆめの としょかん", col: "#c9f", bg: "#0e0716", pool: [T.n.honno, T.n.ink, 8, 15, 2], boss: 14, loop: 1,
+  { name: "ゆめの としょかん", col: "#c9f", bg: "#0e0716", pool: [T.n.honno, T.n.ink, 8, 15, 2], boss: T.b.page, loop: 0,
     intro: "＊ ほんが ひとりでに めくれる。\n＊ あなたの なまえが かいてある…？" },
-  { name: "ほしの はて", col: "#fff", bg: "#000", pool: [T.n.hoshikuzu, T.n.blackhole, 4, 3, 16, 6], boss: 21, loop: 1,
+  { name: "ほしの はて", col: "#fff", bg: "#000", pool: [T.n.hoshikuzu, T.n.blackhole, 4, 3, 16, 6], boss: T.b.nul, loop: 0,
     intro: "＊ ここが せかいの はて。\n＊ ケツイだけが あなたを うごかす。" },
 ];
 
@@ -1873,7 +1935,7 @@ cv.addEventListener("pointerdown", e => {
   if (inMuteBtn(p)) { cycleSound(); return; }
   if (paused) { pausedTap(p); return; }
   if (inPauseBtn(p) && SAVEABLE.includes(state)) { pauseGame(); return; }
-  const ci = cmdAt(p);
+  const ci = form && form.hudGone && !enemies.some(e => e.offered || e.dying) && state === "play" ? -1 : cmdAt(p);
   if (ci >= 0 && (state === "play" || state === "menu" || state === "map")) { pressCmd(ci); return; }
   if (state === "menu" || state === "shop" || state === "rest" || state === "event" || state === "boon" || state === "journal") { tapRows(p); return; }
   if (state === "map") { mapTap(p); return; }
@@ -1885,7 +1947,7 @@ cv.addEventListener("pointermove", e => {
   if (!drag || drag.id !== e.pointerId) return;
   const p = toLogical(e);
   if ((state === "play" || state === "intro") && !paused && soul) {
-    const d = (p.x - drag.x) * SENS[sensI].v * (soul.invert ? -1 : 1); // 相対移動：指で ソウルを かくさない
+    const d = (p.x - drag.x) * SENS[sensI].v * (soul.invert ? -1 : 1) * (soul.frozenT > 0 ? 0.35 : 1); // 相対移動：指で ソウルを かくさない
     soul.x = clampSoul(soul.x + d);
   }
   drag.x = p.x;
@@ -2426,7 +2488,7 @@ function moveSoulKeys(dt) {
   if (keys.ArrowLeft || keys.a || keys.A) d -= 1;
   if (keys.ArrowRight || keys.d || keys.D) d += 1;
   if (soul.invert) d = -d;
-  if (d) soul.x = clampSoul(soul.x + d * 110 * dt);
+  if (d) soul.x = clampSoul(soul.x + d * 110 * dt * (soul.frozenT > 0 ? 0.35 : 1));
 }
 
 function fire() {
@@ -2456,6 +2518,8 @@ function updatePlay(dt) {
   if (soul.inv > 0) soul.inv -= dt;
   if (soul.starT > 0) soul.starT -= dt;
   if (soul.regainT > 0) soul.regainT -= dt;
+  if (soul.frozenT > 0) soul.frozenT -= dt;
+  if (form.glitch > 0) form.glitch -= dt;
   // ため うち（Bravely Default 風）：とまって ためて、うごいた しゅんかんに はなつ
   if (hasChip("charge") && !soul.hold) {
     if (soul.moveT <= 0) soul.chargeT = Math.min(1.5, (soul.chargeT || 0) + dt);
@@ -2553,10 +2617,16 @@ function updatePlay(dt) {
     }
     if (b.bounce && (b.x < BOX.x + 4 || b.x > BOX.x + BOX.w - 4)) { b.vx = -b.vx; b.x = clamp(b.x, BOX.x + 4, BOX.x + BOX.w - 4); }
   }
-  ebul = ebul.filter(b => b.y < BOX.y + BOX.h + 20 && b.y > BOX.y - 30 && b.x > BOX.x - 40 && b.x < BOX.x + BOX.w + 40 && !b.dead);
+  ebul = ebul.filter(b => b.y < BOX.y + BOX.h + 20 && b.y > BOX.y - 120 && b.x > BOX.x - 40 && b.x < BOX.x + BOX.w + 40 && !b.dead);
   for (const bm of beams) {
     bm.t += edt;
-    if (!bm.fired && bm.t >= bm.warn) { bm.fired = true; SFX.beam(); shake = 3; }
+    if (!bm.fired && bm.t >= bm.warn) {
+      bm.fired = true;
+      if (bm.erupt) { // じめんから うえへ ふきだす
+        for (let i = 0; i < 6; i++) ebul.push({ x: bm.x + (Math.random() - 0.5) * 10, y: BOX.y + BOX.h - 4, vx: (Math.random() - 0.5) * 70, vy: -170 - Math.random() * 90, ay: 160, dmg: 4 + (bm.lp || 0), c: "o", shape: "bubble", w: 7, h: 7 });
+        noise(0.25, 0.08, 300); shake = 3;
+      } else { SFX.beam(); shake = 3; }
+    }
   }
   beams = beams.filter(bm => bm.t < bm.warn + bm.dur);
   if (form.inks) { for (const k of form.inks) k.t -= dt; form.inks = form.inks.filter(k => k.t > 0); }
@@ -2630,7 +2700,7 @@ function updatePlay(dt) {
       else if (b.near && !b.grazed && !b.hitSoul) { b.grazed = true; graze(b); }
     }
     if (soul.inv <= 0) for (const bm of beams) {
-      if (bm.fired && Math.abs(bm.x - cx) < bm.w / 2 + 1) { hurt(bm.dmg); break; }
+      if (bm.fired && !bm.erupt && Math.abs(bm.x - cx) < bm.w / 2 + 1) { hurt(bm.dmg); break; }
     }
     if (soul.inv <= 0) for (const e of enemies) {
       if (!e.free || e.dying || MON[e.type].ghost || MON[e.type].boss) continue;
@@ -2952,6 +3022,10 @@ function bossPhase2(e) {
   e.phase2 = true;
   if (key === "bones" || key === "mirror") { TBOX.w = 150; TBOX.x = W / 2 - 75; }
   if (key === "clock") { TBOX.w = 160; TBOX.x = W / 2 - 80; }
+  if (key === "magdon") { TBOX.w = 170; TBOX.x = W / 2 - 85; }
+  if (key === "freezia") form.wind = 25;
+  if (key === "page") { TBOX.w = 160; TBOX.x = W / 2 - 80; }
+  if (key === "nul") { form.glitch = 2.2; form.hudGone = true; noise(1.5, 0.1, 150); } // コマンドが きえる…
   if (key === "cloud") form.dark = true;
   if (key === "shadow" || key === "poko") { TBOX.w = 170; TBOX.x = W / 2 - 85; }
 }
@@ -2966,6 +3040,19 @@ function updateBoss(e, m, dt) {
   e.x = e.cx - e.w / 2 + Math.sin(e.t * 0.6) * range;
   e.y = BOX.y + 16 + Math.sin(e.t * 1.3) * 3;
   if (!e.phase2 && e.hp <= e.maxHp * 0.55) { ebul = []; beams = []; e.reflect = false; soul.invert = false; startTalk(B.mid, e.id, "phase2"); return; }
+  if (e.quiz) { // ○× クイズ：ひだり＝○ / みぎ＝×
+    e.quiz.t -= dt;
+    if (e.quiz.t <= 0) {
+      const ans = soul.x + 3.5 < W / 2 ? "o" : "x";
+      if (ans === e.quiz.a) {
+        SFX.lvup(); pops.push({ x: W / 2, y: BOX.y + 120, text: "せいかい！", color: C.green, t: 0, big: true });
+        e.shield = Math.max(0, (e.shield || 0) - 6);
+        if (e.shieldMax && e.shield <= 0) { e.breakT = 3; shake = 5; SFX.crack(); pops.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, text: "BREAK!", color: C.yellow, t: 0, big: true }); }
+      } else { pops.push({ x: W / 2, y: BOX.y + 120, text: "ざんねん…", color: C.red, t: 0, big: true }); hurt(8 + (e.loop || 0)); }
+      e.quiz = null; e.patT = 0;
+    }
+    return;
+  }
   if (!e.pat || e.patT <= 0) {
     if (e.pat === "invert") soul.invert = false;
     e.reflect = false;
@@ -3039,6 +3126,33 @@ function updateBoss(e, m, dt) {
       tone((e.pa ^= 1) ? 1500 : 1100, 0.03, "square", 0.03);
       const g1 = L + Math.random() * (R - L), g2 = L + Math.random() * (R - L);
       for (let x = L; x <= R; x += 9) if (Math.abs(x - g1) > 13 && Math.abs(x - g2) > 13) dot(x, BOX.y + 6, 0, 110 * sp);
+      break;
+    }
+    case "magmaRain": e.pt = p2 ? 0.12 : 0.18; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: (Math.random() - 0.5) * 20, vy: 95 * sp, dmg: 4 + lp, c: "o", shape: "bubble", w: 7, h: 7 }); break;
+    case "eruption": { // じめんから ふきだす（よこくの あと）
+      e.pt = p2 ? 0.7 : 0.95;
+      beams.push({ x: clamp(soul.x + 3.5 + (Math.random() - 0.5) * 40, L, R), w: 14, warn: 0.7, dur: 0.05, t: 0, dmg: 0, erupt: true, lp }); SFX.warn();
+      break;
+    }
+    case "snowStorm": e.pt = 0.07; e.pa += 0.2; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: Math.sin(e.pa) * 50, vy: 85 * sp, dmg: 3 + lp, c: "w", shape: "dot", w: 3, h: 3 }); break;
+    case "iceWall": {
+      e.pt = p2 ? 1.0 : 1.25;
+      const gw = 20, gc = L + gw / 2 + Math.random() * (R - L - gw);
+      for (let x = L; x <= R; x += 6) if (Math.abs(x - gc) > gw / 2) bone(x, BOX.y + 6, 0, 105 * sp, "w", 8);
+      break;
+    }
+    case "freeze": { // こおって うごきが にぶる＋あおい ほね（とまっていれば だいじょうぶ）
+      if (!e.frozeOnce) { e.frozeOnce = true; soul.frozenT = 4.2; pops.push({ x: soul.x + 3, y: soul.y - 18, text: "こおりついた！", color: C.blue, t: 0 }); }
+      e.pt = 0.18; bone(L + Math.random() * (R - L), BOX.y + 4, 0, 110 * sp, "b", 12);
+      break;
+    }
+    case "letterRain": { e.pt = p2 ? 0.55 : 0.75; const off = Math.random() * 20; for (let x = L + off; x <= R; x += 24) dot(x, BOX.y + 6, 0, 80 * sp); break; }
+    case "quiz": {
+      if (!e.quiz) {
+        const q = pick(QUIZ);
+        e.quiz = { q: q[0], a: q[1], t: 4.5 }; e.patT = 5; ebul = []; SFX.select();
+      }
+      e.pt = 0.05;
       break;
     }
     case "boneStairs": { // かいだんじょうに ふってくる
@@ -3537,6 +3651,19 @@ function drawField() {
 
   drawSoul();
   drawPal();
+  if (soul.frozenT > 0 && state === "play") { ctx.fillStyle = C.blue; for (const [dx, dy] of [[-3, -2], [10, -2], [3, -5], [3, 9]]) ctx.fillRect(Math.round(soul.x + dx), Math.round(soul.y + dy), 1, 1); }
+  // ○× クイズ
+  const qz = enemies.find(e => e.quiz);
+  if (qz && state === "play") {
+    const q = qz.quiz, side = soul.x + 3.5 < W / 2 ? "o" : "x";
+    ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(BOX.x + 6, BOX.y + 96, BOX.w - 12, 44);
+    rectLine(BOX.x + 6, BOX.y + 96, BOX.w - 12, 44, C.white, 1);
+    q.q.split("\n").forEach((l, i) => txt(l, W / 2, BOX.y + 102 + i * 14, 10, C.white, "center"));
+    ctx.fillStyle = C.yellow; ctx.fillRect(BOX.x + 8, BOX.y + 136, Math.round((BOX.w - 16) * Math.max(0, q.t) / 4.5), 2);
+    txt("○", BOX.x + BOX.w * 0.25, BOX.y + BOX.h - 70, 28, side === "o" ? C.yellow : C.dim, "center");
+    txt("×", BOX.x + BOX.w * 0.75, BOX.y + BOX.h - 70, 28, side === "x" ? C.yellow : C.dim, "center");
+    ctx.fillStyle = "#444"; ctx.fillRect(W / 2, BOX.y + 150, 1, BOX.h - 156);
+  }
   if (hasChip("charge") && soul.chargeT > 0.2 && state === "play") {
     const r = 4 + soul.chargeT * 6; ctx.globalAlpha = 0.6; rectLine(Math.round(soul.x + 3.5 - r), Math.round(soul.y + 3 - r), Math.round(r * 2), Math.round(r * 2), soul.chargeT >= 1.5 ? C.yellow : C.white, 1); ctx.globalAlpha = 1;
   }
@@ -3721,6 +3848,7 @@ function drawStatus() {
   ctx.fillStyle = C.yellow; ctx.fillRect(106, y + 1, filled, 9);
   txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10, soul.hp <= soul.maxHp * 0.25 ? C.red : C.white);
 
+  if (form && form.hudGone && !enemies.some(e => e.offered || e.dying) && (state === "play" || state === "talk")) { txt("＊ ？？？", W / 2, CMD_Y + 6, 10, C.dim, "center"); return; } // コマンドが ない…
   const usable = state === "play" || state === "menu" || state === "map";
   const canSpare = usable && spareables().length > 0;
   const active = state === "menu" ? (ui.tab === "item" ? 1 : 2) : state === "map" ? -1 : 0;
