@@ -459,6 +459,57 @@ const ARMORS = {
 };
 const INV_MAX = 8;
 
+// ---- ぞくせい（Octopath／Pokémon／Genshin 風）----
+const ELEM = {
+  fire:  { n: "ほのお", c: "#f63" }, water: { n: "みず", c: "#39f" }, wind: { n: "かぜ", c: "#3d6" },
+  light: { n: "ひかり", c: "#ff6" }, dark:  { n: "やみ", c: "#b7f" },
+};
+// ぶきの ぞくせい
+Object.assign(WEAPONS.fork, { el: "water" }); Object.assign(WEAPONS.toygun, { el: "wind" });
+Object.assign(WEAPONS.wand, { el: "light" }); Object.assign(WEAPONS.sword, { el: "light" });
+Object.assign(WEAPONS.umbrella, { el: "wind" }); Object.assign(WEAPONS.shard, { el: "dark" }); Object.assign(WEAPONS.hand, { el: "dark" });
+WEAPONS.ember = { name: "ひのこステッキ", atk: 1, price: 45, rate: 0.8, el: "fire", desc: "ATK1。ほのお。はやうち。" };
+WEAPONS.shade = { name: "かげのナイフ",   atk: 2, price: 60, el: "dark", desc: "ATK2。やみ。" };
+// まものの よわてん（ばんごう → ぞくせい）
+const WEAK = { 0: "light", 1: "fire", 2: "light", 3: "water", 4: "dark", 5: "fire", 6: "fire", 7: "fire", 8: "water", 9: "light",
+  10: "fire", 11: "light", 12: "light", 13: "wind", 14: "dark", 15: "water", 16: "wind", 17: "fire", 18: "light", 20: "water", 21: "dark" };
+
+T.giant.forEach((pair, i) => pair.forEach((t, j) => { WEAK[t] = WEAK[GIANT_BASE[i][j]]; })); // ヌシは もとの まものと おなじ よわてん
+
+// ---- そざいと つくる（Monster Hunter 風）----
+const MATS = {
+  wata: "わたげ", kasa: "きのこの かさ", hone: "ほねの かけら", hibi: "あおい ひのこ", suna: "ほしの すな", hane: "とりの はね",
+  zeri: "ぷるぷるゼリー", tate: "たての はへん", sippo: "ネズミの しっぽ", kiba: "ミミックの キバ", hige: "ねこの ひげ",
+  kurage: "クラゲの しょくしゅ", wara: "わら", nusi: "ヌシの たましい", kioku: "ボスの きおく",
+};
+const DROP = { 0: "wata", 1: "kasa", 2: "hone", 3: "hibi", 4: "suna", 5: "hane", 6: "zeri", 7: "zeri", 8: "tate", 9: "sippo", 10: "kiba", 15: "hige", 16: "kurage", 17: "wara" };
+Object.assign(WEAPONS, {
+  flameblade: { name: "ほのおの つるぎ",   atk: 3, price: 0, craft: true, el: "fire", desc: "ATK3。ほのお。" },
+  aquabow:    { name: "みずの ゆみ",       atk: 2, price: 0, craft: true, el: "water", shot: "twin", desc: "ATK2。みず。2れつ。" },
+  gale:       { name: "かぜの ブーメラン", atk: 2, price: 0, craft: true, el: "wind", shot: "spread", desc: "ATK2。かぜ。3ほうこう。" },
+  lightrod:   { name: "ひかりの つえ",     atk: 3, price: 0, craft: true, el: "light", shot: "spread", pierce: true, desc: "ATK3。ひかり。3ほうこうで つらぬく。" },
+  scythe:     { name: "やみの おおがま",   atk: 5, price: 0, craft: true, el: "dark", pierce: true, rate: 1.1, desc: "ATK5。やみ。おもいが つよい。" },
+  starblade:  { name: "ほしの つるぎ",     atk: 7, price: 0, craft: true, el: "light", shot: "twin", pierce: true, desc: "ATK7。ひかり。さいきょうの ひとふり。" },
+});
+Object.assign(ARMORS, {
+  mushhat:  { name: "きのこの ぼうし", def: 3, price: 0, craft: true, regen: true, desc: "DEF3。HPが すこしずつ もどる。" },
+  feather:  { name: "はねの マント",   def: 3, price: 0, craft: true, inv: 1.9, desc: "DEF3。むてきじかんが ながい。" },
+  jelly:    { name: "ゼリーの よろい", def: 6, price: 0, craft: true, desc: "DEF6。ぷるぷる はじく。" },
+  kingmail: { name: "ヌシの よろい",   def: 9, price: 0, craft: true, inv: 1.5, desc: "DEF9。ヌシの ちからが やどる。" },
+});
+const RECIPES = [
+  { out: ["weapon", "flameblade"], need: { suna: 5, hibi: 5 }, g: 80 },
+  { out: ["weapon", "aquabow"],    need: { zeri: 6, kurage: 4 }, g: 80 },
+  { out: ["weapon", "gale"],       need: { hane: 6, wata: 6 }, g: 80 },
+  { out: ["armor", "mushhat"],     need: { kasa: 8 }, g: 60 },
+  { out: ["armor", "feather"],     need: { hane: 8, wara: 2 }, g: 90 },
+  { out: ["weapon", "lightrod"],   need: { hone: 10, nusi: 1 }, g: 150 },
+  { out: ["armor", "jelly"],       need: { zeri: 10, tate: 4 }, g: 150 },
+  { out: ["weapon", "scythe"],     need: { tate: 6, hige: 4, nusi: 2 }, g: 220 },
+  { out: ["armor", "kingmail"],    need: { nusi: 4, kiba: 2, tate: 8 }, g: 300 },
+  { out: ["weapon", "starblade"],  need: { kioku: 4, nusi: 6, suna: 10 }, g: 500 },
+];
+
 // ---------------- ボスの せりふ・こうげき ----------------
 const BOSS = {
   bones: {
@@ -680,6 +731,7 @@ function nextWave() {
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
     e.maxHp = e.hp = m.hp + loop * 40 + wave * 2;
     e.cx = W / 2; e.loop = loop;
+    e.shield = e.shieldMax = 8 + loop * 2;
     enemies.push(e);
     form.bossIntro = BOSS[key].intro(mem, soul);
     mem.met[key] = (mem.met[key] || 0) + 1; saveMem();
@@ -932,6 +984,7 @@ function advNextWave() {
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
     e.maxHp = e.hp = Math.round((m.hp + C0.loop * 40 + wave * 2) * (1 + 0.3 * (adv.ch - 1)));
     e.cx = W / 2; e.loop = C0.loop;
+    e.shield = e.shieldMax = (giant ? 6 : 9) + adv.ch;
     if (giant) { // ヌシの こうげきは ちほうごとに ちがう
       const all = ["boneRain", "spiral", "bubbles", "gapWall", "rain", "pendulum", "hail", "tickRain", "mirrorRain", "heartRing"];
       e.pats = [0, 3, 6].map(k => all[(adv.ch * 2 + adv.part - 3 + k) % all.length]);
@@ -944,7 +997,7 @@ function advNextWave() {
     buildFormation(C0.pool);
     if (st.kind === "elite") { // つよい てき：なんたいかが あかく ひかる
       const list = enemies.slice().sort(() => Math.random() - 0.5).slice(0, 4);
-      for (const e of list) { e.elite = true; e.hp = e.hp * 3 + 2; }
+      for (const e of list) { e.elite = true; e.hp = e.hp * 3 + 2; e.shield = e.shieldMax = 3; }
       text = st.wi === 0 ? "＊ ただならぬ けはい…\n＊ あかく ひかる てきが いる！" : "＊ まだ おわらない！";
     } else text = st.wi === 0 ? pick(["＊ モンスターが あらわれた！", "＊ " + C0.name + "の まものたちだ。", "＊ みちを ふさがれた！"]) : "＊ つぎの むれが くる！";
     const ev = Math.random();
@@ -1520,10 +1573,10 @@ window.addEventListener("keydown", e => {
       if (titleView !== "zukan") { const v = ["records", "zukan", "ach"]; titleView = v[(v.indexOf(titleView) + (k === "ArrowLeft" ? 2 : 1)) % 3]; zukanSel = Math.max(0, zukanSel); }
       else if (k === "ArrowRight" && zukanSel === MON.length - 1) titleView = "ach";
       else if (k === "ArrowLeft" && zukanSel <= 0) titleView = "records";
-      else zukanSel = (zukanSel + (k === "ArrowLeft" ? MON.length - 1 : 1)) % MON.length;
+      else { zukanSel = (zukanSel + (k === "ArrowLeft" ? MON.length - 1 : 1)) % MON.length; zukanPage = Math.floor(zukanSel / ZK.per); }
       SFX.move();
     } else if (titleView === "zukan" && (k === "ArrowUp" || k === "ArrowDown")) {
-      zukanSel = clamp(Math.max(0, zukanSel) + (k === "ArrowUp" ? -5 : 5), 0, MON.length - 1); SFX.move();
+      zukanSel = clamp(Math.max(0, zukanSel) + (k === "ArrowUp" ? -5 : 5), 0, MON.length - 1); zukanPage = Math.floor(zukanSel / ZK.per); SFX.move();
     } else if (ok || back) { titleView = "main"; SFX.cancel(); }
     return;
   }
@@ -1590,10 +1643,19 @@ function layoutRows() {
     for (const key of list) {
       const d = ui.sub === "weapon" ? WEAPONS[key] : ARMORS[key];
       const cur = soul[ui.sub] === key;
-      rows.push({ x, y, w, h: 15, label: (cur ? "E " : "") + d.name + (ui.sub === "weapon" && wUp(key) ? " +" + wUp(key) : ""), right: ui.sub === "weapon" ? "ATK" + (d.atk + wUp(key)) : "DEF" + d.def,
+      rows.push({ x, y, w, h: 15, label: (cur ? "E " : "") + d.name + (ui.sub === "weapon" && wUp(key) ? " +" + wUp(key) : ""), right: ui.sub === "weapon" ? (d.el ? ELEM[d.el].n + " " : "") + "ATK" + (d.atk + wUp(key)) : "DEF" + d.def,
         cur, act: () => equip(ui.sub, key) });
       y += 15;
     }
+  } else if (state === "shop" && ui.view === "craft") {
+    let y = BOX0.y + 26;
+    RECIPES.forEach((rc, i) => {
+      const d = rc.out[0] === "weapon" ? WEAPONS[rc.out[1]] : ARMORS[rc.out[1]];
+      const owned = (rc.out[0] === "weapon" ? soul.weapons : soul.armors).includes(rc.out[1]);
+      rows.push({ x, y, w, h: 15, label: d.name, right: owned ? "もってる" : canCraft(rc) ? "つくれる！" : rc.g + "G", dim: owned, act: () => craftTap(i) });
+      y += 16;
+    });
+    rows.push({ x, y: y + 2, w, h: 15, label: "もどる", act: () => { ui.view = null; ui.cursor = 0; SFX.cancel(); say("＊ ほかに なにか いる？"); } });
   } else if (state === "shop") {
     let y = BOX0.y + 104;
     ui.stock.forEach((s, i) => {
@@ -1605,9 +1667,11 @@ function layoutRows() {
       const up = wUp(soul.weapon), price = Math.ceil(forgePrice() * ui.mult);
       rows.push({ x, y, w, h: 17, label: up >= 5 ? "ぶきを きたえる" : "ぶきを きたえる +" + (up + 1), right: up >= 5 ? "MAX" : price + "G", dim: up >= 5, act: forge });
       y += 18;
-      rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "はなす", act: shopTalk });
-    }
-    rows.push({ x: ui.mood !== "empty" && ui.mood !== "asleep" ? x + w / 2 + 6 : x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
+      const tw = (w - 8) / 3;
+      rows.push({ x, y: y + 4, w: tw, h: 17, label: "はなす", act: shopTalk });
+      rows.push({ x: x + tw + 4, y: y + 4, w: tw, h: 17, label: "つくる", act: () => { ui.view = "craft"; ui.cursor = 0; ui.csel = -1; SFX.select(); say("＊ そざいが あれば\n　 なんでも つくるよ！"); } });
+      rows.push({ x: x + (tw + 4) * 2, y: y + 4, w: tw, h: 17, label: "でる", act: leaveShop });
+    } else rows.push({ x, y: y + 4, w: w / 2 - 6, h: 17, label: "でる", act: leaveShop });
   }
   return rows;
 }
@@ -1735,6 +1799,8 @@ function talkTap() {
       pops.push({ x: W / 2, y: BOX0.y + 90, text: m.name + "が みかたに なった", color: C.white, t: -1.6 });
     } else pops.push({ x: W / 2, y: BOX0.y + 70, text: "+" + gold + "G", color: C.gold, t: -0.8 });
     if (key === "cloud" && soul.bag.length < INV_MAX) soul.bag.push("cotton");
+    soul.mats = soul.mats || {};
+    if (key === "giant") soul.mats.nusi = (soul.mats.nusi || 0) + 2; else soul.mats.kioku = (soul.mats.kioku || 0) + 1;
     enemies = enemies.filter(x => !x.dead);
     Object.assign(TBOX, BOX0); soul.invert = false; form.dark = false;
   }
@@ -1774,8 +1840,8 @@ function enterShop() {
 }
 function gearPool() {
   return [
-    ...Object.keys(WEAPONS).filter(k => !WEAPONS[k].unique && !soul.weapons.includes(k)).map(k => ({ type: "weapon", key: k })),
-    ...Object.keys(ARMORS).filter(k => !ARMORS[k].unique && !soul.armors.includes(k)).map(k => ({ type: "armor", key: k })),
+    ...Object.keys(WEAPONS).filter(k => !WEAPONS[k].unique && !WEAPONS[k].craft && !soul.weapons.includes(k)).map(k => ({ type: "weapon", key: k })),
+    ...Object.keys(ARMORS).filter(k => !ARMORS[k].unique && !ARMORS[k].craft && !soul.armors.includes(k)).map(k => ({ type: "armor", key: k })),
   ];
 }
 function stockData(s) { return s.type === "item" ? ITEMS[s.key] : s.type === "weapon" ? WEAPONS[s.key] : ARMORS[s.key]; }
@@ -1799,6 +1865,26 @@ function buy(i) {
     say("＊ " + d.name + " " + verb + "\n＊ したの「そうび」で そうびできる。");
   }
 }
+// つくる
+function canCraft(rc) {
+  const m = soul.mats || {};
+  return soul.gold >= rc.g && Object.entries(rc.need).every(([k, n]) => (m[k] || 0) >= n);
+}
+function craftTap(i) {
+  const rc = RECIPES[i], [type, key] = rc.out, d = type === "weapon" ? WEAPONS[key] : ARMORS[key];
+  const list = type === "weapon" ? soul.weapons : soul.armors;
+  const m = soul.mats || {};
+  const parts = Object.entries(rc.need).map(([k, n]) => MATS[k] + " " + Math.min(m[k] || 0, n) + "/" + n);
+  const needText = parts.slice(0, 2).join("　") + (parts.length > 2 ? "\n＊ " + parts.slice(2).join("　") : "");
+  if (list.includes(key)) { say("＊ " + d.name + "\n＊ " + d.desc + "\n＊ もう もっている。"); return; }
+  if (ui.csel !== i) { ui.csel = i; SFX.move(); say("＊ " + d.name + "　" + rc.g + "G" + (canCraft(rc) ? "　◎" : "") + "\n＊ " + needText); return; }
+  if (!canCraft(rc)) { SFX.cancel(); say("＊ そざいか おかねが たりないよ。\n＊ " + needText); return; }
+  soul.gold -= rc.g;
+  for (const [k, n] of Object.entries(rc.need)) m[k] -= n;
+  list.push(key); SFX.buy(); later(120, () => SFX.lvup()); later(0, saveRun);
+  say("＊ カン、カン、カン…\n＊ " + d.name + " が できた！\n＊ したの「そうび」で そうびしよう。");
+}
+
 // ぶきを きたえる（G の つかいみち）
 function forge() {
   const up = wUp(soul.weapon), price = Math.ceil(forgePrice() * ui.mult), name = weapon().name;
@@ -1993,7 +2079,7 @@ function moveSoulKeys(dt) {
 function fire() {
   const w = weapon(), dmg = atk();
   const x = soul.x + 3, y = soul.y - 2;
-  const mk = (dx, vx) => ({ x: x + dx, y, vx, dmg, pierce: !!w.pierce || hasBoon("pierce"), hit: [] });
+  const mk = (dx, vx) => ({ x: x + dx, y, vx, dmg, el: w.el, pierce: !!w.pierce || hasBoon("pierce"), hit: [] });
   if (w.shot === "twin") shots.push(mk(-2, 0), mk(2, 0));
   else if (w.shot === "spread") shots.push(mk(0, -60), mk(0, 0), mk(0, 60));
   else shots.push(mk(0, 0));
@@ -2051,14 +2137,15 @@ function updatePlay(dt) {
     if (e.flash > 0) e.flash -= dt;
     if (e.shakeT > 0) e.shakeT -= dt;
     const m = MON[e.type];
+    if (e.breakT > 0) { e.breakT -= edt; if (e.breakT <= 0) { e.shield = e.shieldMax; } }
     if (m.shield) { e.guardT -= dt; if (e.guardT <= 0) { e.guard = !e.guard; e.guardT = e.guard ? 1.4 : 1.0; } }
-    if (e.free) updateFree(e, m, edt);
+    if (e.free && !(e.breakT > 0)) updateFree(e, m, edt);
   }
   if (state !== "play") return;
 
   // 隊列の 射撃
   efireT -= edt;
-  const shooters = enemies.filter(e => e.fm && !e.free);
+  const shooters = enemies.filter(e => e.fm && !e.free && !(e.breakT > 0));
   if (form.peace > 0) {
     form.peace -= dt;
     if (form.peace <= 0) { dismissFormation(C.white, "モンスターたちは かえっていった", C.white); return; } // だれも えらばなかった
@@ -2147,7 +2234,7 @@ function updatePlay(dt) {
           ebul.push({ x: s.x, y: e.y + e.h, vx: ax / l * 90, vy: ay / l * 90, dmg: 4, c: "o", shape: "dot", w: 3, h: 3 });
           break;
         }
-        damageEnemy(e, s.dmg);
+        damageEnemy(e, s.dmg, false, s.el);
         if (s.pierce) s.hit.push(e.id); else { s.dead = true; break; }
       }
     }
@@ -2357,8 +2444,21 @@ function enemyFire(e) {
   else if (m.fire === "ring") for (let i = 0; i < 6; i++) { const a = 0.35 + i * (Math.PI - 0.7) / 5; dot(Math.cos(a) * 45, Math.sin(a) * 45); }
 }
 
-function damageEnemy(e, dmg, silent) {
+function damageEnemy(e, dmg, silent, el) {
   const m = MON[e.type];
+  const weakHit = el && WEAK[e.type] === el;
+  if (weakHit) dmg = Math.ceil(dmg * 1.5);
+  if (e.breakT > 0) dmg *= 2;
+  // たいかん（シールド）：よわてんで おおきく、ふつうの こうげきでも すこし けずれる
+  if (e.shieldMax && !(e.breakT > 0)) {
+    e.shield -= weakHit ? 1 : 0.2;
+    if (e.shield <= 0) {
+      e.breakT = 3; e.shield = 0; shake = 5; SFX.crack(); vibrate(30);
+      pops.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, text: "BREAK!", color: C.yellow, t: 0, big: true });
+      ebul = ebul.filter(b => Math.hypot(b.x - (e.x + e.w / 2), b.y - (e.y + e.h)) > 40);
+    }
+  }
+  if (weakHit && Math.random() < 0.25) pops.push({ x: e.x + e.w / 2, y: e.y - 14, text: "よわてん！", color: ELEM[el].c, t: 0 });
   if (m.dummy && e.spare) {
     e.hits++; e.flash = 0.12; e.shakeT = 0.25; SFX.hit();
     if (e.hits >= 4) {
@@ -2414,6 +2514,11 @@ function killEnemy(e) {
       pops.push({ x: e.x + 6, y: e.y - 10, text: stockData(rw).name, color: C.yellow, t: -0.3 }); }
   }
   if (!m.boss && Math.random() < 0.06) items.push({ kind: "candy", x: e.x + e.w / 2 - 3, y: e.y + 4 });
+  // そざい
+  const gainMat = (k, n) => { soul.mats = soul.mats || {}; soul.mats[k] = (soul.mats[k] || 0) + n; pops.push({ x: e.x + e.w / 2, y: e.y + 14, text: MATS[k] + (n > 1 ? "×" + n : ""), color: "#aab", t: -0.2 }); };
+  if (m.boss === "giant") gainMat("nusi", 2);
+  else if (m.boss) gainMat("kioku", 1);
+  else if (DROP[e.type] && (e.elite || Math.random() < 0.2)) gainMat(DROP[e.type], e.elite ? 2 : 1);
 }
 
 function gainExp(n) {
@@ -2796,33 +2901,44 @@ function drawTitle() {
 
 let zukanSel = -1;
 function recordsTap(p) {
-  // タブ → きりかえ / ずかんの マス → えらぶ / それいがい → もどる
+  // タブ → きりかえ / ずかんの マス・ページ → えらぶ / それいがい → もどる
   if (p && p.y > 40 && p.y < 66) { titleView = p.x < W / 3 ? "records" : p.x < W * 2 / 3 ? "zukan" : "ach"; SFX.move(); return; }
   if (p && titleView === "zukan") {
-    const c = Math.floor((p.x - ZK.x) / ZK.cw), r = Math.floor((p.y - ZK.y) / ZK.ch);
-    if (c >= 0 && c < 5 && r >= 0 && r < ZK.rows && r * 5 + c < MON.length) { zukanSel = r * 5 + c; SFX.select(); return; }
+    if (p.y > ZK.y + ZK.ch * ZK.rows && p.y < ZK.y + ZK.ch * ZK.rows + 18) { // ページ
+      zukanPage = (zukanPage + (p.x < W / 2 ? ZK.pages - 1 : 1)) % ZK.pages; zukanSel = -1; SFX.move(); return;
+    }
+    const c = Math.floor((p.x - ZK.x) / ZK.cw), r = Math.floor((p.y - ZK.y) / ZK.ch), i = zukanPage * ZK.per + r * 5 + c;
+    if (c >= 0 && c < 5 && r >= 0 && r < ZK.rows && i < MON.length) { zukanSel = i; SFX.select(); return; }
   }
   titleView = "main"; SFX.cancel();
 }
-const ZK = { x: BOX0.x + 10, y: 72, cw: 40, ch: 30, rows: Math.ceil(MON.length / 5) };
+let zukanPage = 0;
+const ZK = { x: BOX0.x + 10, y: 72, cw: 40, ch: 30, rows: 4, per: 20, pages: Math.ceil(MON.length / 20) };
 function drawZukan() {
-  MON.forEach((m, i) => {
-    const c = i % 5, r = Math.floor(i / 5), x = ZK.x + c * ZK.cw, y = ZK.y + r * ZK.ch;
+  for (let k = 0; k < ZK.per; k++) {
+    const i = zukanPage * ZK.per + k;
+    if (i >= MON.length) break;
+    const c = k % 5, r = Math.floor(k / 5), x = ZK.x + c * ZK.cw, y = ZK.y + r * ZK.ch;
     rectLine(x + 1, y + 1, ZK.cw - 2, ZK.ch - 2, i === zukanSel ? C.yellow : C.dim, 1);
     if (mem.seen[i]) {
-      const img = SPR.mon[i].base[0], sc = img.width > 14 ? 1 : 2;
-      spr(img, x + ZK.cw / 2 - img.width * sc / 2, y + ZK.ch / 2 - img.height * sc / 2, sc);
+      const img = SPR.mon[i].base[0], sc = Math.max(0.5, Math.min(2, 26 / Math.max(img.width, img.height)));
+      ctx.drawImage(img, Math.round(x + ZK.cw / 2 - img.width * sc / 2), Math.round(y + ZK.ch / 2 - img.height * sc / 2), img.width * sc, img.height * sc);
     } else txt("?", x + ZK.cw / 2, y + 10, 12, C.dim, "center");
-  });
+  }
   const n = Object.keys(mem.seen).length;
   txt(n + " / " + MON.length, BOX0.x + BOX0.w - 14, 58, 9, C.gray, "right");
-  const y = ZK.y + ZK.ch * ZK.rows + 8;
+  const py = ZK.y + ZK.ch * ZK.rows + 2;
+  txt("◀", BOX0.x + 30, py, 10, C.gray, "center"); txt((zukanPage + 1) + " / " + ZK.pages, W / 2, py, 10, C.gray, "center"); txt("▶", BOX0.x + BOX0.w - 30, py, 10, C.gray, "center");
+  const y = py + 20;
   if (zukanSel >= 0) {
     const i = zukanSel;
     if (mem.seen[i]) {
       txt(MON[i].name, BOX0.x + 14, y, 12, C.white);
       txt("たおした: " + (mem.defeated[i] || 0), BOX0.x + BOX0.w - 14, y + 2, 9, C.gray, "right");
-      LORE[i].split("\n").forEach((l, j) => txt((j ? "　 " : "＊ ") + l, BOX0.x + 14, y + 22 + j * 16, 10, C.white));
+      const lore = LORE[i] || (MON[i].boss === "giant" ? "その ちほうを まもる ヌシ。\nとても おおきい。" : "……");
+      lore.split("\n").forEach((l, j) => txt((j ? "　 " : "＊ ") + l, BOX0.x + 14, y + 20 + j * 15, 10, C.white));
+      const extra = [WEAK[i] ? "よわてん: " + ELEM[WEAK[i]].n : "", DROP[i] ? "そざい: " + MATS[DROP[i]] : ""].filter(Boolean).join("  ");
+      if (extra) txt(extra, BOX0.x + 14, y + 52, 9, C.gray);
     } else txt("＊ まだ であって いない。", BOX0.x + 14, y, 10, C.gray);
   } else txt("＊ モンスターを タップ", BOX0.x + 14, y, 10, C.gray);
 }
@@ -2934,6 +3050,16 @@ function drawField() {
         const tw = Math.ceil(ctx.measureText(e.chat).width) + 6, bx = Math.round(clamp(e.x + e.w / 2 - tw / 2, BOX.x + 3, BOX.x + BOX.w - tw - 3)), by = Math.round(e.y - 12);
         ctx.fillStyle = C.white; ctx.fillRect(bx, by, tw, 10);
         txt(e.chat, bx + 3, by + 1, 7, C.black);
+      }
+      if (e.shieldMax && !e.dying) { // シールド（たいかん）と よわてん
+        const sx = Math.round(m.boss ? e.x + e.w / 2 - 44 : e.x + e.w / 2 - 6), sy = Math.round(m.boss ? e.y - 10 : e.y + e.h + 1);
+        if (e.breakT > 0) txt("BREAK", sx, sy, 7, Math.floor(time * 8) % 2 ? C.yellow : C.white);
+        else {
+          ctx.fillStyle = "#666"; ctx.fillRect(sx, sy, 8, 8);
+          txt(String(Math.ceil(e.shield)), sx + 4, sy, 7, C.white, "center");
+          const wk = WEAK[e.type];
+          if (wk) { ctx.fillStyle = ELEM[wk].c; ctx.fillRect(sx + 10, sy + 2, 4, 4); }
+        }
       }
       if (m.boss && !e.dying) {
         // HPバー
@@ -3129,6 +3255,13 @@ function drawMenu() {
 }
 
 function drawShop() {
+  if (ui.view === "craft") {
+    txt("＊ つくる", BOX0.x + 10, BOX0.y + 8, 11, C.orange);
+    txt(soul.gold + "G", BOX0.x + BOX0.w - 12, BOX0.y + 8, 10, C.gold, "right");
+    drawRows(layoutRows());
+    drawMsgArea();
+    return;
+  }
   if (ui.mood !== "empty") {
     const shiver = ui.mood === "scared" ? Math.round(Math.sin(time * 40)) : 0;
     if (ui.mood === "asleep") txt("Z", W / 2 + 26 + Math.sin(time * 2) * 3, BOX0.y + 14 - (time * 6 % 10), 10, C.gray);
