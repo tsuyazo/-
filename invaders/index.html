@@ -952,7 +952,7 @@ function mkEnemy(type, x, y, extra = {}) {
   const m = MON[type];
   if (!mem.seen[type]) { mem.seen[type] = 1; saveMem(); }
   const en = Object.assign({
-    id: nextId++, type, x, y, w: m.w, h: m.h, hp: Math.round((m.hp + Math.floor((wave - 1) / 3)) * (mode === "adv" ? advHpMul() : 1)), flash: 0, shakeT: 0,
+    id: nextId++, type, x, y, w: m.w, h: m.h, hp: Math.round((m.hp + Math.floor((wave - 1) / (mode === "adv" ? 7 : 3))) * (mode === "adv" ? advHpMul() : 1)), flash: 0, shakeT: 0,
     free: !m.fm, fm: !!m.fm, t: Math.random() * 10, fx: 0, fy: 0, dv: 0, guard: false, guardT: Math.random() * 1.2,
   }, extra);
   en.maxHp0 = en.hp;
@@ -973,7 +973,7 @@ function setState(s) { state = s; stateT = 0; if (s === "title") runCache = null
 //  ・たたかいの あとに かご（ブーン）を 3つから えらぶ（Hades／Vampire Survivors 風）
 // ============================================================
 let mode = "endless", adv = null;
-const ROWS = 12; // ボスの まえの だんすう
+const ROWS = 15; // ボスの まえの だんすう
 
 const CHAPTERS = [
   // 9: うらがわ（エンディングの あと）は さいごに ついか
@@ -1075,7 +1075,7 @@ function advShowMap(text) {
 }
 // ちほうと すすみぐあいで つよさを きめる（むげんモードの WAVE と おなじ ものさし）
 // てきの かたさ（ちほうが すすむほど かたい）
-function advHpMul() { return (3.6 + 0.7 * (adv.ch - 1) + (adv.part - 1) * 0.3) * (1 + 0.6 * (adv.ng || 0)); }
+function advHpMul() { return (4.5 + 0.5 * (adv.ch - 1) + (adv.part - 1) * 0.25) * (1 + 0.6 * (adv.ng || 0)); }
 const PARTS = 3; // ちほうは 3つの マップ（ヌシ → ヌシ → ボス）
 function advLevel(kind) {
   const r = adv.cur ? adv.cur[0] : 0;
@@ -1090,7 +1090,7 @@ function advEnter(p) {
   SFX.select();
   switch (nd.kind) {
     case "battle": case "elite": case "boss":
-      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : nd.kind === "elite" ? 3 : 2, wi: 0 };
+      adv.stage = { kind: nd.kind, waves: nd.kind === "boss" ? 1 : nd.kind === "elite" ? 3 : adv.ch >= 3 ? 3 : 2, wi: 0 };
       advNextWave(); break;
     case "shop": enterShop(); ui.fromNode = true; break;
     case "treasure": enterChest(); ui.fromNode = true; break;
@@ -3015,7 +3015,7 @@ function enemyFire(e) {
   const m = MON[e.type];
   const bx = e.x + e.w / 2, by = e.y + e.h;
   const sp = (70 + wave * 4) * (easy ? 0.8 : hard ? 1.2 : 1);
-  const dmg = 3 + Math.min(3, Math.floor(e.type / 2)) + Math.floor(wave / 4);
+  const dmg = mode === "adv" ? 3 + Math.min(2, Math.floor(e.type / 6)) + Math.floor(wave / 9) : 3 + Math.min(3, Math.floor(e.type / 2)) + Math.floor(wave / 4);
   const dot = (vx, vy, c = "w") => ebul.push({ x: bx, y: by, vx, vy, dmg, c, shape: "dot", w: 3, h: 3 });
   if (m.fire === "straight" || wave < 2) dot(0, sp);
   else if (m.fire === "aimed") {
@@ -3211,7 +3211,8 @@ function updateBoss(e, m, dt) {
     case "boneRain": e.pt = p2 ? 0.11 : 0.16; bone(L + Math.random() * (R - L), BOX.y + 4, 0, (90 + wave) * sp); break;
     case "gapWall": {
       e.pt = p2 ? 1.25 : 1.5;
-      const gw = p2 ? 22 : 28, gc = L + gw / 2 + Math.random() * (R - L - gw);
+      const gw = p2 ? 22 : 28, gc = e.nextGap != null ? clamp(e.nextGap, L + gw / 2, R - gw / 2) : L + gw / 2 + Math.random() * (R - L - gw);
+      e.nextGap = L + gw / 2 + Math.random() * (R - L - gw); // みらいし：つぎの すきまを さきに きめておく
       for (let x = L; x <= R; x += 7) if (Math.abs(x - gc) > gw / 2) bone(x, BOX.y + 6, 0, 70 * sp);
       break;
     }
@@ -3264,7 +3265,8 @@ function updateBoss(e, m, dt) {
     case "snowStorm": e.pt = 0.07; e.pa += 0.2; ebul.push({ x: L + Math.random() * (R - L), y: BOX.y + 4, vx: Math.sin(e.pa) * 50, vy: 85 * sp, dmg: 3 + lp, c: "w", shape: "dot", w: 3, h: 3 }); break;
     case "iceWall": {
       e.pt = p2 ? 1.0 : 1.25;
-      const gw = 20, gc = L + gw / 2 + Math.random() * (R - L - gw);
+      const gw = 20, gc = e.nextGap != null ? clamp(e.nextGap, L + gw / 2, R - gw / 2) : L + gw / 2 + Math.random() * (R - L - gw);
+      e.nextGap = L + gw / 2 + Math.random() * (R - L - gw);
       for (let x = L; x <= R; x += 6) if (Math.abs(x - gc) > gw / 2) bone(x, BOX.y + 6, 0, 105 * sp, "w", 8);
       break;
     }
@@ -3782,6 +3784,12 @@ function drawField() {
   drawSoul();
   drawPal();
   if (soul.frozenT > 0 && state === "play") { ctx.fillStyle = C.blue; for (const [dx, dy] of [[-3, -2], [10, -2], [3, -5], [3, 9]]) ctx.fillRect(Math.round(soul.x + dx), Math.round(soul.y + dy), 1, 1); }
+  // みらいし（Xenoblade 風）：つぎの かべの すきまが さきに みえる
+  for (const e of enemies) if ((e.pat === "gapWall" || e.pat === "iceWall") && e.nextGap != null && e.pt < 0.7 && state === "play" && !e.spare) {
+    ctx.globalAlpha = 0.5 + Math.sin(time * 20) * 0.3;
+    txt("▼", e.nextGap, BOX.y + 6, 9, C.yellow, "center");
+    ctx.globalAlpha = 1;
+  }
   // ○× クイズ
   const qz = enemies.find(e => e.quiz);
   if (qz && state === "play") {
