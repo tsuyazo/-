@@ -976,6 +976,7 @@ let mode = "endless", adv = null;
 const ROWS = 12; // ボスの まえの だんすう
 
 const CHAPTERS = [
+  // 9: うらがわ（エンディングの あと）は さいごに ついか
   { name: "はじまりの もり", col: "#7d7", bg: "#071207", pool: [0, 1, 2, 5], boss: 12, loop: 0,
     intro: "＊ もりの においが する。\n＊ とおくで ほねの なる おとが…" },
   { name: "しずくの どうくつ", col: "#6bf", bg: "#050b16", pool: [1, 3, 6, 16], boss: 13, loop: 0,
@@ -994,6 +995,8 @@ const CHAPTERS = [
     intro: "＊ ここが せかいの はて。\n＊ ケツイだけが あなたを うごかす。" },
 ];
 
+CHAPTERS.push({ name: "うらがわ", col: "#f7f", bg: "#0c000c", pool: [T.n.magman, T.n.yuki, T.n.honno, T.n.hoshikuzu, 8, 15, 16], boss: null, secret: true, loop: 1,
+  intro: "＊ せかいが さかさまに みえる。\n＊ …ここは どこ？" });
 // ノードの アイコン（7x7）
 const NODE_ICON = {
   battle:   ["#.....#", ".#...#.", "..#.#..", "...#...", "..#.#..", ".#...#.", "#.....#"],
@@ -1059,7 +1062,7 @@ function newAdventure() {
   adv = { ch: 1, part: 1, unlocked: 1, map: genMap(), pos: null, rest: null, drop: null, cur: null, stage: null, sel: null, deaths: 0 };
   mem.runs++; saveMem();
   if (!mem.flower) { flowerScene(); return; }
-  advShowMap(CHAPTERS[0].intro);
+  showStory(1, CHAPTERS[0].intro);
 }
 function advShowMap(text) {
   Object.assign(TBOX, BOX0); Object.assign(BOX, BOX0);
@@ -1072,12 +1075,13 @@ function advShowMap(text) {
 }
 // ちほうと すすみぐあいで つよさを きめる（むげんモードの WAVE と おなじ ものさし）
 // てきの かたさ（ちほうが すすむほど かたい）
-function advHpMul() { return 3.6 + 0.7 * (adv.ch - 1) + (adv.part - 1) * 0.3; }
+function advHpMul() { return (3.6 + 0.7 * (adv.ch - 1) + (adv.part - 1) * 0.3) * (1 + 0.6 * (adv.ng || 0)); }
 const PARTS = 3; // ちほうは 3つの マップ（ヌシ → ヌシ → ボス）
 function advLevel(kind) {
   const r = adv.cur ? adv.cur[0] : 0;
   const base = (adv.ch - 1) * 5 + 1 + Math.floor(((adv.part - 1) * ROWS + r) * 4 / (ROWS * PARTS));
-  return kind === "boss" ? adv.ch * 5 : kind === "elite" ? base + 1 : base;
+  const ng = (adv.ng || 0) * 8;
+  return (kind === "boss" ? adv.ch * 5 : kind === "elite" ? base + 1 : base) + ng;
 }
 
 function advEnter(p) {
@@ -1113,12 +1117,14 @@ function advNextWave() {
   let text;
   if (st.kind === "boss") {
     const giant = adv.part < PARTS;
-    const type = giant ? T.giant[adv.ch - 1][adv.part - 1] : C0.boss, m = MON[type], key = m.boss;
+    const gi = (adv.ch - 1) % T.giant.length;
+    const secretBoss = ADV_BOSSES.every(k => soul.route[k] === "killed") ? T.secret.poko : T.secret.shadow;
+    const type = giant ? T.giant[gi][adv.part - 1] : (C0.secret ? secretBoss : C0.boss), m = MON[type], key = m.boss;
     const e = mkEnemy(type, W / 2 - m.w / 2, BOX0.y + 16, { free: true, fm: false });
     e.maxHp = e.hp = Math.round((m.hp + C0.loop * 40 + wave * 2) * (1 + 0.3 * (adv.ch - 1)));
     e.cx = W / 2; e.loop = C0.loop;
     e.shield = e.shieldMax = (giant ? 6 : 9) + adv.ch;
-    if (giant) e.baseT = GIANT_BASE[adv.ch - 1][adv.part - 1];
+    if (giant) e.baseT = GIANT_BASE[gi][adv.part - 1];
     if (giant) { // ヌシの こうげきは ちほうごとに ちがう
       const all = ["boneRain", "spiral", "bubbles", "gapWall", "rain", "pendulum", "hail", "tickRain", "mirrorRain", "heartRing"];
       e.pats = [0, 3, 6].map(k => all[(adv.ch * 2 + adv.part - 3 + k) % all.length]);
@@ -1188,13 +1194,13 @@ function advChapterClear() {
 }
 function chclearTap() {
   if (!msg.done) { msg.shown = msgLen(); msg.done = true; return; }
-  if (adv.ch >= CHAPTERS.length) { // さいごの ちほう：いまは さいしょの ちほうへ もどる（つづきは じゅんびちゅう）
-    adv.ch = CHAPTERS.length;
-  } else adv.ch++;
+  if (adv.ch === 8) { startAdvEnding(); return; }   // ほしの はて → エンディング
+  if (adv.ch >= 9) { startTrueEnding(); return; }   // うらがわ → ほんとうの エンディング
+  adv.ch++;
   adv.unlocked = Math.max(adv.unlocked, adv.ch);
   adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null; adv.part = 1;
   soul.revived = false;
-  advShowMap(chapter().intro);
+  showStory(adv.ch, chapter().intro);
 }
 
 // たおれた：さいごの たきびへ もどる
@@ -1736,9 +1742,127 @@ function drawScenery() {
   ctx.fillStyle = g; ctx.fillRect(L, T0, Wd, Hd);
 }
 
+// ============================================================
+//  ものがたり：ちほうごとの ヒマワリン／ぼうけんの エンディング／うらがわ（ポストゲーム）
+// ============================================================
+const ADV_BOSSES = ["bones", "cloud", "mirror", "clock", "magdon", "freezia", "page", "nul"];
+function storyLines(ch) {
+  const spared = ADV_BOSSES.filter(k => soul.route[k] === "spared").length, killed = ADV_BOSSES.filter(k => soul.route[k] === "killed").length;
+  switch (ch) {
+    case 1: return ["やあ、また あったね。", "この せかいの はてには\nなんでも かなう ほしが\nあるんだって。", "…いって みたら？\nくすくす。"];
+    case 2: return ["どうくつは くらいね。", "きみの ソウル、\nすこし ひかってる。", "…まぶしいなあ。"];
+    case 3: return ["すなの おうこく。", "かがみの まじょは\nなにかを かくしてる。", "ぼくも かくしごとが\nすきだよ。"];
+    case 4: return ["とけいの まち。", "ここでは じかんが\nずれている。", mem.deaths ? "…きみは もう\n" + mem.deaths + "かいも やりなおしたね。" : "…きみは まだ\nいちども たおれてない？\nすごいね。"];
+    case 5: return ["あつい やまだね。", killed > spared ? "きみ、たくさん\nたおしてきたね。" : "きみ、みのがして\nばかり だね。", "…それで ほんとうに\nはてまで いけるの？"];
+    case 6: return ["こおりの みずうみ。", "ぼくも むかしは\nソウルが あったんだ。", "…なんでも ない。\nわすれて。"];
+    case 7: return ["ここは としょかん。", "きみの なまえの\nほんが ある。", "…よまない ほうが\nいいよ。"];
+    case 8: return ["ほしの はて。", "ヌルは なにも ない もの。", "…ぼくと おなじだ。"];
+    default: return ["…ここは うらがわ。", "ほんとうの ことを\nおしえて あげる。", "ぼくは きみの\nさいしょの ケツイの\nぬけがら なんだ。"];
+  }
+}
+function showStory(ch, then) {
+  setState("story"); ui = { lines: storyLines(ch), i: 0, then };
+  say(ui.lines[0]);
+  saveRun();
+}
+function storyTap() {
+  if (!msg.done) { msg.shown = msgLen(); msg.done = true; return; }
+  ui.i++;
+  if (ui.i < ui.lines.length) { say(ui.lines[ui.i]); return; }
+  const then = ui.then; ui = null;
+  advShowMap(then || chapter().intro);
+}
+function drawStory() {
+  const C0 = chapter();
+  ctx.fillStyle = C0.bg; ctx.fillRect(BOX0.x + 2, BOX0.y + 2, BOX0.w - 4, BOX0.h - 4);
+  txt("ちほう " + adv.ch + "：" + C0.name, BOX0.x + 10, BOX0.y + 8, 11, C0.col);
+  const f = SPR.mon[T.flower].base[0];
+  spr(f, W / 2 - f.width * 1.5, BOX0.y + 50 + Math.round(Math.sin(time * 2) * 2), 3);
+  // ふきだし
+  const bw = 170, bx = W / 2 - bw / 2, by = BOX0.y + 110, bh = 14 + msg.lines.length * 15;
+  ctx.fillStyle = C.white; ctx.fillRect(bx, by, bw, bh);
+  for (let i = 0; i < 6; i++) ctx.fillRect(W / 2 - (5 - i), by - 6 + i, (5 - i) * 2 + 1, 1);
+  drawMsg(bx + 8, by + 7, 10, C.black, 5);
+  if (msg.done && Math.floor(time * 3) % 2) txt("▼", bx + bw - 12, by + bh - 12, 8, C.black);
+}
+
+// ---- ぼうけんの エンディング（8たいの ボスを どう したか）----
+function startAdvEnding() {
+  const spared = ADV_BOSSES.filter(k => soul.route[k] === "spared").length;
+  const kind = spared === 8 ? "pacifist" : spared === 0 ? "genocide" : "neutral";
+  let pages;
+  if (kind === "pacifist") pages = [
+    { t: "＊ ほしの はてに\n　 ひかりが さした。" },
+    { show: "friends", t: "＊ みのがした みんなが\n　 あつまってきた。" },
+    { flower: true, t: "…きみは だれも\nきずつけなかった。" },
+    { flower: true, t: "ぼくの まけだ。\n…でも、すこし うれしい。" },
+    { big: "THE END", t: "＊ あなたは ケツイで\n　 みたされた。" },
+    { t: "＊ …でも、まだ\n　「うらがわ」が のこっている。" },
+  ];
+  else if (kind === "genocide") pages = [
+    { t: "＊ ……………" },
+    { t: "＊ ほしの はてには\n　 なにも なかった。" },
+    { flower: true, t: "あはは。\nきみは ぼくより\nひどいね。" },
+    { big: "THE END", red: true, t: "＊ あなたの LV は " + soul.lv + "。" },
+    { red: true, t: "＊ …まだ つづけるの？" },
+  ];
+  else pages = [
+    { t: "＊ プルルルル…" },
+    { keeper: true, t: "＊ もしもし？ ポコだよ。\n＊ あんた、ほしの はてまで\n　 いったんだって？" },
+    { keeper: true, t: "＊ みのがした ボスは " + spared + "たい。\n＊ …ま、あんたの じんせいだ。" },
+    { big: "THE END?", t: "＊ たびは まだ おわらない。" },
+  ];
+  mem.endings["adv_" + kind] = (mem.endings["adv_" + kind] || 0) + 1;
+  mem.endings[kind] = (mem.endings[kind] || 0) + 1;
+  if (kind === "genocide") mem.genocide = true; if (kind === "pacifist") mem.genocide = false;
+  saveMem();
+  setState("aending"); ui = { kind, pages, i: 0, after: "post" };
+  say(pages[0].t);
+}
+function startTrueEnding() {
+  const hrs = Math.floor((mem.playSec || 0) / 3600), mins = Math.floor((mem.playSec || 0) / 60) % 60;
+  const pages = [
+    { flower: true, t: "…ぬけがらの ぼくにも\nケツイが もどってきた。" },
+    { flower: true, t: "ありがとう。\nきみの おかげだ。" },
+    { show: "friends", t: "＊ せかいに あさが きた。" },
+    { big: "SOUL INVADERS", t: "＊ あそんで くれて\n　 ありがとう。" },
+    { big: "きろく", t: "＊ あそんだ じかん " + hrs + "じかん " + mins + "ふん\n＊ LV " + soul.lv + "　みのがした かず " + soul.spares },
+    { t: "＊ つぎは もっと つよい せかいで\n　 また あおう。（2しゅうめ）" },
+  ];
+  mem.endings.true = (mem.endings.true || 0) + 1; saveMem();
+  setState("aending"); ui = { kind: "true", pages, i: 0, after: "ng" };
+  say(pages[0].t);
+}
+function aendingTap() {
+  if (!msg.done) { msg.shown = msgLen(); msg.done = true; return; }
+  ui.i++;
+  if (ui.i < ui.pages.length) { say(ui.pages[ui.i].t); SFX.blip(); return; }
+  const after = ui.after; ui = null;
+  if (after === "post") adv.ch = 9; // うらがわへ
+  else { adv.ng = (adv.ng || 0) + 1; adv.ch = 1; } // 2しゅうめ
+  adv.map = genMap(); adv.pos = null; adv.rest = null; adv.drop = null; adv.cur = null; adv.part = 1;
+  soul.revived = false;
+  showStory(adv.ch, chapter().intro);
+}
+function drawAEnding() {
+  const pg = ui.pages[ui.i];
+  if (pg.show === "friends") {
+    ADV_BOSSES.filter(k => soul.route[k] === "spared").forEach((k, i) => {
+      const t = { bones: 12, cloud: 13, mirror: 14, clock: T.boss[3], magdon: T.b.magdon, freezia: T.b.freezia, page: T.b.page, nul: T.b.nul }[k];
+      const img = SPR.mon[t].base[0];
+      spr(img, BOX0.x + 14 + (i % 4) * 50, BOX0.y + 30 + Math.floor(i / 4) * 50 + Math.sin(time * 2 + i) * 3, 1.5);
+    });
+  }
+  if (pg.flower) spr(SPR.mon[T.flower].base[0], W / 2 - 18, BOX0.y + 50 + Math.sin(time * 2) * 2, 3);
+  if (pg.keeper) spr(SPR.keeper, W / 2 - 24, BOX0.y + 40, 3);
+  if (pg.big) txt(pg.big, W / 2, BOX0.y + 140, pg.big.length > 8 ? 16 : 22, pg.red ? C.red : C.white, "center");
+  drawMsgArea();
+  if (msg.done && Math.floor(time * 2) % 2 === 0) txt("▼", BOX0.x + BOX0.w - 16, BOX0.y + BOX0.h - 16, 9, C.white);
+}
+
 // ---------------- セーブ・ロード（いつでも 中断・再開） ----------------
-const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept", "map", "boon", "rest", "event", "chclear", "journal"];
-const FROZEN = ["menu", "shop", "chest", "talk", "revive", "ending", "savept", "map", "boon", "rest", "event", "chclear", "journal"];
+const SAVEABLE = ["intro", "play", "talk", "menu", "shop", "chest", "ending", "savept", "map", "boon", "rest", "event", "chclear", "journal", "story", "aending"];
+const FROZEN = ["menu", "shop", "chest", "talk", "revive", "ending", "savept", "map", "boon", "rest", "event", "chclear", "journal", "story", "aending"];
 const saveKey = m => m === "adv" ? "adv" : "run";
 function saveRun(periodic) {
   if (!soul || !SAVEABLE.includes(state)) return;
@@ -1896,6 +2020,8 @@ function confirmTap(p) {
   else if (state === "ending") endingTap();
   else if (state === "savept") saveTap();
   else if (state === "chclear") chclearTap();
+  else if (state === "story") storyTap();
+  else if (state === "aending") aendingTap();
   else if (state === "over" && stateT > 3.2) { SFX.select(); setState("title"); }
 }
 
@@ -2184,7 +2310,7 @@ function talkTap() {
     enemies = enemies.filter(x => !x.dead);
     mem.flower = true; saveMem();
     soul.hold = false; soul.hp = soul.maxHp; form.flower = 0;
-    if (mode === "adv") advShowMap(CHAPTERS[0].intro); else nextWave();
+    if (mode === "adv") showStory(1, CHAPTERS[0].intro); else nextWave();
     return;
   }
   if (after === "phase2") bossPhase2(e);
@@ -2424,6 +2550,7 @@ function update(dt) {
   time += dt; stateT += dt;
   if (osDownT > 0) { osDownT -= dt; return; }
   if (paused) return;
+  if (state !== "title" && state !== "over") mem.playSec = (mem.playSec || 0) + dt;
   if (hurtT > 0) hurtT -= dt;
   if (form && form.blastT > 0) form.blastT -= dt;
 
@@ -3482,6 +3609,7 @@ function drawRecords() {
   line("あそんだ かず", mem.runs);
   line("たおれた かず", mem.deaths);
   line("さいこう WAVE", mem.bestWave || 0);
+  line("あそんだ じかん", Math.floor((mem.playSec || 0) / 3600) + "じかん " + (Math.floor((mem.playSec || 0) / 60) % 60) + "ふん");
   line("ハイスコア", hi);
   y += 8;
   txt("ボス　　　であった / みのがした / たおした", x, y, 9, C.gray); y += 16;
@@ -3495,7 +3623,7 @@ function drawRecords() {
   });
   y += 8;
   txt("エンディング", x, y, 9, C.gray); y += 16;
-  [["pacifist", "やさしい みち", C.yellow], ["neutral", "ふつうの みち", C.white], ["genocide", "ちりの みち", C.red]].forEach(([k, n, c]) => {
+  [["pacifist", "やさしい みち", C.yellow], ["neutral", "ふつうの みち", C.white], ["genocide", "ちりの みち", C.red], ["true", "ほんとうの エンディング", C.pink]].forEach(([k, n, c]) => {
     const seen = mem.endings[k];
     txt(seen ? n : "？？？", x, y, 10, seen ? c : C.dim);
     if (seen) txt("×" + seen, BOX0.x + BOX0.w - 14, y, 10, C.gray, "right");
@@ -3511,7 +3639,7 @@ function drawGame() {
   if (mode === "adv") txt("ちほう " + adv.ch, W - 50, 10, 10, chapter().col, "right");
   else txt("WAVE " + wave, W - 50, 10, 10, C.white, "right");
 
-  if (["menu", "shop", "chest", "ending", "savept", "map", "rest", "event", "boon", "chclear", "journal"].includes(state)) rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
+  if (["menu", "shop", "chest", "ending", "savept", "map", "rest", "event", "boon", "chclear", "journal", "story", "aending"].includes(state)) rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
   else rectLine(Math.round(BOX.x), BOX.y, Math.round(BOX.w), BOX.h, C.white, 2);
 
   if (state === "menu") drawMenu();
@@ -3525,6 +3653,8 @@ function drawGame() {
   else if (state === "boon") drawBoons();
   else if (state === "chclear") drawChClear();
   else if (state === "journal") drawJournal();
+  else if (state === "story") drawStory();
+  else if (state === "aending") drawAEnding();
   else drawField();
 
   drawStatus();
