@@ -47,6 +47,7 @@ const FONT = '"DotGothic16", ui-monospace, monospace';
 const C = {
   white: "#fff", black: "#000", yellow: "#ff0", red: "#f00", orange: "#ff7f27", hpRed: "#c00",
   gray: "#888", dim: "#555", green: "#3f3", gold: "#fc3", blue: "#2bf", bOrange: "#f90", pink: "#f9c",
+  pRed: "#e3172e", ember: "#ff8a26",
 };
 const SAVE_V = 3;
 
@@ -236,6 +237,23 @@ setInterval(() => {
 }, 50);
 
 // ---------------- スプライト ----------------
+// いろつき スプライト（もじ → いろ）
+function makeSpriteC(rows, pal) {
+  const w = Math.max(...rows.map(r => r.length));
+  const c = document.createElement("canvas");
+  c.width = w; c.height = rows.length;
+  const x = c.getContext("2d");
+  rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (pal[r[i]]) { x.fillStyle = pal[r[i]]; x.fillRect(i, j, 1, 1); } });
+  return c;
+}
+// プレイヤーの すがた：ひのこ（Dark Souls の かがりび・Hollow Knight の たましい）
+const EMBER_A = ["...+...", "..#+#..", ".#o*o#.", "#oo*oo#", "#o***o#", ".#ooo#."];
+const EMBER_B = ["..+....", "..#+#..", ".#o*o#.", "#oo*oo#", "#o***o#", ".#ooo#."];
+const EMBER_PAL = { "#": "#e8451e", o: "#ff9a2e", "*": "#fff2a8", "+": "#ffd27a" };
+const EMBER_PAL_W = { "#": "#fff", o: "#ffe", "*": "#fff", "+": "#fff" };
+const EMBER_PAL_D = { "#": "#555", o: "#777", "*": "#999", "+": "#666" };
+// えらぶ カーソル（DQ の ▶）
+const CURSOR = ["#...", "##..", "###.", "##..", "#..."];
 function makeSprite(rows, color) {
   const w = Math.max(...rows.map(r => r.length));
   const c = document.createElement("canvas");
@@ -467,6 +485,8 @@ T.b = {
     "#...###.##.###...#", "#...###.##.###...#", "#...####..####...#", "##...########...##", "###....####....###", ".####........####.", "..######..######..", "....##########....", "......######......"]] }),
 };
 const SPR = {
+  ember: [makeSpriteC(EMBER_A, EMBER_PAL), makeSpriteC(EMBER_B, EMBER_PAL)], emberW: makeSpriteC(EMBER_A, EMBER_PAL_W), emberD: makeSpriteC(EMBER_A, EMBER_PAL_D),
+  cursor: makeSprite(CURSOR, C.yellow), cursorW: makeSprite(CURSOR, C.white),
   heart: makeSprite(HEART, C.red), heartW: makeSprite(HEART, "#fbb"), heartL: makeSprite(HEART_L, C.red), heartR: makeSprite(HEART_R, C.red),
   candy: makeSprite(CANDY, C.pink), coin: makeSprite(COIN, C.gold), tent: makeSprite(SHOP_TENT, C.white),
   chest: makeSprite(CHEST, C.gold), star: makeSprite(SAVESTAR, C.yellow), starW: makeSprite(SAVESTAR, C.white), chestOpen: makeSprite(CHEST_OPEN, C.gold), keeper: makeSprite(SHOPKEEPER, C.white),
@@ -717,6 +737,7 @@ const BOSS = {
 
 // ---------------- 描画ヘルパー ----------------
 function txt(s, x, y, size = 10, color = C.white, align = "left") {
+  if (typeof s === "string" && s[0] === "＊") s = s.replace(/^＊ ?/, "");
   ctx.font = `${size}px ${FONT}`;
   ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "top";
   ctx.fillText(s, x, y);
@@ -727,6 +748,51 @@ function rectLine(x, y, w, h, color = C.white, lw = 2) {
   ctx.fillRect(x, y, lw, h); ctx.fillRect(x + w - lw, y, lw, h);
 }
 function spr(img, x, y, s = 1) { ctx.drawImage(img, Math.round(x), Math.round(y), img.width * s, img.height * s); }
+const emberSpr = () => SPR.ember[Math.floor(time * 6) % 2];
+const cursorAt = (x, y) => spr(SPR.cursor, x + (Math.floor(time * 3) % 2), y);
+// ななめの おび（Persona 風）
+function slant(x, y, w, h, col, sk = 5) {
+  x = Math.round(x); y = Math.round(y);
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(x + sk, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w - sk, y + h); ctx.lineTo(x, y + h);
+  ctx.closePath(); ctx.fill();
+}
+function heading(t, x, y, col = C.pRed) {
+  ctx.font = `11px ${FONT}`;
+  const w = Math.ceil(ctx.measureText(t).width) + 18;
+  slant(x - 2, y - 2, w + 2, 16, "#000", 6); slant(x, y - 3, w, 15, col, 6);
+  txt(t, x + 9, y, 11, C.white);
+  return w;
+}
+// ウィンドウ（DQ の かどまる 2じゅう わく × FF の あおい グラデーション）
+function drawWin(x, y, w, h, edge = C.white) {
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  g.addColorStop(0, "#18204a"); g.addColorStop(1, "#05071a");
+  ctx.fillStyle = g; ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+  ctx.fillStyle = edge;
+  ctx.fillRect(x + 2, y, w - 4, 1); ctx.fillRect(x + 2, y + h - 1, w - 4, 1);
+  ctx.fillRect(x, y + 2, 1, h - 4); ctx.fillRect(x + w - 1, y + 2, 1, h - 4);
+  ctx.fillRect(x + 1, y + 1, 1, 1); ctx.fillRect(x + w - 2, y + 1, 1, 1); ctx.fillRect(x + 1, y + h - 2, 1, 1); ctx.fillRect(x + w - 2, y + h - 2, 1, 1);
+  ctx.globalAlpha = 0.3; rectLine(x + 3, y + 3, w - 6, h - 6, edge, 1); ctx.globalAlpha = 1;
+}
+// たたかいの わく（NieR:Automata 風の かどかっこ。いろは ちほうの いろ）
+function drawFieldFrame() {
+  const x = Math.round(BOX.x), y = BOX.y, w = Math.round(BOX.w), h = BOX.h, L = 12;
+  const col = mode === "adv" && adv ? chapter().col : "#bfe";
+  ctx.globalAlpha = 0.28; rectLine(x, y, w, h, col, 1); ctx.globalAlpha = 1;
+  ctx.fillStyle = col;
+  for (const [cx, cy, dx, dy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) {
+    ctx.fillRect(dx > 0 ? cx : cx - L, dy > 0 ? cy : cy - 2, L, 2);
+    ctx.fillRect(dx > 0 ? cx : cx - 2, dy > 0 ? cy : cy - L, 2, L);
+  }
+}
+// たおれた ときの おび（Dark Souls 風）
+function drawDiedBanner(a, y, text = "ひが きえた") {
+  ctx.globalAlpha = a * 0.85; ctx.fillStyle = "#000"; ctx.fillRect(0, y, W, 46);
+  ctx.globalAlpha = a * 0.35; ctx.fillStyle = "#300"; ctx.fillRect(0, y, W, 1); ctx.fillRect(0, y + 45, W, 1);
+  ctx.globalAlpha = a; txt(text, W / 2, y + 10, 24, "#b3121b", "center");
+  ctx.globalAlpha = 1;
+}
 const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -756,14 +822,14 @@ function cycleDiff() {
 }
 
 const msg = { lines: [], shown: 0, t: 0, done: false, hold: 0 };
-function say(text) { msg.lines = text.split("\n"); msg.shown = 0; msg.t = 0; msg.done = false; msg.hold = 0; }
+function say(text) { msg.lines = text.split("\n").map(l => l.replace(/^＊ ?/, "").replace(/^　 ?/, "")); msg.shown = 0; msg.t = 0; msg.done = false; msg.hold = 0; }
 function msgLen() { return msg.lines.reduce((a, l) => a + l.length, 0); }
 
 const WAVE_TEXT = [
   "＊ くうきが ピリピリしている。",
   "＊ なにかが うごめいている…",
   "＊ ふわりんは あなたを\n　 じっと みつめている。",
-  "＊ あなたは ケツイで\n　 みたされた。",
+  "＊ ゆびさきに ちいさな\n　 ひが ともった。",
   "＊ とおくに みせの あかりが\n　 みえた きがする。",
   "＊ キノコロが じぶんの かさを\n　 じまんしている。",
   "＊ ホネコウモリが\n　 カタカタと わらっている。",
@@ -1412,7 +1478,7 @@ function removeBoons() {
   soul.boons = [];
 }
 function drawBoons() {
-  txt("＊ かごを えらぶ", BOX0.x + 12, BOX0.y + 10, 12, C.yellow);
+  heading("かごを えらぶ", BOX0.x + 12, BOX0.y + 10);
   txt("（この ちほうの あいだ きく）", BOX0.x + 12, BOX0.y + 28, 9, C.gray);
   boonRows().forEach((r, i) => {
     const b = BOONS[r.boon], sel = i === ui.cursor, n = boonCount(r.boon);
@@ -1475,7 +1541,7 @@ function drawMap() {
   }
   // いまの ばしょ
   const here = adv.pos ? nodeXY(advNode(adv.pos)) : { x: W / 2, y: MAPG.bot + 16 };
-  spr(SPR.heart, here.x - 3.5, here.y + (adv.pos ? 6 : -3) + Math.round(Math.sin(time * 3)), 1);
+  spr(emberSpr(), here.x - 3.5, here.y + (adv.pos ? 6 : -3) + Math.round(Math.sin(time * 3)), 1);
   drawMsgArea();
 }
 function drawChClear() {
@@ -1687,7 +1753,7 @@ function drawJournal() {
       return;
     }
     txt(r.label, r.x + 12, r.y + 2, 11, i === ui.cursor ? C.yellow : C.white);
-    if (i === ui.cursor) spr(SPR.heart, r.x, r.y + 4);
+    if (i === ui.cursor) cursorAt(r.x, r.y + 4);
   });
   drawMsgArea();
 }
@@ -1783,10 +1849,10 @@ function drawStory() {
   spr(f, W / 2 - f.width * 1.5, BOX0.y + 50 + Math.round(Math.sin(time * 2) * 2), 3);
   // ふきだし
   const bw = 170, bx = W / 2 - bw / 2, by = BOX0.y + 110, bh = 14 + msg.lines.length * 15;
-  ctx.fillStyle = C.white; ctx.fillRect(bx, by, bw, bh);
-  for (let i = 0; i < 6; i++) ctx.fillRect(W / 2 - (5 - i), by - 6 + i, (5 - i) * 2 + 1, 1);
-  drawMsg(bx + 8, by + 7, 10, C.black, 5);
-  if (msg.done && Math.floor(time * 3) % 2) txt("▼", bx + bw - 12, by + bh - 12, 8, C.black);
+  ctx.fillStyle = C.white; for (let i = 0; i < 7; i++) ctx.fillRect(W / 2 - (6 - i), by - 7 + i, (6 - i) * 2 + 1, 1);
+  drawWin(bx, by, bw, bh);
+  drawMsg(bx + 8, by + 7, 10, C.white, 5);
+  if (msg.done && Math.floor(time * 3) % 2) txt("▼", bx + bw - 12, by + bh - 12, 8, C.white);
 }
 
 // ---- ぼうけんの エンディング（8たいの ボスを どう したか）----
@@ -1799,7 +1865,7 @@ function startAdvEnding() {
     { show: "friends", t: "＊ みのがした みんなが\n　 あつまってきた。" },
     { flower: true, t: "…きみは だれも\nきずつけなかった。" },
     { flower: true, t: "ぼくの まけだ。\n…でも、すこし うれしい。" },
-    { big: "THE END", t: "＊ あなたは ケツイで\n　 みたされた。" },
+    { big: "THE END", t: "＊ ひのこは まだ\n　 きえていない。" },
     { t: "＊ …でも、まだ\n　「うらがわ」が のこっている。" },
   ];
   else if (kind === "genocide") pages = [
@@ -2477,10 +2543,10 @@ function enterSave() {
   soul.hp = soul.maxHp;
   ui = { t: 0 };
   const next = (wave + 1) % 5 === 0;
-  say(next ? "＊ つぎの ウェーブから\n　 つよい けはいが する。\n＊ あなたは ケツイで みたされた。"
-    : pick(["＊ ほしの ひかりが\n　 あなたを つつみこむ。\n＊ あなたは ケツイで みたされた。",
-            "＊ ここまで これた ことが\n　 すこし ほこらしい。\n＊ あなたは ケツイで みたされた。",
-            "＊ モンスターたちの こえが\n　 とおくに きこえる。\n＊ あなたは ケツイで みたされた。"]));
+  say(next ? "＊ つぎの ウェーブから\n　 つよい けはいが する。\n＊ ひのこが すこし つよく なった。"
+    : pick(["＊ ほしの ひかりが\n　 あなたを つつみこむ。\n＊ ひのこが すこし つよく なった。",
+            "＊ ここまで これた ことが\n　 すこし ほこらしい。\n＊ ひのこが すこし つよく なった。",
+            "＊ モンスターたちの こえが\n　 とおくに きこえる。\n＊ ひのこが すこし つよく なった。"]));
   saveRun();
 }
 function saveTap() {
@@ -3363,7 +3429,7 @@ function startEnding() {
     { t: "＊ ……………" },
     { t: "＊ だれも いなくなった。" },
     { t: "＊ よろずやの あかりも\n　 きえている。" },
-    { big: "THE END", red: true, t: "＊ あなたの LV は " + soul.lv + "。\n＊ LV は「LOVE」の りゃく。" },
+    { big: "THE END", red: true, t: "＊ あなたの LV は " + soul.lv + "。\n＊ たかい LV は ほめられた ものでは ない。" },
     { red: true, t: "＊ …まだ つづけるの？" },
   ];
   else pages = [
@@ -3416,7 +3482,7 @@ function drawEnding() {
     if (pg.who === "keeper") spr(SPR.keeper, W / 2 - 24, BOX0.y + 40, 3);
     else txt("☎", W / 2, BOX0.y + 70 + Math.round(Math.sin(time * 30)), 28, C.white, "center");
   } else {
-    spr(SPR.heart, W / 2 - 7, BOX0.y + 90, 2);
+    spr(emberSpr(), W / 2 - 7, BOX0.y + 90, 2);
   }
   if (pg.big) txt(pg.big, W / 2, BOX0.y + 128, 22, pg.red ? C.red : C.white, "center");
   drawMsgArea();
@@ -3439,8 +3505,10 @@ function updateDying() {
     soul.shattered = true; SFX.shatter();
     for (let i = 0; i < 6; i++) {
       parts.push({ x: soul.x + 3, y: soul.y + 2, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, g: 160,
-        life: 2.5, max: 2.5, delay: 0, color: C.red, s: 2, shard: true });
+        life: 2.5, max: 2.5, delay: 0, color: i % 2 ? C.ember : "#ffd27a", s: 2, shard: true });
     }
+    for (let i = 0; i < 10; i++) parts.push({ x: soul.x + 2 + Math.random() * 4, y: soul.y, vx: (Math.random() - 0.5) * 14, vy: -18 - Math.random() * 20,
+      life: 1.6, max: 1.6, delay: Math.random() * 0.4, color: "#666", s: 1 });
   }
   if (stateT > 2.6) {
     // いちどだけ、くだけた ソウルが もとに もどる（ウェーブ3 から）
@@ -3455,7 +3523,7 @@ function updateDying() {
     clearRun();
     setState("over");
     say(mem.deaths >= 5 ? "＊ …まだ やるの？\n＊ いいね。その ケツイ。"
-      : pick(["＊ あきらめては いけない…\n＊ ケツイを ちからに かえて！", "＊ ここで おわりじゃない。\n＊ ケツイを たもて！"]));
+      : pick(["＊ ひのこは はいの なかで\n　 まだ あたたかい。", "＊ たきびは いつでも\n　 あなたを まっている。"]));
   }
 }
 function reviveTap() {
@@ -3464,7 +3532,7 @@ function reviveTap() {
     ui = { reviving: true };
     SFX.revive();
     soul.hp = Math.ceil(soul.maxHp / 2);
-    say("＊ あなたは ケツイで みたされた。\n＊ HPが " + soul.hp + " もどった。");
+    say("＊ きえかけた ひが\n　 もういちど もえあがった！\n＊ HPが " + soul.hp + " もどった。");
     return;
   }
   ui = null; soul.cracked = false; soul.shattered = false; soul.inv = 2.5; parts = [];
@@ -3494,7 +3562,7 @@ function draw() {
       txt("＊ おかえり！ " + welcome.text, W / 2, H / 2 - 92, 10, C.white, "center");
       if (welcome.heal) txt("HPが " + welcome.heal + " もどった", W / 2, H / 2 - 76, 10, C.green, "center");
     }
-    spr(SPR.heart, W / 2 - 3.5, H / 2 - 14);
+    spr(emberSpr(), W / 2 - 3.5, H / 2 - 14);
     txt("[ タップで つづける ]", W / 2, H / 2 + 2, 12, C.yellow, "center");
     rectLine(W / 2 - 60, H / 2 + 26, 120, 26, C.gray, 1);
     txt("セーブして タイトルへ", W / 2, H / 2 + 33, 10, C.gray, "center");
@@ -3533,10 +3601,11 @@ function drawTitle() {
   }
   txt("SOUL", W / 2, 128, 28, C.white, "center");
   txt("INVADERS", W / 2, 158, 28, C.white, "center");
-  txt("ソウル・インベーダー", W / 2, 194, 10, C.gray, "center");
+  slant(W / 2 - 62, 191, 124, 15, C.pRed, 7);
+  txt("ソウル・インベーダー", W / 2, 194, 10, C.white, "center");
 
-  if (mem.genocide) { spr(SPR.heartL, W / 2 - 9, 218, 2); spr(SPR.heartR, W / 2 - 5, 218, 2); }
-  else spr(SPR.heart, W / 2 - 7, 218 + Math.sin(time * 3) * 2, 2);
+  if (mem.genocide) spr(SPR.emberD, W / 2 - 7, 218, 2);
+  else spr(emberSpr(), W / 2 - 7, 218 + Math.sin(time * 3) * 2, 2);
   const greet = mem.genocide ? "＊ ……" : mem.endings.pacifist ? "＊ みんな げんきに してるよ。" :
     mem.deaths >= 10 ? "＊ ずっと みているよ。" : mem.deaths >= 3 ? "＊ なんど でも、ケツイを。" : mem.deaths >= 1 ? "＊ また きたんだね。" : "";
   if (greet) txt(greet, W / 2, 240, 9, mem.genocide ? C.red : C.dim, "center");
@@ -3544,7 +3613,7 @@ function drawTitle() {
   hasRun();
   [["ぼうけん", "adv"], ["むげん", "run"]].forEach(([l, m], i) => {
     const y = 262 + i * 24, sel = i === titleSel;
-    if (sel) spr(SPR.heart, 22, y + 3);
+    if (sel) cursorAt(22, y + 4);
     txt(l, 34, y, 13, sel ? C.yellow : C.white);
     txt(runInfo[m] || (m === "adv" ? "ストーリー" : "どこまで いける？"), 98, y + 3, 9, C.gray);
     if (runInfo[m]) txt(titleReset === m ? "ほんとう？" : "はじめから", W - 14, y + 3, 9, titleReset === m ? C.red : C.dim, "right");
@@ -3596,7 +3665,7 @@ function drawZukan() {
       txt(MON[i].name, BOX0.x + 14, y, 12, C.white);
       txt("たおした: " + (mem.defeated[i] || 0), BOX0.x + BOX0.w - 14, y + 2, 9, C.gray, "right");
       const lore = LORE[i] || (MON[i].boss === "giant" ? "その ちほうを まもる ヌシ。\nとても おおきい。" : "……");
-      lore.split("\n").forEach((l, j) => txt((j ? "　 " : "＊ ") + l, BOX0.x + 14, y + 20 + j * 15, 10, C.white));
+      lore.split("\n").forEach((l, j) => txt(l, BOX0.x + 14, y + 20 + j * 15, 10, C.white));
       const extra = [WEAK[i] ? "よわてん: " + ELEM[WEAK[i]].n : "", DROP[i] ? "そざい: " + MATS[DROP[i]] : ""].filter(Boolean).join("  ");
       if (extra) txt(extra, BOX0.x + 14, y + 52, 9, C.gray);
     } else txt("＊ まだ であって いない。", BOX0.x + 14, y, 10, C.gray);
@@ -3659,8 +3728,8 @@ function drawGame() {
   if (mode === "adv") txt("ちほう " + adv.ch, W - 50, 10, 10, chapter().col, "right");
   else txt("WAVE " + wave, W - 50, 10, 10, C.white, "right");
 
-  if (["menu", "shop", "chest", "ending", "savept", "map", "rest", "event", "boon", "chclear", "journal", "story", "aending"].includes(state)) rectLine(BOX0.x, BOX0.y, BOX0.w, BOX0.h, C.white, 2);
-  else rectLine(Math.round(BOX.x), BOX.y, Math.round(BOX.w), BOX.h, C.white, 2);
+  if (["menu", "shop", "chest", "savept", "map", "rest", "event", "boon", "chclear", "journal"].includes(state)) drawWin(BOX0.x, BOX0.y, BOX0.w, BOX0.h);
+  else if (!["ending", "story", "aending"].includes(state)) drawFieldFrame(); // えいがの ような ばめんは わく なし
 
   if (state === "menu") drawMenu();
   else if (state === "shop") drawShop();
@@ -3843,6 +3912,7 @@ function drawField() {
 
   if (state === "talk") drawBubble();
   if (state === "revive") drawRevive();
+  drawDying();
 }
 
 function drawBullet(b) {
@@ -3872,24 +3942,26 @@ function drawBullet(b) {
 function drawSoul() {
   if (!soul) return;
   if (state === "dying" || state === "revive") {
-    if (state === "revive" && ui && ui.reviving) { spr(SPR.heart, soul.x, soul.y); return; }
+    if (state === "revive" && ui && ui.reviving) { spr(emberSpr(), soul.x, soul.y); return; }
     if (soul.shattered && state === "dying") return;
-    if (soul.cracked || state === "revive") { spr(SPR.heartL, soul.x - 1, soul.y); spr(SPR.heartR, soul.x + 1, soul.y); }
-    else spr(SPR.heart, soul.x, soul.y);
+    spr(soul.cracked || state === "revive" ? SPR.emberD : emberSpr(), soul.x, soul.y);
     return;
   }
   if (soul.starT > 0 && state === "play") { // ほしのかけら：ひかる
     ctx.fillStyle = Math.floor(time * 10) % 2 ? C.yellow : C.white;
     ctx.fillRect(Math.round(soul.x) - 2, Math.round(soul.y) + 2, 1, 1); ctx.fillRect(Math.round(soul.x) + 9, Math.round(soul.y) + 2, 1, 1);
     ctx.fillRect(Math.round(soul.x) + 3, Math.round(soul.y) - 3, 1, 1);
-    spr(SPR.heart, soul.x, soul.y); return;
+    spr(emberSpr(), soul.x, soul.y); return;
   }
   if (soul.inv > 0 && Math.floor(soul.inv * 12) % 2 === 0) return; // 無敵中は点滅
   const low = soul.hp <= soul.maxHp * 0.25 && state === "play";
-  spr(low && Math.floor(time * 4) % 2 ? SPR.heartW : SPR.heart, soul.x, soul.y);
+  spr(low && Math.floor(time * 4) % 2 ? SPR.emberW : emberSpr(), soul.x, soul.y);
   if (soul.invert) txt("⇄", soul.x + 3.5, soul.y + 7, 8, C.yellow, "center");
 }
 
+function drawDying() {
+  if (state === "dying" && soul && soul.shattered) drawDiedBanner(Math.min(1, (stateT - 1.6) / 0.6), BOX.y + BOX.h / 2 - 30);
+}
 function drawRevive() {
   ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(BOX.x + 2, BOX.y + 2, BOX.w - 4, BOX.h - 4);
   drawSoul();
@@ -3897,7 +3969,7 @@ function drawRevive() {
   if (msg.done && Math.floor(time * 2) % 2 === 0) txt("[ タップ ]", W / 2, BOX.y + 170, 11, C.yellow, "center");
 }
 
-// ボスの ふきだし（しろい ふきだしに くろい もじ）
+// ボスの ふきだし
 function drawBubble() {
   const e = enemies.find(x => x.id === (ui && ui.who));
   if (!e) return;
@@ -3906,13 +3978,13 @@ function drawBubble() {
   const ecx = e.x + e.w / 2;
   const bx = Math.round(clamp(ecx - bw / 2, BOX.x + 6, BOX.x + BOX.w - bw - 6));
   const by = Math.round(e.y + e.h + 10);
-  ctx.fillStyle = C.white; ctx.fillRect(bx, by, bw, bh);
-  for (let i = 0; i < 6; i++) ctx.fillRect(Math.round(ecx) - (5 - i), by - 6 + i, (5 - i) * 2 + 1, 1);
-  drawMsg(bx + 7, by + 6, 10, C.black, 5);
-  if (msg.done && Math.floor(time * 3) % 2) { ctx.fillStyle = C.black; ctx.fillRect(bx + bw - 9, by + bh - 7, 4, 2); ctx.fillRect(bx + bw - 8, by + bh - 5, 2, 2); }
+  ctx.fillStyle = C.white; for (let i = 0; i < 7; i++) ctx.fillRect(Math.round(ecx) - (6 - i), by - 7 + i, (6 - i) * 2 + 1, 1);
+  drawWin(bx, by, bw, bh);
+  drawMsg(bx + 7, by + 6, 10, C.white, 5);
+  if (msg.done && Math.floor(time * 3) % 2) { ctx.fillStyle = C.white; ctx.fillRect(bx + bw - 10, by + bh - 7, 5, 1); ctx.fillRect(bx + bw - 9, by + bh - 6, 3, 1); ctx.fillRect(bx + bw - 8, by + bh - 5, 1, 1); }
 }
 
-// えらべる行を描く（カーソルには ハート）
+// えらべる行を描く（カーソルは ▶）
 function drawRows(rows) {
   let ai = 0;
   for (const r of rows) {
@@ -3922,11 +3994,11 @@ function drawRows(rows) {
       const col = r.on ? C.yellow : C.gray;
       rectLine(r.x, r.y - 2, r.w, r.h + 2, col, 1);
       txt(r.label, r.x + r.w / 2, r.y + 1, 10, col, "center");
-      if (sel) spr(SPR.heart, r.x + 6, r.y + 4);
+      if (sel) cursorAt(r.x + 4, r.y + 3);
       continue;
     }
     const col = r.dim ? C.dim : sel ? C.yellow : C.white;
-    if (sel) spr(SPR.heart, r.x, r.y + 4);
+    if (sel) cursorAt(r.x + 1, r.y + 4);
     txt(r.label, r.x + 12, r.y + 2, 11, col);
     if (r.right) txt(r.right, r.x + r.w, r.y + 2, 10, r.dim ? C.dim : C.gray, "right");
   }
@@ -3934,16 +4006,17 @@ function drawRows(rows) {
 
 function drawMsgArea() {
   const y = BOX0.y + BOX0.h - 62;
-  ctx.fillStyle = C.white; ctx.fillRect(BOX0.x + 6, y, BOX0.w - 12, 1);
-  drawMsg(BOX0.x + 10, y + 10, 11);
+  ctx.globalAlpha = 0.4; ctx.fillStyle = C.white; ctx.fillRect(BOX0.x + 8, y, BOX0.w - 16, 1); ctx.globalAlpha = 1;
+  drawMsg(BOX0.x + 12, y + 10, 11);
+  if (msg.done && msg.lines.join("") && Math.floor(time * 2) % 2) { const ax = BOX0.x + BOX0.w - 16, ay = BOX0.y + BOX0.h - 12; ctx.fillStyle = C.white; ctx.fillRect(ax, ay, 5, 1); ctx.fillRect(ax + 1, ay + 1, 3, 1); ctx.fillRect(ax + 2, ay + 2, 1, 1); }
 }
 
 function drawMenu() {
   const x = BOX0.x + 10;
   if (ui.tab === "item") {
-    txt("＊ アイテム  " + soul.bag.length + "/" + INV_MAX, x, BOX0.y + 8, 11);
+    heading("アイテム", x, BOX0.y + 9); txt(soul.bag.length + "/" + INV_MAX, BOX0.x + BOX0.w - 12, BOX0.y + 9, 10, C.gray, "right");
   } else {
-    txt("＊ そうび", x, BOX0.y + 8, 11);
+    heading("そうび", x, BOX0.y + 9);
     txt("LV " + soul.lv, x + 4, BOX0.y + 26, 10);
     txt("ATK " + atk(), x + 54, BOX0.y + 26, 10);
     txt("DEF " + def(), x + 114, BOX0.y + 26, 10);
@@ -3956,7 +4029,7 @@ function drawMenu() {
 
 function drawShop() {
   if (ui.view === "craft") {
-    txt("＊ つくる", BOX0.x + 10, BOX0.y + 8, 11, C.orange);
+    heading("つくる", BOX0.x + 10, BOX0.y + 9, "#c76a12");
     txt(soul.gold + "G", BOX0.x + BOX0.w - 12, BOX0.y + 8, 10, C.gold, "right");
     drawRows(layoutRows());
     drawMsgArea();
@@ -3994,34 +4067,44 @@ function drawChest() {
   drawMsgArea();
 }
 
+let hpLag = 0;
 function drawStatus() {
-  const y = BOX0.y + BOX0.h + 10;
-  txt("SOUL", 12, y, 10);
-  txt("LV " + soul.lv, 50, y, 10);
-  txt("HP", 90, y + 1, 8);
-  const bw = Math.min(70, soul.maxHp * 1.4), filled = bw * soul.hp / soul.maxHp;
-  ctx.fillStyle = C.hpRed; ctx.fillRect(106, y + 1, bw, 9);
-  ctx.fillStyle = C.yellow; ctx.fillRect(106, y + 1, filled, 9);
-  txt(soul.hp + " / " + soul.maxHp, 106 + bw + 6, y, 10, soul.hp <= soul.maxHp * 0.25 ? C.red : C.white);
+  const y = BOX0.y + BOX0.h + 8;
+  // LV は ななめの おび（Persona 風）
+  slant(8, y - 1, 40, 14, C.pRed, 5);
+  txt("LV" + soul.lv, 29, y + 1, 10, C.white, "center");
+  // HP は ほそい あかい バー＋しろい のこりかげ（Dark Souls 風）
+  const bx = 54, bw = 112, low = soul.hp <= soul.maxHp * 0.25;
+  hpLag = hpLag > soul.hp ? Math.max(soul.hp, hpLag - soul.maxHp * 0.012) : soul.hp;
+  ctx.fillStyle = "#3a3a3a"; ctx.fillRect(bx - 1, y, bw + 2, 7);
+  ctx.fillStyle = "#1a0505"; ctx.fillRect(bx, y + 1, bw, 5);
+  ctx.fillStyle = "#e8e0d0"; ctx.fillRect(bx, y + 1, Math.round(bw * hpLag / soul.maxHp), 5);
+  ctx.fillStyle = low && Math.floor(time * 4) % 2 ? "#ff4a3a" : "#b3121b"; ctx.fillRect(bx, y + 1, Math.round(bw * soul.hp / soul.maxHp), 5);
+  ctx.fillStyle = "rgba(255,255,255,.25)"; ctx.fillRect(bx, y + 1, Math.round(bw * soul.hp / soul.maxHp), 1);
+  // ケツイ（かすると たまる）は その した に ほそく
+  ctx.fillStyle = "#222"; ctx.fillRect(bx, y + 9, bw, 2);
+  if (soul.tp > 0) { ctx.fillStyle = soul.tp >= 100 ? (Math.floor(time * 6) % 2 ? C.gold : C.white) : "#c9a227"; ctx.fillRect(bx, y + 9, Math.round(bw * soul.tp / 100), 2); }
+  txt(soul.hp + "/" + soul.maxHp, W - 10, y - 1, 10, low ? C.red : C.white, "right");
 
-  if (form && form.hudGone && !enemies.some(e => e.offered || e.dying) && (state === "play" || state === "talk")) { txt("＊ ？？？", W / 2, CMD_Y + 6, 10, C.dim, "center"); return; } // コマンドが ない…
+  if (form && form.hudGone && !enemies.some(e => e.offered || e.dying) && (state === "play" || state === "talk")) { txt("？？？", W / 2, CMD_Y + 6, 10, C.dim, "center"); return; } // コマンドが ない…
   const usable = state === "play" || state === "menu" || state === "map";
   const canSpare = usable && spareables().length > 0;
   const active = state === "menu" ? (ui.tab === "item" ? 1 : 2) : state === "map" ? -1 : 0;
   const blink = Math.floor(time * 3) % 2 === 0;
+  // コマンドは ななめの カード（Persona 風）。えらんでいる ものは あか、つかえない ものは くらく
   CMD.forEach((lbl, i) => {
     let l = lbl;
     const x = CMD_X0 + i * (CMD_W + CMD_GAP);
-    let on = i === active, col = !usable ? C.dim : on ? C.yellow : C.orange;
-    if (i === 3) col = canSpare ? (blink ? C.yellow : C.orange) : C.dim;
-    if (i === 0 && state === "map") { l = "てちょう"; col = C.orange; }
-    if (i === 0 && soul.hold && state === "play") { col = blink ? C.yellow : C.orange; on = false; }
+    let on = i === active && usable, fill = !usable ? "#262626" : "#ececec", ink = !usable ? "#5a5a5a" : "#111";
+    if (i === 3) { fill = canSpare ? (blink ? C.gold : "#ececec") : "#262626"; ink = canSpare ? "#111" : "#5a5a5a"; on = false; }
+    if (i === 0 && state === "map") { l = "てちょう"; fill = "#ececec"; ink = "#111"; on = false; }
+    if (i === 0 && soul.hold && state === "play") { fill = blink ? C.gold : "#ececec"; ink = "#111"; on = false; }
     const full = i === 0 && soul.tp >= 100 && !soul.hold && state === "play";
-    if (full) { col = blink ? C.red : C.yellow; l = "ケツイ！"; }
-    rectLine(x, CMD_Y, CMD_W, CMD_H, col, 1);
-    if (i === 0 && soul.tp > 0) { ctx.fillStyle = soul.tp >= 100 ? C.red : C.orange; ctx.fillRect(x + 2, CMD_Y + CMD_H - 4, Math.round((CMD_W - 4) * soul.tp / 100), 2); }
-    if (on && usable) spr(SPR.heart, x + 4, CMD_Y + 9);
-    txt(l, x + (on && usable ? (CMD_W + 11) / 2 : CMD_W / 2), CMD_Y + 7, 9, col, "center");
+    if (full) { l = "ケツイ！"; on = true; }
+    const lift = on ? 2 : 0;
+    if (on) { slant(x + 1, CMD_Y + 2, CMD_W, CMD_H, "#000", 6); slant(x - 1, CMD_Y - lift - 1, CMD_W + 2, CMD_H + 2, C.white, 6); fill = full && blink ? C.gold : C.pRed; ink = full && blink ? "#111" : C.white; }
+    slant(x, CMD_Y - lift, CMD_W, CMD_H, fill, 6);
+    txt(l, x + CMD_W / 2, CMD_Y + 7 - lift, 9, ink, "center");
   });
 }
 
@@ -4040,10 +4123,7 @@ function drawOver() {
     ctx.fillStyle = p.color;
     ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 1); ctx.fillRect(Math.round(p.x) + 1, Math.round(p.y) + 1, 1, 2);
   }
-  ctx.globalAlpha = Math.min(1, stateT / 1.2);
-  txt("GAME", W / 2, 90, 36, C.white, "center");
-  txt("OVER", W / 2, 132, 36, C.white, "center");
-  ctx.globalAlpha = 1;
+  drawDiedBanner(Math.min(1, stateT / 1.2), 104);
   if (stateT > 1.2) { updateMsg(1 / 60); drawMsg(30, 210, 12); }
   if (stateT > 2.0) {
     txt("SCORE " + String(score).padStart(6, "0"), W / 2, 270, 10, C.white, "center");
