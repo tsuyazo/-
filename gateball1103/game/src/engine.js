@@ -211,9 +211,9 @@ export class Duel {
         else if (m.hint_type === HT.OPSELECTED || m.hint_type === HT.EFFECT) { /* 相手の選択の表示は省略 */ }
         break;
       case M.DRAW: this.say(`${n(m.player)}が${m.drawn.length}枚ドロー`, m.player); break;
-      case M.SUMMONING: if (m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`, m.controller); break;
-      case M.SPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`, m.controller); break;
-      case M.FLIPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`, m.controller); break;
+      case M.SUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'normal', turn: this.turn }; if (m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`, m.controller); break;
+      case M.SPSUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'special', loc: m.location, turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`, m.controller); break;
+      case M.FLIPSUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'flip', turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`, m.controller); break;
       case M.SET: if (m.location === L.MZONE && m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}がカードをセット`, m.controller); break;
       case M.CHAINING:
         this.chain.push({ code: m.code, player: m.controller, desc: m.description });
@@ -228,6 +228,7 @@ export class Duel {
       case M.LPUPDATE: this.lp[m.player] = m.lp; break;
       case M.ATTACK: {
         const a = this.query(m.card), t = m.target ? this.query(m.target) : null;
+        this.lastAttack = { player: m.card.controller, code: a?.code, atk: a?.attack ?? 0, target: t ? { code: t.code, atk: t.attack, def: t.defense, position: t.position } : null, turn: this.turn };
         this.say(`${n(m.card.controller)}の「${D.name(a?.code)}」が${t ? `「${D.name(t.code)}」に` : '直接'}攻撃`, m.card.controller); break;
       }
       case M.MOVE: {

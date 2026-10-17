@@ -36,6 +36,7 @@ export function loadRaw() {
       main: d.main.map(e => [e.n, idOf[e.code]]), extra: d.extra.map(e => [e.n, idOf[e.code]]) }])),
     cardData: JSON.parse(fs.readFileSync(path.join(HERE, 'card_data.json'))),
     recipes: JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/recipes_meta.json'))),
+    images: fs.existsSync(path.join(HERE, 'card_images.json')) ? JSON.parse(fs.readFileSync(path.join(HERE, 'card_images.json'))) : {},
     effectStrings: renameAll(JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json')))),
     scripts,
   };

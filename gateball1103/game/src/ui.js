@@ -217,7 +217,8 @@ function tileHTML(q, p, loc, i) {
   if (ctr) b.push(`<span class="bdg">C${ctr}</span>`);
   if (loc === L.MZONE && c && (q.attack !== c.atk || q.defense !== c.def_) && typeof c.atk === 'number') b.push(`<span class="bdg mod">${q.attack > c.atk ? '↑' : '↓'}</span>`);
   const down = (q.position & POS.FACEDOWN) && loc !== L.HAND ? 'down' : '';
-  return `<button class="tile t-${t} ${def ? 'def' : ''} ${down} ${can}" data-card="${p}:${loc}:${i}" aria-label="${esc(data.name(q.code))}">
+  const img = imageOf(q.code);
+  return `<button class="tile t-${t} ${def ? 'def' : ''} ${down} ${can} ${img ? 'img' : ''}" data-card="${p}:${loc}:${i}" aria-label="${esc(data.name(q.code))}"${img ? ` style="background-image:url('${img}')"` : ''}>
     ${b.length ? `<span class="badges">${b.join('')}</span>` : ''}<span class="nm">${esc(data.name(q.code))}</span><span class="st">${st}</span></button>`;
 }
 
@@ -265,11 +266,14 @@ function metaLine(c) {
   const t = [SUBTYPE_LABEL[c.subtype] || c.subtype, ...(c.tags || []).map(x => SUBTYPE_LABEL[x] || x)].join('・');
   return `${c.attribute}属性／${c.race}／${t}／${c.subtype === '重ね' ? 'ランク' : 'レベル'}${c.level}／攻${c.atk} 守${c.def_}`;
 }
+// カード画像（gateball1103/game/card_images.json があれば、アーティファクトのアセットURLを使う）
+function imageOf(code) { const e = data.raw.images?.[code]; return e && e.url ? e.url : null; }
 function cardSheet(code, extraHTML, list, hidden) {
   const c = data.card(code);
   if (hidden || !code) { sheet(`<h3>裏側のカード</h3>${extraHTML || ''}${btns(list || [])}`); return; }
-  sheet(`<h3>${esc(data.name(code))}${c?.limit && c.limit !== '無制限' ? ` <span class="tier">【${esc(c.limit)}】</span>` : ''}</h3>
-    <p class="meta">${esc(metaLine(c))}</p>${c ? `<p class="ctext">${esc(c.text)}</p>` : ''}${extraHTML || ''}${btns(list || [])}`);
+  const img = imageOf(code);
+  sheet(`<div class="cardhead">${img ? `<img class="cardimg" src="${img}" alt="">` : ''}<div class="cardinfo"><h3>${esc(data.name(code))}${c?.limit && c.limit !== '無制限' ? ` <span class="tier">【${esc(c.limit)}】</span>` : ''}</h3>
+    <p class="meta">${esc(metaLine(c))}</p></div></div>${c ? `<p class="ctext">${esc(c.text)}</p>` : ''}${extraHTML || ''}${btns(list || [])}`);
 }
 function openFieldCard(p, loc, i) {
   const arr = loc === L.HAND ? F[p].hand : loc === L.MZONE ? F[p].mz : loc === L.SZONE && i === 5 ? [, , , , , F[p].fz] : F[p].sz;
