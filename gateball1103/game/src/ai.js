@@ -15,7 +15,7 @@ import { planIdle } from './ai_plan.js';
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
 const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000;
 const PH_DRAW = 1, PH_STANDBY = 2, PH_MAIN1 = 4, PH_END = 512;
-const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893;
+const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893, HURRICANE = 42703248;
 const SELF_TURN_ONLY = new Set([21007444, 32603633]);
 const LOCKS = new Set([29981921, 71564252]);   // シエン・ライオウ
 
@@ -117,7 +117,8 @@ function idleGreedy(ctx, m) {
   if (oppSetST) {
     // トラップ・スタンは攻撃の前（メイン1）に、攻撃できるモンスターがいる時だけ
     const stun = duel.phase === PH_MAIN1 && duel.turn > 1 && f[me].mz.some(q => q && (q.position & POS.ATTACK) && (q.attack || 0) >= 1500);
-    const i = m.activates.findIndex(c => ((ST_REMOVAL.has(c.code) && !hold.has(c.code)) || (c.code === TRAP_STUN && stun)) && !used(c) && c.location !== L.MZONE);
+    // ハリケーンは2枚以上伏せてある時に（多伏せを一掃してから展開する）
+    const i = m.activates.findIndex(c => ((ST_REMOVAL.has(c.code) && !hold.has(c.code) && (c.code !== HURRICANE || oppSetST >= 2)) || (c.code === TRAP_STUN && stun)) && !used(c) && c.location !== L.MZONE);
     if (i >= 0) { mark(m.activates[i]); return { type: R.SELECT_IDLECMD, action: 5, index: i }; }
   }
   // 2. サーチ・ドロー・展開の魔法と、場のモンスターの起動効果
@@ -130,6 +131,7 @@ function idleGreedy(ctx, m) {
     if (BOARD_WIPE.has(c.code)) return opVal > myVal + 1000;
     // 温存するよう勧められた除去（王宮の弾圧などへの回答）は、表側の永続カードにだけ使う
     if (ST_REMOVAL.has(c.code) && hold.has(c.code)) return f[op].sz.some(q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_CONT));
+    if (c.code === HURRICANE) return oppSetST >= 2;
     if (ST_REMOVAL.has(c.code)) return oppSetST > 0 || f[op].sz.some(q => q && (q.position & POS.FACEUP));
     if (c.code === 72892473) return f[me].hand.length <= 2;           // 手札抹殺は手札が少ない時だけ
     return true;
@@ -266,7 +268,7 @@ function chain(ctx, m) {
       return summonValue >= 2300 || KEY_THREATS.has(ls.code) || ctx.rules?.threats.has(ls.code) ? 90 : 0;
     }
     if (NEGATE_SPSUMMON.has(code)) return oppSummoning && ls.kind === 'special' && summonValue >= 2000 && lp > 1000 ? 85 : 0;
-    if (ON_SUMMON.has(code)) return oppSummoned && summonValue >= 1800 ? 85 : 0;
+    if (ON_SUMMON.has(code)) return oppSummoned && summonValue >= 1500 ? 85 : 0;     // 奈落：攻撃力1500以上（記事より）
     if (WIPE_ON_SUMMON.has(code)) return oppSummoned && f[op].mz.filter(Boolean).length >= f[me].mz.filter(Boolean).length + 1 ? 80 : 0;
     if (ATTACK_RESPONSE.has(code)) {
       if (!oppAttacking) return 0;
@@ -294,9 +296,13 @@ function chain(ctx, m) {
     if (t & T_QUICK) return oppTop && impact(duel, top.code, ctx.rules) >= 2 ? 45 : 0;
     return 0;
   };
+  // 同じ効果を1ターンに何度も発動しない（「スキルドレイン」で無効にされ続ける効果などで、終わらなくなるのを防ぐ）
+  const ck = c => `c${c.code}:${c.description ?? ''}`;
   let best = -1, bestScore = 0;
-  m.selects.forEach((c, i) => { const s = score(c); if (s > bestScore) { bestScore = s; best = i; } });
-  return { type: R.SELECT_CHAIN, index: bestScore >= 40 ? best : null };
+  m.selects.forEach((c, i) => { if ((ctx.memo.used[ck(c)] || 0) >= 2) return; const s = score(c); if (s > bestScore) { bestScore = s; best = i; } });
+  if (bestScore < 40) return { type: R.SELECT_CHAIN, index: null };
+  const k = ck(m.selects[best]); ctx.memo.used[k] = (ctx.memo.used[k] || 0) + 1;
+  return { type: R.SELECT_CHAIN, index: best };
 }
 // 相手が発動したカードの危険度（0〜3）
 function impact(duel, code, rules) {

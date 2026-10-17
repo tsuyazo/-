@@ -92,17 +92,21 @@ async function loop() {
 
 /* ---------------- 演出：ターン交代の帯、フェイズ、相手の行動の字幕 ---------------- */
 const wait = ms => new Promise(r => setTimeout(r, ms));
+let capCount = 0;   // このターンに出したCPUの字幕の数
 async function playEvents(evs) {
   const fast = setup.speed === 'fast';
   for (const e of evs) {
     if (e.k === 'turn') {
+      capCount = 0;
       render();
       await banner(e.p, e.t, fast ? 700 : 1500);
     } else if (e.k === 'phase') {
       if (e.p !== view || setup.mode === 'pvp') { render(); await wait(fast ? 120 : 380); }
     } else if (e.k === 'log' && e.p != null && setup.mode === 'cpu' && e.p !== view && /召喚|セット|チェーン|攻撃/.test(e.s)) {
       render();
-      await caption(e.s, fast ? 450 : 1100);
+      // 展開の長いターンは、7つ目以降の字幕を短くして待ち時間を減らす
+      const long = ++capCount > 6;
+      await caption(e.s, (fast ? 450 : 1100) * (long ? 0.5 : 1));
     }
   }
 }
