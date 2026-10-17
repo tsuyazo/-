@@ -118,6 +118,16 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .curtain .brand{font-size:40px}
 .win{border:2px solid var(--brass);border-radius:6px;padding:10px;text-align:center;font-family:var(--display);color:var(--brass);background:var(--felt)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:50;max-width:90%}
+/* ---- PC幅：盤面の右にデュエルの記録を常に出す ---- */
+#sidelog{display:none}
+@media (min-width:1000px){
+  #sidelog{display:block;position:fixed;top:12px;bottom:12px;right:16px;width:min(340px,calc((100vw - 520px)/2 - 32px));
+    background:var(--felt);border:1px solid var(--line);border-radius:6px;padding:10px 12px;overflow-y:auto;font-size:12px;line-height:1.7}
+  #sidelog h4{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:14px;color:var(--brass);position:sticky;top:-10px;background:var(--felt);padding-block:4px}
+  #sidelog div{padding-block:1px;border-bottom:1px solid rgba(255,255,255,.04)}
+  #sidelog .sl-turn{color:var(--brass);font-weight:700;margin-top:8px;border:0}
+  #sidelog .sl-op{color:var(--muted)}
+}
 .logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
 .logbox div{border-bottom:1px solid var(--line);padding-block:2px}
 @media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
@@ -169,6 +179,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 }
 </style>
 <div id="app"><div class="setup"><h1 class="brand">ゲートボール1103<small>デュエルエンジンを読み込み中…</small></h1></div></div>
+<aside id="sidelog" hidden></aside>
 <div id="layer"></div>
 <div id="banner" class="banner" hidden></div>
 <div id="caption" class="caption" hidden></div>

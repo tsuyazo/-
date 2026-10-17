@@ -87,7 +87,22 @@ export class GameData {
   }
 }
 
-export async function loadCore() { return createCore({ sync: true }); }
+// エンジンのメモリ（WebAssembly.Memory）も捕まえておく。CPUの先読みで局面を丸ごと保存・復元するのに使う
+export async function loadCore() {
+  let memory = null;
+  const W = WebAssembly, orig = W.instantiate, origS = W.instantiateStreaming;
+  const grab = r => { const inst = r.instance || r; for (const v of Object.values(inst.exports || {})) if (v instanceof W.Memory) memory = v; return r; };
+  W.instantiate = (...a) => orig.apply(W, a).then(grab);
+  if (origS) W.instantiateStreaming = (...a) => origS.apply(W, a).then(grab);
+  try {
+    const lib = await createCore({ sync: true });
+    lib.memory = memory;
+    return lib;
+  } finally {
+    W.instantiate = orig;
+    if (origS) W.instantiateStreaming = origS;
+  }
+}
 
 export class Duel {
   // opts: { decks:[key,key], ai:[bool,bool], names:[str,str], seed:[4 bigint as string], responses:[] }
@@ -117,7 +132,7 @@ export class Duel {
         const m = name.match(/(c\d+\.lua)$/);
         return data.raw.scripts[m ? `official/${m[1]}` : name] ?? null;
       },
-      errorHandler: (t, s) => { if (!/attempt to call a nil value \(field 'initial_effect'\)/.test(s)) this.errors.push(s); },
+      errorHandler: (t, s) => { if (this.simming) return; if (!/attempt to call a nil value \(field 'initial_effect'\)/.test(s)) this.errors.push(s); },
     });
     lib.loadScript(this.h, 'constant.lua', data.raw.scripts['constant.lua']);
     lib.loadScript(this.h, 'utility.lua', data.raw.scripts['utility.lua']);

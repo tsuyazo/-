@@ -15,8 +15,9 @@ import { planIdle } from './ai_plan.js';
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
 const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000;
 const PH_DRAW = 1, PH_STANDBY = 2, PH_MAIN1 = 4, PH_END = 512;
-const VEILER = 97268402, TRAP_STUN = 59616123;
+const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893;
 const SELF_TURN_ONLY = new Set([21007444, 32603633]);
+const LOCKS = new Set([29981921, 71564252]);   // シエン・ライオウ
 
 const info = (duel, code) => duel.data.eng(code) || { type: 0, attack: 0, defense: 0, level: 0 };
 const isExtra = t => (t & (T_FUSION | T_SYNCHRO | T_XYZ)) !== 0;
@@ -40,7 +41,7 @@ export function aiRespond(duel, m) {
   const me = m.player, op = 1 - me;
   const f = duel.field();
   const memo = duel.aiMemo;
-  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; }
+  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; memo.plans = 0; memo.attackerAtk = null; }
   const ctx = { duel, f, me, op, memo, myTurn: duel.turnPlayer === me, rules: rulesFor(duel, me) };
   switch (m.type) {
     case M.SELECT_IDLECMD: return idle(ctx, m);
@@ -96,7 +97,9 @@ export function boardValue(duel, me) {
   const st = p => f[p].sz.filter(Boolean).reduce((s, q) => s + (q.position & POS.FACEDOWN ? 850 : 450), 0) + (f[p].fz ? 500 : 0);
   // 相手の伏せが多いほど、場に出したモンスターは罠で失いやすい（手札は安全）
   const risk = Math.pow(0.93, Math.min(4, f[op].sz.filter(q => q && (q.position & POS.FACEDOWN)).length));
-  return fieldValue(duel, f, me) * risk + st(me) + 700 * f[me].hand.length + 0.5 * duel.lp[me]
+  // 相手の行動を止め続けるモンスター（シエン・ライオウなど）は、先読みの中では働きが見えないので上乗せ
+  const lock = f[me].mz.filter(q => q && (q.position & POS.FACEUP) && LOCKS.has(q.code)).length * 1500;
+  return fieldValue(duel, f, me) * risk + lock + st(me) + 700 * f[me].hand.length + 0.5 * duel.lp[me]
     - fieldValue(duel, f, op) - st(op) - duel.lp[op];
 }
 function idleGreedy(ctx, m) {
@@ -122,6 +125,7 @@ function idleGreedy(ctx, m) {
     if (used(c) >= (c.location === L.MZONE ? 1 : 1)) return false;
     if (HAND_TRAP.has(c.code) || DAMAGE_STEP.has(c.code)) return false;
     if (SELF_TURN_ONLY.has(c.code)) return false;                        // 普段は使わず、先読みで得になる時だけ
+    if (c.code === BOOK_OF_MOON) return false;                           // 月の書は相手の攻撃・召喚に合わせて使う
     if (e.type & T_TRAP) return OWN_TURN_TRAPS.has(c.code) && !HOLD_TRAPS.has(c.code);
     if (BOARD_WIPE.has(c.code)) return opVal > myVal + 1000;
     // 温存するよう勧められた除去（王宮の弾圧などへの回答）は、表側の永続カードにだけ使う
@@ -249,6 +253,12 @@ function chain(ctx, m) {
       return 60;   // ゴーズなど（条件はエンジンが判定）
     }
     if (DAMAGE_STEP.has(code)) return 70;                                   // ダメージステップで出てくる時は使う
+    if (code === BOOK_OF_MOON) {
+      // 月の書：強い攻撃を止める／重要なモンスターの召喚成功時に裏にして効果を使わせない
+      if (oppAttacking) return la.atk >= 1700 || lethal ? 80 : 0;
+      if (oppSummoned && (KEY_THREATS.has(ls.code) || ctx.rules?.threats.has(ls.code) || summonValue >= 2400)) return 75;
+      return 0;
+    }
     if (NEGATE_SUMMON.has(code)) {
       if (!oppSummoning) return oppTop && top && impact(duel, top.code, ctx.rules) >= 3 && code === 41420027 && lp > 3000 ? 75 : 0;
       if (code === 41420027 && lp <= 2000) return 0;                        // 神の宣告はLPが少ないと撃たない
@@ -292,6 +302,7 @@ function chain(ctx, m) {
 function impact(duel, code, rules) {
   if (BOARD_WIPE.has(code) || rules?.threats.has(code)) return 3;
   if (code === 83764718 || code === 37520316 || code === 53567095) return 3;  // 死者蘇生・精神操作・ゴッドバードアタック
+  if (code === 45906428 || code === 42703248 || code === 77565204) return 3;  // ミラクル・フュージョン・ハリケーン・未来融合（神の宣告の温存先）
   if (KEY_THREATS.has(code)) return 2;
   if (ATTACK_RESPONSE.has(code) || ST_REMOVAL.has(code) || NEGATE_SUMMON.has(code) || ON_SUMMON.has(code)) return 2;
   const t = info(duel, code).type;

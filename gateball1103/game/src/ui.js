@@ -129,6 +129,7 @@ function answer(res) {
 /* ---------------- 描画 ---------------- */
 function render() {
   const app = $('#app');
+  renderSideLog();
   if (!duel) { app.innerHTML = setupHTML(); closeSheet(); return; }
   const me = view, op = 1 - me;
   const lastLog = duel.log[duel.log.length - 1]?.s || '';
@@ -148,6 +149,15 @@ function render() {
     <div class="tools">${toolsHTML()}</div>`;
   if (curtain) showCurtain();
   else if (pend && !isCommand(pend) && !$('#layer').innerHTML) openPrompt();
+}
+// PC幅で盤面の右に出す記録（スマホ幅ではCSSで隠れる。今まで通り「ログ」から見られる）
+function renderSideLog() {
+  const sl = $('#sidelog'); if (!sl) return;
+  if (!duel || curtain) { sl.hidden = true; return; }
+  sl.hidden = false;
+  const cls = l => /^―/.test(l.s) ? 'sl-turn' : l.p == null ? '' : l.p === view ? '' : 'sl-op';
+  sl.innerHTML = `<h4>デュエルの記録</h4>${duel.log.slice(-250).map(l => `<div class="${cls(l)}">${esc(l.s)}</div>`).join('')}`;
+  sl.scrollTop = sl.scrollHeight;
 }
 const PHASES = [[1, 'ドロー'], [2, 'スタンバイ'], [4, 'メイン1'], [248, 'バトル'], [256, 'メイン2'], [512, 'エンド']];
 function phaseStrip() {

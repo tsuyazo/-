@@ -6,7 +6,7 @@ import { OcgMessageType as M, OcgResponseType as R, OcgLocation as L, OcgPositio
 import { Duel, fallback } from './engine.js';
 
 // 1ターンに先読みする回数と、1回の先読みで試す候補数の上限（ブラウザで待たせすぎないため）
-export const PLAN = { perTurn: 8, candidates: 6, steps: 500 };
+export const PLAN = { perTurn: 12, candidates: 8, steps: 500 };
 
 export function planIdle(ctx, m, greedy, respond, value) {
   const { duel, me, memo } = ctx;
@@ -16,6 +16,8 @@ export function planIdle(ctx, m, greedy, respond, value) {
   const cands = candidates(duel, m, greedy);
   if (cands.length < 2) return null;
   memo.plans++;
+  // エンジンのメモリを今の局面で保存（候補ごとにここへ戻す）
+  if (duel.lib.memory) duel._snap = new Uint8Array(duel.lib.memory.buffer).slice();
   let best = null;
   for (const c of cands) {
     const v = rollout(duel, me, c.res, respond, value);
@@ -24,6 +26,7 @@ export function planIdle(ctx, m, greedy, respond, value) {
     const score = v + (c.greedy ? 1 : 0);
     if (!best || score > best.score) best = { ...c, score };
   }
+  duel._snap = null;
   return best ? best.res : null;
 }
 
@@ -53,15 +56,48 @@ function keyOf(m, r) {
   return `a${r.action}:${c.code}:${c.location}:${c.description ?? ''}`;
 }
 
+// 影のデュエルを作る。エンジンのメモリを保存できる時は、今の局面を写した上でJS側の状態だけ複製する（速い）。
+// できない時は、これまでの応答を最初から再生する（遅い）
+function shadow(duel) {
+  // インスタンスに直接付いた関数（テストの差し替えなど、元のデュエルに束縛されたもの）は写さない
+  const s = Object.create(Object.getPrototypeOf(duel));
+  for (const [k, v] of Object.entries(duel)) if (typeof v !== 'function') s[k] = v;
+  Object.assign(s, {
+    isSim: true, replay: [], lp: [...duel.lp], log: [], uiEvents: [], chain: duel.chain.map(c => ({ ...c })),
+    events: duel.events.map(e => new Set(e)), history: [], errors: [], hintMsg: [...duel.hintMsg],
+    aiMemo: JSON.parse(JSON.stringify(duel.aiMemo)),
+  });
+  return s;
+}
 function rollout(duel, me, first, respond, value) {
+  const mem = duel.lib.memory;
+  if (mem) {
+    const snap = duel._snap;
+    new Uint8Array(mem.buffer).set(snap);
+    const s = shadow(duel);
+    duel.simming = true;
+    try { return play(s, me, first, respond, value); }
+    catch (e) { return null; }
+    finally { new Uint8Array(mem.buffer).set(snap); duel.simming = false; }
+  }
   const s = new Duel(duel.lib, duel.data, { ...duel.opts, ai: [true, true] });
   s.isSim = true;
   s.replay = [...duel.history];
   try {
     s.start();
-    let st = s.advance();
+    const st = s.advance();
     if (st !== 'ai' || s.replay.length || s.req.type !== M.SELECT_IDLECMD) return null;
     s.aiMemo = JSON.parse(JSON.stringify(duel.aiMemo));
+    return play(s, me, first, respond, value);
+  } catch (e) {
+    return null;
+  } finally {
+    s.destroy();
+  }
+}
+function play(s, me, first, respond, value) {
+  let st;
+  {
     s.respond(first);
     const turn = s.turn;
     for (let n = 0; n < PLAN.steps; n++) {
@@ -86,10 +122,6 @@ function rollout(duel, me, first, respond, value) {
       s.respond(s.retry > 1 ? fallback(q) : respond(s, q));
     }
     return value(s, me);
-  } catch (e) {
-    return null;
-  } finally {
-    s.destroy();
   }
 }
 

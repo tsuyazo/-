@@ -4,6 +4,7 @@ import { boot } from './ui.js';
 
 const hot = window.claude?.hot;
 loadCore().then(lib => {
+  document.documentElement.dataset.engineSnapshot = lib.memory ? 'on' : 'off';   // CPUの先読みが高速版で動くか（確認用）
   const start = d => boot(window.GB_DATA, lib, { data: d, snapshot: f => hot?.snapshot?.(f) });
   if (hot?.ready) hot.ready(start); else start(hot?.data);
 }).catch(e => {
