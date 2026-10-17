@@ -11,7 +11,8 @@
 | [decklists.md](decklists.md) | 10デッキのレシピ（メイン40枚＋エクストラ） |
 | [decks.md](decks.md) | 環境分析、各デッキの解説、相性表、使ったデータ |
 | `data/cards.json` `data/decks.json` | 上記の機械可読データ（`ref` は開発用の参照元カード名） |
-| `game/index.html` | 遊べるデュエル盤（ブラウザで開くだけ。`game/template.html` から `tools/build_game.py` で生成） |
+| `game/index.html` | 遊べるデュエル（ブラウザで開くだけ。効果・チェーン・フェイズはデュエルエンジンが自動処理。CPU対戦／2人対戦） |
+| `game/` | ゲームのソース（`src/`）、エンジン用カードスクリプト（`scripts/`）、ビルド・テスト |
 | `tools/` | 生成スクリプト一式 |
 
 ## 10デッキ
@@ -40,7 +41,6 @@
 cd tools
 curl -L -o cards.cdb https://raw.githubusercontent.com/ProjectIgnis/BabelCDB/master/cards.cdb
 python3 build.py cards.cdb   # data/ と *.md を作り直す
-python3 build_game.py        # game/index.html を作り直す
 ```
 
 ## 注意点・未確定の部分
@@ -49,3 +49,19 @@ python3 build_game.py        # game/index.html を作り直す
 2. **カードプールの境界**：一部のカード（重ねモンスターや後期のテーマカードなど）は、2011年8月31日までに発売されていたかを一次資料で確かめられていない。疑わしいものは採用を避けたが、各大会のカードプール規定と照らし合わせることを推奨。
 3. **収録範囲**：今回は10デッキに使う151種だけを移植した。参照元の全カードプールの移植は今後の作業（`limit_list.md` の開発用資料に、未収録の制限カードも載せてある）。
 4. **公開前の確認**：`data/*.json` の `ref` 欄と `limit_list.md` の開発用資料には参照元のカード名が入っている。一般向けに公開する時は削除すること。
+
+## ゲーム（自動処理デュエル）
+
+- デュエルエンジンに **EDOPro のコア（ocgcore）** の WebAssembly 版（npm `ocgcore-wasm` 0.1.2、MIT）を使い、カードの効果は **ProjectIgnis/CardScripts** の Lua スクリプト（AGPL-3.0）で処理する。ADS → YGOPro → EDOPro と続く「スクリプトでカード効果を処理する」方式。
+- ルールはエンジンの「マスタールール2」設定（先攻もドロー、フィールド魔法は場全体で1枚）。
+- 2011年当時の性能に合わせて一部スクリプトを差し替えている（`game/scripts/PATCHES.md`）。
+- CPUは簡単な評価で動く（強い手を読むAIではない）。
+- `game/scripts/` は AGPL-3.0 のため、ゲームを公開・配布する場合はソースの公開などAGPLの条件に従うこと。
+
+```sh
+cd game
+npm install
+npm run build   # index.html を作る（約2MB、エンジンとデータを1ファイルに埋め込み）
+npm test        # CPU同士で全組み合わせを対戦させ、決着まで進むかを確認
+```
+

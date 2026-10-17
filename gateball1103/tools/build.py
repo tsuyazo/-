@@ -87,7 +87,7 @@ def main(cdb):
     for i, ref in enumerate(used, 1):
         cid, t, lv, atk, df, attr, race = rows[ref]
         cat, sub = kind(t)
-        c = {"code": f"GB-{i:03d}", "name": cards[ref]["name"], "category": cat, "subtype": sub}
+        c = {"code": f"GB-{i:03d}", "id": cid, "name": cards[ref]["name"], "category": cat, "subtype": sub}
         if cat == "モンスター":
             c.update(level=lv & 0xFF, rank_or_level="ランク" if sub == "重ね" else "レベル",
                      attribute=ATTR[attr], race=RACE[race], tags=tags(t),
