@@ -5,6 +5,7 @@ import createCore, {
   OcgResponseType as R, OcgQueryFlags as Q, OcgProcessResult as PR, OcgHintType as HT,
 } from 'ocgcore-wasm';
 import { aiRespond } from './ai.js';
+import { aiRespond as aiSimple } from './ai_baseline.js';
 
 export { L, POS, M, R };
 
@@ -163,7 +164,11 @@ export class Duel {
   }
   aiAct() {
     const req = this.req;
-    const res = this.retry > 1 ? fallback(req) : aiRespond(this, req);
+    let res;
+    // CPUの思考で例外が起きても止まらないよう、規則上安全な応答に切り替える
+    const think = this.opts.level === 'weak' ? aiSimple : aiRespond;   // 強さ「弱い」は初期版のCPU
+    try { res = this.retry > 1 ? fallback(req) : think(this, req); }
+    catch (e) { this.errors.push(`CPU: ${e && e.message}`); console.error(e); res = fallback(req); }
     this.respond(res);
   }
   respond(res) {

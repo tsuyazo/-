@@ -50,7 +50,13 @@ export function loadAiRules(cards, report = false) {
       const to = ids(list);
       for (const part of from.split(/[／/]/)) { const f = id(part); if (f && to.length) searchBy[f] = to; }
     }
-    out[key] = { plan: d.plan || '', searchBy, threats: ids(d.threats), hold: ids(d.hold) };
+    // 画面に出す「戦い方」：方針・主な展開・先攻／後攻・相性（出典の記事の数も）
+    const guide = {
+      plan: d.plan || '', first: d.first_turn || '', second: d.second_turn || '', setPolicy: d.set_policy || '',
+      combos: (d.combos || []).slice().sort((a, b) => (b.priority || 0) - (a.priority || 0)).slice(0, 4).map(c => ({ name: c.name, steps: (c.steps || []).slice(0, 4) })),
+      matchups: d.matchups || {}, sources: (d.sources || []).length,
+    };
+    out[key] = { plan: d.plan || '', searchBy, threats: ids(d.threats), hold: ids(d.hold), guide };
   }
   if (report && missing.size) console.error(`ai_rules：名前が合わないカード ${missing.size}件：${[...missing].slice(0, 40).join('、')}`);
   return out;

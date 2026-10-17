@@ -11,7 +11,7 @@ const SUBTYPE_LABEL = { 同調: 'シンクロ', 重ね: 'エクシーズ', 調�
 const TYPE_COLOR = { 通常: 'normal', 効果: 'effect', 融合: 'fusion', 同調: 'synchro', 重ね: 'xyz' };
 
 let lib, data, duel = null;
-let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'events', speed: 'normal' };
+let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'events', speed: 'normal', level: 'strong' };
 let view = 0;              // 画面の持ち主（下側に表示するプレイヤー）
 let curtain = false;
 let busy = false;          // CPUが考え中
@@ -49,6 +49,7 @@ function startFromSetup() {
     ai: seatOfTeam.map(s => setup.mode === 'cpu' && s === 1),
     names: seatOfTeam.map(s => names[s]),
     seed: [1, 2, 3, 4].map(() => String(1 + Math.floor(Math.random() * 2 ** 31))),
+    level: setup.level,
   };
   newDuel(opts, { seatOfTeam }, []);
 }
@@ -437,6 +438,12 @@ function showCurtain() {
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
 
 /* ---------------- セットアップ ---------------- */
+// CPUの強さ
+const LEVELS = [
+  ['weak', 'CPU：弱い', '基本的な判断だけで動きます。'],
+  ['normal', 'CPU：普通', '罠の使いどころ・攻撃対象・デッキ別のサーチ先（大会参加者の記事より）を考えて動きます。'],
+  ['strong', 'CPU：強い', '「普通」に加えて、メインフェイズの行動をいくつか先読みして、ターンの終わりに一番良い盤面になる手を選びます。'],
+];
 function setupHTML() {
   SAVED = loadSaved();
   const decks = Object.entries(data.raw.decks);
@@ -449,7 +456,9 @@ function setupHTML() {
     ${SAVED ? `<button class="big" data-a="resume">続きから（${esc(SAVED.opts.names.join(' vs '))}）</button>` : ''}
     <section class="seat"><h2>対戦モード</h2><div class="row">
       <button class="chipbtn ${cpu ? 'on' : ''}" data-a="mode" data-k="cpu">CPUと対戦</button>
-      <button class="chipbtn ${!cpu ? 'on' : ''}" data-a="mode" data-k="pvp">2人で対戦（1台を交互に）</button></div></section>
+      <button class="chipbtn ${!cpu ? 'on' : ''}" data-a="mode" data-k="pvp">2人で対戦（1台を交互に）</button></div>
+      ${cpu ? `<div class="row">${LEVELS.map(([k, l]) => `<button class="chipbtn ${setup.level === k ? 'on' : ''}" data-a="level" data-k="${k}">${l}</button>`).join('')}</div>
+      <p class="note">${esc(LEVELS.find(x => x[0] === setup.level)?.[2] || '')}</p>` : ''}</section>
     ${seat(0, cpu ? 'あなたのデッキ' : 'P1のデッキ')}${seat(1, cpu ? 'CPUのデッキ' : 'P2のデッキ')}
     <section class="seat"><h2>先攻</h2><div class="row">
       ${[['rand', 'ランダム'], ['me', cpu ? 'あなた' : 'P1'], ['opp', cpu ? 'CPU' : 'P2']].map(([k, l]) => `<button class="chipbtn ${setup.first === k ? 'on' : ''}" data-a="first" data-k="${k}">${l}</button>`).join('')}</div>
@@ -468,7 +477,18 @@ function recipeSheet(k) {
   const part = arr => arr.map(([n, id]) => `<button class="li" data-show="${id}">${swatch(id)}<span class="tx"><b>${esc(data.name(id))} ×${n}</b><span>${esc(metaLine(data.card(id)))}</span></span></button>`).join('');
   const m = data.raw.recipes?.[k] || {};
   sheet(`<h3>【${esc(d.name)}】</h3><p class="meta">${esc(recipeLabel(k))}${m.player ? ` ・ 使用者：${esc(m.player)}` : ''}</p><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s, x) => s + x[0], 0)} ／ EX${d.extra.reduce((s, x) => s + x[0], 0)}</p>
-    <div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
+    ${guideHTML(k)}<div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
+}
+// 記事から集めたこのデッキの戦い方（knowhow）。CPUもこの方針の一部（サーチ先・止めるべきカード）で動く
+function guideHTML(k) {
+  const g = data.raw.aiRules?.[k]?.guide; if (!g || !g.plan) return '';
+  const deckName = key => data.raw.decks[key]?.name || key;
+  const p = (label, text) => text ? `<p class="gline"><b>${label}</b>${esc(text)}</p>` : '';
+  return `<details class="guide"><summary>戦い方（大会参加者の記事より${g.sources ? `・${g.sources}件` : ''}）</summary>
+    ${p('方針', g.plan)}${p('先攻', g.first)}${p('後攻', g.second)}${p('罠の読み', g.setPolicy)}
+    ${g.combos.length ? `<p class="gline"><b>主な動き</b></p><ol class="gcombo">${g.combos.map(c => `<li><b>${esc(c.name)}</b>${c.steps.length ? `<ul>${c.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>` : ''}
+    ${Object.keys(g.matchups).length ? `<p class="gline"><b>相性</b></p><ul class="gmatch">${Object.entries(g.matchups).map(([o, t]) => `<li><b>対${esc(deckName(o))}</b> ${esc(t)}</li>`).join('')}</ul>` : ''}
+  </details>`;
 }
 
 /* ---------------- 入力 ---------------- */
@@ -494,6 +514,7 @@ function onClick(e) {
     if (a === 'pick') setup.deck[+b.dataset.p] = b.dataset.k;
     if (a === 'mode') setup.mode = b.dataset.k;
     if (a === 'first') setup.first = b.dataset.k;
+    if (a === 'level') setup.level = b.dataset.k;
     if (a === 'curtain') setup.curtain = !setup.curtain;
     if (a === 'recipe') { recipeSheet(b.dataset.k); return; }
     if (a === 'resume' && SAVED) { restore(SAVED); return; }

@@ -13,7 +13,7 @@ import {
 import { planIdle } from './ai_plan.js';
 
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
-const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000;
+const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000;
 const PH_DRAW = 1, PH_STANDBY = 2, PH_MAIN1 = 4, PH_END = 512;
 const VEILER = 97268402, TRAP_STUN = 59616123;
 const SELF_TURN_ONLY = new Set([21007444, 32603633]);
@@ -46,7 +46,7 @@ export function aiRespond(duel, m) {
     case M.SELECT_IDLECMD: return idle(ctx, m);
     case M.SELECT_BATTLECMD: return battle(ctx, m);
     case M.SELECT_CHAIN: return chain(ctx, m);
-    case M.SELECT_EFFECTYN: return { type: R.SELECT_EFFECTYN, yes: true };
+    case M.SELECT_EFFECTYN: return { type: R.SELECT_EFFECTYN, yes: effectYes(ctx, m) };
     case M.SELECT_YESNO: return { type: R.SELECT_YESNO, yes: yesNo(ctx, m) };
     case M.SELECT_OPTION: return { type: R.SELECT_OPTION, index: 0 };
     case M.SELECT_CARD: case M.SELECT_TRIBUTE: {
@@ -140,8 +140,10 @@ function idleGreedy(ctx, m) {
     if (opts.length) { mark(opts[0].c); return { type: R.SELECT_IDLECMD, action: 1, index: opts[0].i }; }
   }
   // 4. 通常召喚（展開の起点を優先）
-  if (m.summons.length) {
-    const best = m.summons.map((c, i) => ({ i, v: (SUMMON_PRIORITY[c.code] || 0) * 100 + cardValue(duel, c.code) - (hold.has(c.code) ? 20000 : 0) })).sort((a, b) => b.v - a.v)[0];
+  // リバース効果モンスターは表で出さず、セットする（下の5で）
+  const summons = m.summons.map((c, i) => ({ c, i })).filter(({ c }) => !(info(duel, c.code).type & T_FLIP));
+  if (summons.length) {
+    const best = summons.map(({ c, i }) => ({ i, v: (SUMMON_PRIORITY[c.code] || 0) * 100 + cardValue(duel, c.code) - (hold.has(c.code) ? 20000 : 0) })).sort((a, b) => b.v - a.v)[0];
     return { type: R.SELECT_IDLECMD, action: 0, index: best.i };
   }
   if (acts.length) { mark(acts[0].c); return { type: R.SELECT_IDLECMD, action: 5, index: acts[0].i }; }
@@ -210,7 +212,8 @@ function battle(ctx, m) {
   if (!m.to_m2 && !m.to_ep && atks.length) return go(atks[0]);  // 攻撃が強制される場合
   if (!m.to_m2 && !m.to_ep && m.attacks.length) return { type: R.SELECT_BATTLECMD, action: 1, index: 0 };
   // バトルフェイズに自分から使うのは、場のモンスターの起動効果だけ（伏せた罠をむやみに撃たない）
-  const ci = m.chains.findIndex(c => c.location === L.MZONE && !HAND_TRAP.has(c.code) && !DAMAGE_STEP.has(c.code) && !memo.used[`b${c.code}`]);
+  const reactive = c => ATTACK_RESPONSE.has(c.code) || NEGATE_ACTIVATION.has(c.code) || NEGATE_SPSUMMON.has(c.code);   // 相手の行動に合わせて使うもの
+  const ci = m.chains.findIndex(c => c.location === L.MZONE && !reactive(c) && !HAND_TRAP.has(c.code) && !DAMAGE_STEP.has(c.code) && !memo.used[`b${c.code}`]);
   if (ci >= 0) { memo.used[`b${m.chains[ci].code}`] = 1; return { type: R.SELECT_BATTLECMD, action: 0, index: ci }; }
   return { type: R.SELECT_BATTLECMD, action: m.to_m2 ? 2 : 3, index: null };
 }
@@ -303,18 +306,33 @@ function chooseCards(ctx, m, list, want) {
   const n = Math.min(Math.max(m.min, want, 1), m.max);
   const giveUp = [500, 501, 504, 507, 511, 512, 513, 519, 531, 534 - 1].includes(hint);   // 自分のカードを失う系
   const take = [506, 509, 527, 518, 573].includes(hint);                                 // 自分が得をする系
+  const gyGood = graveyardGood(duel);
   const scored = list.map((c, i) => {
     const q = c.location === L.MZONE ? f[c.controller]?.mz[c.sequence] : null;
     const v = cardValue(duel, c.code, q);
     const opp = c.controller !== me;
     let s;
     if (hint === 549) s = attackTargetScore(ctx, c);
+    // デッキから墓地へ（おろかな埋葬など）：記事の推奨順、なければ墓地で働くカード
+    else if (!opp && c.location === L.DECK && (hint === 504 || hint === 501)) s = searchScore(ctx, c, v) + (gyGood.has(c.code) ? 50000 : 0);
+    // 手札を捨てる：捨てられて働くカード（暗黒界など）を先に、次に価値の低いカード
+    else if (!opp && c.location === L.HAND && (hint === 501 || hint === 504)) s = (gyGood.has(c.code) ? 100000 + v : -v);
     else if (giveUp) s = opp ? 5000 + v : -v + (c.location === L.HAND ? 0 : -200);
     else if (take) s = searchScore(ctx, c, v);
     else s = opp ? 10000 + v : -v;                       // 対象を取る系：相手の強いカードを優先
     return { i, s };
   }).sort((a, b) => b.s - a.s);
   return scored.slice(0, n).map(x => x.i);
+}
+// 墓地に送られて得をするカード（暗黒界は捨てられると効果、植物などは墓地から効果）
+const GY_GOOD_IDS = [15341821, 67441435, 11747708, 85087012, 26202165];
+function graveyardGood(duel) {
+  if (!duel.data._gyGood) {
+    const set = new Set(GY_GOOD_IDS);
+    for (const c of Object.values(duel.data.byId)) if (c.category === 'モンスター' && String(c.name).startsWith('暗黒界の')) set.add(c.id);
+    duel.data._gyGood = set;
+  }
+  return duel.data._gyGood;
 }
 function searchScore(ctx, c, v) {
   // 今処理している効果のカード（チェーンの一番上）ごとに、記事で推奨された持ってくる順
@@ -342,6 +360,15 @@ function position(ctx, m) {
   const order = wantAtk ? [POS.FACEUP_ATTACK, POS.FACEUP_DEFENSE, POS.FACEDOWN_DEFENSE, POS.FACEDOWN_ATTACK]
     : [POS.FACEUP_DEFENSE, POS.FACEDOWN_DEFENSE, POS.FACEUP_ATTACK, POS.FACEDOWN_ATTACK];
   return order.find(p => m.positions & p);
+}
+// 「効果を使いますか」：攻撃を止める効果（ホープなど）は相手の攻撃にだけ。それ以外は使う
+function effectYes(ctx, m) {
+  const { duel, op } = ctx;
+  if (ATTACK_RESPONSE.has(m.code)) {
+    const la = duel.lastAttack;
+    return !!(la && la.turn === duel.turn && la.player === op);
+  }
+  return true;
 }
 function yesNo(ctx, m) {
   // 「攻撃を続けますか」（巻き戻し）は、勝てる相手がいる時だけ続ける

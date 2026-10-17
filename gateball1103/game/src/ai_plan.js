@@ -10,10 +10,10 @@ export const PLAN = { perTurn: 8, candidates: 6, steps: 500 };
 
 export function planIdle(ctx, m, greedy, respond, value) {
   const { duel, me, memo } = ctx;
-  if (duel.isSim || !duel.lib || PLAN.perTurn <= 0) return null;
+  if (duel.isSim || !duel.lib || PLAN.perTurn <= 0 || duel.opts.level === 'normal') return null;   // 強さ「普通」は先読みしない
   memo.plans = memo.plans || 0;
   if (memo.plans >= PLAN.perTurn) return null;
-  const cands = candidates(m, greedy);
+  const cands = candidates(duel, m, greedy);
   if (cands.length < 2) return null;
   memo.plans++;
   let best = null;
@@ -28,7 +28,7 @@ export function planIdle(ctx, m, greedy, respond, value) {
 }
 
 // 試す候補：普段の判断＋召喚・特殊召喚・発動（同じカードの重複は1つにまとめる）＋何もしない
-function candidates(m, greedy) {
+function candidates(duel, m, greedy) {
   const out = [], seen = new Set();
   const add = (res, k, isGreedy = false) => {
     if (seen.has(k)) return;
@@ -38,6 +38,8 @@ function candidates(m, greedy) {
   const groups = [[1, 'special_summons'], [5, 'activates'], [0, 'summons'], [3, 'monster_sets']];
   for (const [action, f] of groups) m[f].forEach((c, index) => {
     if (out.length >= PLAN.candidates) return;
+    // リバース効果モンスターを表で召喚するのは候補にしない（ターン終了時の盤面では損が見えないため）
+    if (action === 0 && ((duel.data.eng(c.code)?.type || 0) & 0x200000)) return;
     add({ type: R.SELECT_IDLECMD, action, index }, keyOf(m, { action, index }));
   });
   if (m.to_bp) add({ type: R.SELECT_IDLECMD, action: 6, index: null }, 'a6');
@@ -67,9 +69,19 @@ function rollout(duel, me, first, respond, value) {
       if (st === 'end' || s.turn !== turn) break;
       const q = s.req;
       if (q.player !== me) {
-        // 相手：任意の発動・効果の使用はしない
-        if (q.type === M.SELECT_CHAIN) { s.respond({ type: R.SELECT_CHAIN, index: q.forced ? 0 : null }); continue; }
-        if (q.type === M.SELECT_EFFECTYN) { s.respond({ type: R.SELECT_EFFECTYN, yes: false }); continue; }
+        // 相手：表側のカード（場のモンスター・表側の魔法罠＝誰でも見える情報）の効果だけ使う。
+        // 手札・伏せカードは見えないので使わせない（ライオウや王宮の弾圧は読み込める）
+        if (q.type === M.SELECT_CHAIN) {
+          if (q.forced) { s.respond({ type: R.SELECT_CHAIN, index: 0 }); continue; }
+          const pub = q.selects.map((c, i) => ({ c, i })).filter(({ c }) => isPublic(s, c));
+          let index = null;
+          if (pub.length) {
+            const r = respond(s, { ...q, selects: pub.map(x => x.c) });
+            if (r && r.index != null) index = pub[r.index]?.i ?? null;
+          }
+          s.respond({ type: R.SELECT_CHAIN, index }); continue;
+        }
+        if (q.type === M.SELECT_EFFECTYN) { s.respond({ type: R.SELECT_EFFECTYN, yes: isPublic(s, q) }); continue; }
       }
       s.respond(s.retry > 1 ? fallback(q) : respond(s, q));
     }
@@ -79,4 +91,11 @@ function rollout(duel, me, first, respond, value) {
   } finally {
     s.destroy();
   }
+}
+
+function isPublic(s, c) {
+  if (c.location === L.MZONE) return true;
+  if (c.location !== L.SZONE) return false;
+  const q = s.query({ controller: c.controller, location: c.location, sequence: c.sequence });
+  return !!(q && (q.position & POS.FACEUP));
 }
