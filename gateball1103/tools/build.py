@@ -177,11 +177,32 @@ def write_cards_md(cards):
 
 
 def write_decklists_md(decks, by_ref):
-    lines = ["# デッキレシピ（10種）", "", "各デッキの分析は decks.md を参照。", ""]
+    meta = json.load(open(os.path.join(HERE, "recipes_meta.json")))
+    lines = ["# デッキレシピ（10種・大会入賞レシピ）", "",
+             "寒波亭（1103ゲートボール大会）の資料室・公式デッキDBに掲載されたレシピをそのまま使用。カード名は本ゲームの名前に置き換え。",
+             "各デッキの解説は decks.md を参照。", ""]
     for key, d in decks.items():
+        m = meta.get(key, {})
         main = sum(e["n"] for e in d["main"])
         extra = sum(e["n"] for e in d["extra"])
         lines += [f"## 【{d['name']}】（参照：{d['ref_archetype']}） メイン{main}／エクストラ{extra}", ""]
+        src = []
+        if m.get("event") or m.get("placing"):
+            src.append(f"{m.get('event') or ''} {m.get('placing') or ''}".strip())
+        if m.get("player"):
+            src.append(f"使用者：{m['player']}")
+        if m.get("date"):
+            src.append(m["date"])
+        lines.append(f"- 出典：{' ／ '.join(src) if src else m.get('title') or ''}（[元ページ]({m.get('source_url')})）")
+        if not m.get("placing_confirmed"):
+            lines.append("- 注意：このレシピは寒波亭が公式デッキDBに登録した参考デッキで、ページ上に入賞記録の記載はない。")
+        if m.get("uncertain"):
+            lines.append(f"- 注意：元画像の解像度が低く、推定で特定したカードを含む：{'、'.join(m['uncertain'])}")
+        if m.get("illegible"):
+            n = sum(c for part, c in m["illegible"] if part == "main")
+            if n:
+                lines.append(f"- 注意：元画像で判読できなかったメインの罠{n}枚は除いている（元のメインは{main + n}枚）。")
+        lines.append("")
         for label, part in (("メインデッキ", "main"), ("エクストラデッキ", "extra")):
             lines.append(f"**{label}**")
             lines.append("")
@@ -194,8 +215,9 @@ def write_decklists_md(decks, by_ref):
                 total = sum(int(s.rsplit('×', 1)[1]) for s in items)
                 lines.append(f"- {g}（{total}）：" + "、".join(items))
             lines.append("")
+        if m.get("side"):
+            lines += ["**サイドデッキ（参考・元のカード名）**", "", "- " + "、".join(f"{n}×{c}" for c, n in m["side"]), ""]
     open(os.path.join(ROOT, "decklists.md"), "w").write("\n".join(lines))
-
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "cards.cdb"))

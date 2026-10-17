@@ -435,7 +435,7 @@ function setupHTML() {
   SAVED = loadSaved();
   const decks = Object.entries(data.raw.decks);
   const seat = (p, title) => `<section class="seat"><h2>${title}</h2><div class="decks">
-    ${decks.map(([k, d]) => `<button class="deckbtn ${setup.deck[p] === k ? 'on' : ''}" data-a="pick" data-p="${p}" data-k="${k}"><span class="tier">Tier ${TIER[k]}</span><b>${esc(d.name)}</b><span>参照：${esc(d.ref)}</span></button>`).join('')}
+    ${decks.map(([k, d]) => `<button class="deckbtn ${setup.deck[p] === k ? 'on' : ''}" data-a="pick" data-p="${p}" data-k="${k}"><span class="tier">Tier ${TIER[k]}</span><b>${esc(d.name)}</b><span>参照：${esc(d.ref)}</span><span>${esc(recipeLabel(k))}</span></button>`).join('')}
     </div><button class="chipbtn" data-a="recipe" data-k="${setup.deck[p]}">レシピを見る</button></section>`;
   const cpu = setup.mode === 'cpu';
   return `<div class="setup">
@@ -451,10 +451,17 @@ function setupHTML() {
       <p class="note">カードの効果・チェーン・フェイズ進行・ダメージ計算はすべて自動で処理されます（マスタールール2、先攻もドロー）。発動できる場面になると選択肢が出ます。</p></section>
     <button class="big" data-a="start">デュエル開始</button></div>`;
 }
+// 大会レシピの出典（例：寒波亭 第46回 個人戦 優勝）
+function recipeLabel(k) {
+  const m = data.raw.recipes?.[k]; if (!m) return '';
+  if (!m.placing_confirmed) return '寒波亭 登録レシピ';
+  return `${m.event || ''} ${m.placing || ''}`.trim();
+}
 function recipeSheet(k) {
   const d = data.raw.decks[k];
   const part = arr => arr.map(([n, id]) => `<button class="li" data-show="${id}">${swatch(id)}<span class="tx"><b>${esc(data.name(id))} ×${n}</b><span>${esc(metaLine(data.card(id)))}</span></span></button>`).join('');
-  sheet(`<h3>【${esc(d.name)}】</h3><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s, x) => s + x[0], 0)} ／ EX${d.extra.reduce((s, x) => s + x[0], 0)}</p>
+  const m = data.raw.recipes?.[k] || {};
+  sheet(`<h3>【${esc(d.name)}】</h3><p class="meta">${esc(recipeLabel(k))}${m.player ? ` ・ 使用者：${esc(m.player)}` : ''}</p><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s, x) => s + x[0], 0)} ／ EX${d.extra.reduce((s, x) => s + x[0], 0)}</p>
     <div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
 }
 

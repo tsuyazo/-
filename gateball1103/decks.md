@@ -1,6 +1,8 @@
 # 環境分析と10デッキ解説
 
-レシピ本体は [decklists.md](decklists.md)、カード効果は [cards.md](cards.md)。
+レシピ本体は [decklists.md](decklists.md)（寒波亭の大会入賞レシピ。出典・順位つき）、カード効果は [cards.md](cards.md)。
+
+※ 以下の解説はデッキタイプの一般的な動きの説明。採用カードは入賞レシピに合わせて変わっているので、枚数・構成は decklists.md を正とする。
 
 ## 1. データについて（重要）
 

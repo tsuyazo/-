@@ -20,6 +20,7 @@ export function loadRaw() {
     decks: Object.fromEntries(Object.entries(decks).map(([k, d]) => [k, { name: d.name, ref: d.ref_archetype,
       main: d.main.map(e => [e.n, idOf[e.code]]), extra: d.extra.map(e => [e.n, idOf[e.code]]) }])),
     cardData: JSON.parse(fs.readFileSync(path.join(HERE, 'card_data.json'))),
+    recipes: JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/recipes_meta.json'))),
     effectStrings: JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json'))),
     scripts,
   };
