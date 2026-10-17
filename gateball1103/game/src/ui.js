@@ -1,6 +1,7 @@
 // 画面層：エンジンの状態を描画し、人間の入力をエンジンへの応答に変換する。
 import { cardMatchesOpcode } from 'ocgcore-wasm';
 import { Duel, GameData, PHASE_NAME, L, POS, M, R, locName, sumSolve } from './engine.js';
+import { aiRespond } from './ai.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -337,25 +338,53 @@ function selLabel(c) {
   const where = `${c.controller === view ? '自分' : '相手'}の${locName(c.location)}`;
   return { hidden, name: hidden ? '裏側のカード' : data.name(c.code), where };
 }
-function openActs() {
+// ヒント：CPU（強さ「強い」と同じ考え方）なら今どうするか。CPUの記憶は汚さないよう元に戻す
+let HINT = null;   // { req, res }
+function aiHint() {
+  if (HINT && HINT.req === pend) return HINT.res;
+  const memo = JSON.parse(JSON.stringify(duel.aiMemo)), level = duel.opts.level;
+  let res = null;
+  try { duel.opts.level = 'strong'; res = aiRespond(duel, pend); } catch (e) { res = null; }
+  finally { duel.aiMemo = memo; duel.opts.level = level; }
+  HINT = { req: pend, res };
+  return res;
+}
+const sameRes = (a, b) => a && b && a.type === b.type && a.action === b.action && (a.index ?? null) === (b.index ?? null);
+function hintNote(res) {
+  if (!res) return '';
+  const words = { 6: 'バトルフェイズへ進む', 7: 'ターンを終了する' };
+  if (res.type === R.SELECT_IDLECMD && words[res.action]) return words[res.action];
+  if (res.type === R.SELECT_BATTLECMD && res.action === 2) return 'メインフェイズ2へ進む';
+  if (res.type === R.SELECT_BATTLECMD && res.action === 3) return 'ターンを終了する';
+  if (res.type === R.SELECT_CHAIN && res.index == null) return '発動しない';
+  return '';
+}
+const hintBtn = () => `<button class="chipbtn hintbtn" data-a="hint">ヒント：CPUならどうする？</button>`;
+function openActs(showHint = false) {
   const list = allActions();
+  const rec = showHint ? aiHint() : null;
+  const note = showHint ? hintNote(rec) : '';
   sheet(`<h3>${pend.type === M.SELECT_IDLECMD ? '行動一覧' : '攻撃・発動'}</h3><p class="note">盤面のカードをタップしても選べます（光っているカード）。</p>
-    <div class="list">${list.map((a, k) => `<button class="li" data-actpick="${k}">${swatch(a.c.code)}<span class="tx"><b>${esc(a.label)}</b><span>「${esc(data.name(a.c.code))}」・${esc(locName(a.c.location))}</span></span></button>`).join('') || '<p class="note">できる行動はありません</p>'}</div>`);
+    ${showHint ? `<p class="hintline">${note ? `おすすめ：${esc(note)}` : list.some(a => sameRes(a.res, rec)) ? 'おすすめの行動に印を付けました' : 'おすすめは特にありません'}</p>` : hintBtn()}
+    <div class="list">${list.map((a, k) => `<button class="li ${sameRes(a.res, rec) ? 'rec' : ''}" data-actpick="${k}">${swatch(a.c.code)}<span class="tx"><b>${sameRes(a.res, rec) ? '<i class="recmark">おすすめ</i>' : ''}${esc(a.label)}</b><span>「${esc(data.name(a.c.code))}」・${esc(locName(a.c.location))}</span></span></button>`).join('') || '<p class="note">できる行動はありません</p>'}</div>`);
   ACTS = list.map(a => ({ fn: () => answer(a.res) }));
 }
 
 /* ---------------- 要求ごとのプロンプト ---------------- */
-function openPrompt() {
+function openPrompt(showHint = false) {
   const r = pend; if (!r) return;
   const hint = data.hint(duel.hintMsg[r.player]);
   const yes = (label, res) => ({ label, pri: true, fn: () => answer(res) });
   switch (r.type) {
-    case M.SELECT_IDLECMD: case M.SELECT_BATTLECMD: openActs(); return;
+    case M.SELECT_IDLECMD: case M.SELECT_BATTLECMD: openActs(showHint); return;
     case M.SELECT_CHAIN: {
       const last = duel.chain[duel.chain.length - 1];
       const ctx = last ? `相手の行動：チェーン${duel.chain.length}「${data.name(last.code)}」` : (duel.log[duel.log.length - 1]?.s || '');
+      const rec = showHint ? aiHint() : null;
+      const isRec = k => rec && rec.type === R.SELECT_CHAIN && rec.index === k;
       sheet(`<h3>${r.forced ? '発動する効果を選んでください' : 'チェーンして発動しますか？'}</h3><p class="meta">${esc(ctx)}</p>
-        <div class="list">${r.selects.map((c, k) => `<button class="li" data-actpick="${k}">${swatch(c.code)}<span class="tx"><b>「${esc(data.name(c.code))}」</b><span>${esc(data.desc(c.description))}・${esc(locName(c.location))}</span></span></button>`).join('')}</div>
+        ${r.forced ? '' : showHint ? `<p class="hintline">${rec && rec.index == null ? 'おすすめ：発動しない' : 'おすすめの発動に印を付けました'}</p>` : hintBtn()}
+        <div class="list">${r.selects.map((c, k) => `<button class="li ${isRec(k) ? 'rec' : ''}" data-actpick="${k}">${swatch(c.code)}<span class="tx"><b>${isRec(k) ? '<i class="recmark">おすすめ</i>' : ''}「${esc(data.name(c.code))}」</b><span>${esc(data.desc(c.description))}・${esc(locName(c.location))}</span></span></button>`).join('')}</div>
         ${r.forced ? '' : btns([{ label: '発動しない', fn: () => answer({ type: R.SELECT_CHAIN, index: null }) },
           { label: setup.chainMode === 'events' ? 'チェーン確認：要所のみ' : 'チェーン確認：毎回', fn: () => { setup.chainMode = setup.chainMode === 'events' ? 'always' : 'events'; duel.chainMode = setup.chainMode; openPrompt(); } }])}`);
       const pick = r.selects.map((c, k) => ({ fn: () => answer({ type: R.SELECT_CHAIN, index: k }) }));
@@ -535,6 +564,7 @@ function onClick(e) {
   if (a === 'log') logSheet();
   else if (a === 'more') moreSheet();
   else if (a === 'acts' || a === 'prompt') openPrompt();
+  else if (a === 'hint' && pend) openPrompt(true);
   else if (a === 'tobp') answer({ type: R.SELECT_IDLECMD, action: 6, index: null });
   else if (a === 'toep') answer({ type: R.SELECT_IDLECMD, action: 7, index: null });
   else if (a === 'tom2') answer({ type: R.SELECT_BATTLECMD, action: 2, index: null });
