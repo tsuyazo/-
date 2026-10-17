@@ -42,7 +42,10 @@ const LOC_NAME = { 1: 'デッキ', 2: '手札', 4: 'モンスターゾーン', 8
 // Q.TYPE は 0.1.2 のパーサーで手札・EXの読み取りに失敗するため使わない（種類はカードデータから引く）
 const QFLAGS = Q.CODE | Q.POSITION | Q.LEVEL | Q.RANK | Q.ATTACK | Q.DEFENSE | Q.BASE_ATTACK | Q.BASE_DEFENSE
   | Q.OVERLAY_CARD | Q.COUNTERS | Q.OWNER | Q.IS_PUBLIC | Q.ATTRIBUTE | Q.RACE;
-const EVENT_TYPES = new Set([M.CHAINING, M.SUMMONING, M.SPSUMMONING, M.FLIPSUMMONING, M.ATTACK, M.CHAIN_END]);
+// これらが起きた後は、チェーン確認「要所のみ」でも人間に発動の機会を聞く
+// （召喚は「召喚する時」と「召喚に成功した時」の2回、戦闘は攻撃宣言とダメージステップ）
+const EVENT_TYPES = new Set([M.CHAINING, M.CHAIN_END, M.SUMMONING, M.SPSUMMONING, M.FLIPSUMMONING,
+  M.SUMMONED, M.SPSUMMONED, M.FLIPSUMMONED, M.ATTACK, M.BATTLE, M.DAMAGE_STEP_START]);
 
 export function locName(l) { return LOC_NAME[l] || ''; }
 
@@ -93,7 +96,9 @@ export class Duel {
     this.nsUsed = false;                     // このターンの通常召喚（セット含む）を使ったか
     this.uiEvents = [];                      // 画面の演出用（ターン交代・フェイズ・行動）
     this.log = []; this.chain = []; this.win = null; this.req = null; this.lastReq = null;
-    this.hintMsg = [null, null]; this.events = new Set(); this.retry = 0;
+    this.hintMsg = [null, null]; this.retry = 0;
+    // プレイヤーごとに「自分が最後に応答してから起きた出来事」。相手の応答では消さない
+    this.events = [new Set(), new Set()];
     this.history = []; this.errors = []; this.reveal = null;
     this.chainMode = 'events';               // 'events' = 何か起きた時だけチェーン確認 / 'always'
     this.aiMemo = { turn: -1, used: {} };
@@ -162,7 +167,8 @@ export class Duel {
   }
   respond(res) {
     this.history.push(res);
-    this.req = null; this.events = new Set();
+    if (this.req) this.events[this.req.player] = new Set();
+    this.req = null;
     this.lib.duelSetResponse(this.h, res);
   }
   isRequest(m) {
@@ -175,7 +181,7 @@ export class Duel {
     switch (m.type) {
       case M.SELECT_CHAIN:
         if (!m.selects.length && !m.forced) return { type: R.SELECT_CHAIN, index: null };
-        if (!this.ai[m.player] && !m.forced && this.chainMode === 'events' && !this.events.size) return { type: R.SELECT_CHAIN, index: null };
+        if (!this.ai[m.player] && !m.forced && this.chainMode === 'events' && !this.events[m.player].size) return { type: R.SELECT_CHAIN, index: null };
         return null;
       case M.SELECT_PLACE: case M.SELECT_DISFIELD: return placeResponse(m);
       case M.SORT_CARD: case M.SORT_CHAIN: return { type: R.SORT_CARD, order: null };
@@ -195,10 +201,10 @@ export class Duel {
   onMessage(m) {
     const n = p => this.names[p];
     const D = this.data;
-    if (EVENT_TYPES.has(m.type)) this.events.add(m.type);
+    if (EVENT_TYPES.has(m.type)) this.events.forEach(e => e.add(m.type));
     switch (m.type) {
-      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.nsUsed = false; this.uiEvents.push({ k: 'turn', p: m.player, t: this.turn }); this.events.clear(); this.say(`――― ターン${this.turn}：${n(m.player)} ―――`, m.player); break;
-      case M.NEW_PHASE: this.phase = m.phase; this.uiEvents.push({ k: 'phase', ph: m.phase, p: this.turnPlayer }); if (m.phase === 512 || m.phase === 8) this.events.add('phase'); break;
+      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.nsUsed = false; this.uiEvents.push({ k: 'turn', p: m.player, t: this.turn }); this.events.forEach(e => e.clear()); this.say(`――― ターン${this.turn}：${n(m.player)} ―――`, m.player); break;
+      case M.NEW_PHASE: this.phase = m.phase; this.uiEvents.push({ k: 'phase', ph: m.phase, p: this.turnPlayer }); if (m.phase === 512 || m.phase === 8) this.events.forEach(e => e.add('phase')); break;
       case M.HINT:
         if (m.hint_type === HT.SELECTMSG) this.hintMsg[m.player] = m.hint;
         else if (m.hint_type === HT.OPSELECTED || m.hint_type === HT.EFFECT) { /* 相手の選択の表示は省略 */ }

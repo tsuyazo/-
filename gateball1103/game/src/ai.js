@@ -86,9 +86,9 @@ export function aiRespond(duel, m) {
       if (!m.selects.length) return { type: R.SELECT_CHAIN, index: m.forced ? 0 : null };
       if (m.forced) return { type: R.SELECT_CHAIN, index: 0 };
       const last = duel.chain[duel.chain.length - 1];
-      const oppActed = (last && last.player === op) || (!myTurn && duel.events.size > 0);
+      const oppActed = (last && last.player === op) || (!myTurn && duel.events[me].size > 0);
       const i = m.selects.findIndex(c => {
-        if (c.code === MAXX_C) return !myTurn && duel.events.has(M.SPSUMMONING);
+        if (c.code === MAXX_C) return !myTurn && duel.events[me].has(M.SPSUMMONING);
         if (OPP_TURN_ONLY.has(c.code)) return !myTurn;
         const t = info(duel, c.code).type;
         if (c.location === L.MZONE || c.location === L.GRAVE || c.location === L.HAND && (t & TYPE_MONSTER)) return true; // 自分の誘発効果
