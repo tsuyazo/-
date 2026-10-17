@@ -191,7 +191,14 @@ function countActs(r) { return r.summons.length + r.special_summons.length + r.p
 function winHTML() {
   const w = duel.win.player;
   const msg = w === 2 ? '引き分け' : `${duel.names[w]}の勝利`;
-  return `<div class="win">${esc(msg)}</div>`;
+  // 決着の理由（エンジンの番号：1＝ライフが0、2＝デッキ切れ、0＝降参など）
+  const why = { 1: 'ライフポイントが0になった', 2: 'デッキからカードを引けなかった' }[duel.win.reason] || '';
+  const loser = w === 2 ? null : 1 - w;
+  const deck = p => data.raw.decks[duel.opts.decks[p]]?.name || '';
+  const row = p => `<span>${esc(duel.names[p])}（${esc(deck(p))}）</span><b>LP ${duel.lp[p]}</b>`;
+  return `<div class="win"><div class="wt">${esc(msg)}</div>
+    <p class="wsub">${loser != null && why ? `${esc(duel.names[loser])}の${esc(why)}・` : ''}${duel.turn}ターン</p>
+    <div class="wrows"><div>${row(0)}</div><div>${row(1)}</div></div></div>`;
 }
 function pilesHTML(p) {
   const P = F[p];

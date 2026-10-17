@@ -116,7 +116,12 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .form input,.form select{background:var(--slot);border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:8px;font-size:16px;width:100%;font-family:inherit}
 .curtain{position:fixed;inset:0;z-index:40;background:var(--table);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
 .curtain .brand{font-size:40px}
-.win{border:2px solid var(--brass);border-radius:6px;padding:10px;text-align:center;font-family:var(--display);color:var(--brass);background:var(--felt)}
+.win{border:2px solid var(--brass);border-radius:6px;padding:12px;text-align:center;color:var(--brass);background:var(--felt);margin-bottom:6px}
+.win .wt{font-family:var(--display);font-size:24px;line-height:1.2}
+.win .wsub{margin:4px 0 8px;font-size:12px;color:var(--muted)}
+.win .wrows{display:grid;gap:4px;font-size:12.5px;color:var(--ink);text-align:left}
+.win .wrows div{display:flex;justify-content:space-between;gap:8px;background:var(--slot);border-radius:4px;padding:4px 8px}
+.win .wrows b{font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:50;max-width:90%}
 /* ---- PC幅：盤面の右にデュエルの記録を常に出す ---- */
 #sidelog{display:none}
