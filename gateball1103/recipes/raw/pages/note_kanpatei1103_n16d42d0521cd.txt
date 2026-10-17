@@ -1,0 +1,63 @@
+source_url: https://note.com/kanpatei1103/n/n16d42d0521cd
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/n16d42d0521cd (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(デブリ)
+publish_at: 2024-08-27T03:52:28.000+09:00
+url: None
+第2回 チーム戦 準優勝 サブロー
+[IMG https://assets.st-note.com/img/1724698149485-QocYUAuBq3.png]
+第9回 チーム戦 優勝 アイス
+[IMG https://assets.st-note.com/img/1724698196921-UheuhdB22M.png]
+第10回 チーム戦 優勝(個人成績8-0) shoot
+[IMG https://assets.st-note.com/img/1724698210525-tuxABIwQqz.png]
+寒波亭 グランド2023 個人戦 優勝 アイス
+[IMG https://assets.st-note.com/img/1756859714-ljmsUApd52HBaTCJ7NS9w6ev.png]
+5人でCS! 優勝 やすもり
+[IMG https://assets.st-note.com/img/1724698223696-3NOH9HE0UN.png]
+第12回 チーム戦 準優勝 アイス
+[IMG https://assets.st-note.com/img/1746422288-GeXCRmqWEsknvpr6gVuzFAYB.png]
+第18回 チーム戦 準優勝 やまなし
+[IMG https://assets.st-note.com/img/1724698250388-LTQrwNIdJj.png]
+第20回 チーム戦 準優勝 のり
+[IMG https://assets.st-note.com/img/1756830256-bFRznqkTCDSof3sZxvI85wN4.png]
+第21回 チーム戦 準優勝 のり
+[IMG https://assets.st-note.com/img/1746422326-Og5FqTKZ3db0982v7sSiMnYx.png]
+第21回 チーム戦 準優勝 らーばぁ
+[IMG https://assets.st-note.com/img/1746422337-CHG9V61kvxbQp27WZicARPDU.png]
+第27回 3人チーム戦 優勝 やまなし
+[IMG https://assets.st-note.com/img/1741631014-Y3u0VpJwtQXjBS5PdaCiHfxy.png]
+第28回 個人戦 優勝 さいとう
+[IMG https://assets.st-note.com/img/1741630693-e6xUlO0mr395VwfEihkFYJAc.png]
+第30回 個人戦 準優勝 ドロンパ
+[IMG https://assets.st-note.com/img/1746422146-ZRD5qlCkFyubUAOipT23MKoh.png]
+第5回 mini with カードボックス横浜西口店 準優勝 やまなし
+[IMG https://assets.st-note.com/img/1746422541-jV8DfL20O9yRXgob4HcJSsQz.png]
+寒波亭 グランド2025 準優勝 ろこん様
+[IMG https://assets.st-note.com/img/1746422905-tYCoRsjZWpiU9qadJFKHv4l1.png]
+第31回 チーム戦 準優勝 NEKO
+[IMG https://assets.st-note.com/img/1747623843-B6b1dSYeUmFI84WnqcVgzHxf.jpg]
+第2回 寒波亭 with 博多ドラグーン 個人戦 優勝 ジェダイ
+[IMG https://assets.st-note.com/img/1756876022-GSkUt4I1WP0Cdf2py6LYBFMK.jpg]
+メモリアル2025 with トレカード 個人戦 準優勝 黒モア
+[IMG https://assets.st-note.com/img/1754134267-MO1zcUsJnp3fANIejlaHtwZW.png]
+第35回 個人戦 準優勝 さいとう
+[IMG https://assets.st-note.com/img/1758557115-qzP5Ze3bQTahHXLBwYtCDAdS.png]
+第36回 チーム戦 準優勝 たかはし
+[IMG https://assets.st-note.com/img/1760457448-AcWXy4hIaqLVd38nMxJ7S0EN.png]
+第36回 チーム戦 準優勝 さいとう
+[IMG https://assets.st-note.com/img/1760457463-gcNEiQX9GDlFTLx25MaspYnB.png]
+第7回  寒波亭mini 優勝 さいとう
+[IMG https://assets.st-note.com/img/1763868150-7qBgp9d2bLcJheo0mRwk1OWM.png]
+5人でCS  優勝 まるお
+[IMG https://assets.st-note.com/img/1763868060-QezNnxT6Z5GtsjqXWKB73akP.png]
+第38回 チーム戦 優勝 さいとう
+[IMG https://assets.st-note.com/img/1766373732-qJrEtpK4ocX3s6Fmnbj9VUf5.png]
+第38回 チーム戦 準優勝 [LINK https://an.an/] an.an
+[IMG https://assets.st-note.com/img/1768016394-N73BmPCDV8f1ayZUgksetbqd.png]
+メモリアル2025 Winter with 福福トレカ 優勝 さいとう
+[IMG https://assets.st-note.com/img/1774366828-izejUoYPC8Q4rWak7TAqyE36.png]
+第41回 チーム戦 優勝 さいた
+[IMG https://assets.st-note.com/img/1775996940-CsRb2lze0j74VgoS3dvxnckX.png]
+寒波亭 エリア予選 北海道 優勝 らいたろ
+[IMG https://assets.st-note.com/img/1789967687-iGFSynjEsdfP9Y8aAwxk6DHm.png]

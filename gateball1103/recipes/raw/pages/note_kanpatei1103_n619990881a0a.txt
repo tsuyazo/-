@@ -1,0 +1,21 @@
+source_url: https://note.com/kanpatei1103/n/n619990881a0a
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/n619990881a0a (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(マシンガジェット)
+publish_at: 2024-08-27T04:05:21.000+09:00
+url: None
+第5回 チーム戦 優勝 くれは
+[IMG https://assets.st-note.com/img/1724699016284-LylxXlCA1Q.png]
+第5回 チーム戦 優勝 イーグル
+[IMG https://assets.st-note.com/img/1724699043090-at0qtqXW9b.png]
+第9回 チーム戦 優勝 もりしま
+[IMG https://assets.st-note.com/img/1724699065641-OkrShC30T0.png]
+第13回 個人戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699082474-7ZQgymVxnv.png]
+第13回 個人戦 準優勝 おおかみ
+[IMG https://assets.st-note.com/img/1724699096507-zZ758I9Set.png]
+第29回 チーム戦 優勝 Jing Jing
+[IMG https://assets.st-note.com/img/1746417824-leAZ7hyDE1V2fBpvUONsrj3n.png]
+第44回 個人戦 優勝 すみやき
+[IMG https://assets.st-note.com/img/1779033071-LWKFJv45S6i1GwgM2sIjO09H.png]

@@ -1,0 +1,47 @@
+source_url: https://note.com/kanpatei1103/n/ne38a2114aece
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/ne38a2114aece (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(六武衆)
+publish_at: 2024-08-27T03:41:50.000+09:00
+url: None
+第2回 チーム戦 優勝 いっとー
+[IMG https://assets.st-note.com/img/1724697536040-uXb5Lva5Xr.png]
+第6回 個人戦 優勝 ゆかまん
+[IMG https://assets.st-note.com/img/1724697548691-Qx1XtZCEfh.png]
+第7回 チーム戦 優勝 ゆかまん、にき　(同一構築)
+[IMG https://assets.st-note.com/img/1724697564268-tKrt5AkNWF.png]
+第1回 チャレンジカップ 優勝 大嵐
+[IMG https://assets.st-note.com/img/1724697578656-MLgxZfWPxM.png]
+第10回 チーム戦 準優勝 かぼちゃ
+[IMG https://assets.st-note.com/img/1724697593288-wKAQPTtUKG.png]
+第12回 チーム戦 優勝 南の四天王
+[IMG https://assets.st-note.com/img/1746421529-PUZNDapFOkIl3rfoeCE9tJBM.png]
+第12回 チーム戦 優勝 ミサイルマン
+[IMG https://assets.st-note.com/img/1746421540-J3X50G4Wk2OL1PvcEf9iZy7F.png]
+寒波亭 グランド2024 個人戦 準優勝 大嵐
+[IMG https://assets.st-note.com/img/1756835636-qvB47mrzypJeAZLXQsW29NGf.png]
+第25回 個人戦 準優勝 るか
+[IMG https://assets.st-note.com/img/1735113215-vxiAdosC9Qa7yunPBR1LUqrW.png]
+第5回 寒波亭mini with カードボックス横浜西口店 優勝 わべ
+[IMG https://assets.st-note.com/img/1746421084-muVONJaM0gvqCpkY6Qi3FAW8.png]
+第3回 チャレンジカップ 優勝 るか
+[IMG https://assets.st-note.com/img/1746421253-zoDPHiMnUTkbxvQ5LJgswCAO.png]
+第34回 チーム戦 準優勝 ごろう
+[IMG https://assets.st-note.com/img/1756829928-MFbmk3lgTACH8KzXOrqys2PZ.png]
+第34回 チーム戦 準優勝るか
+[IMG https://assets.st-note.com/img/1756829946-1uI4VO62Y5WhrqHeP7cnJMGa.png]
+第34回 チーム戦 準優勝 ちけ
+[IMG https://assets.st-note.com/img/1756829976-jzqg7n2wJiIoOuUfDYX4SKL3.png]
+第36回 チーム戦 優勝 るか
+[IMG https://assets.st-note.com/img/1760457659-52ZqnrohxpASOHQT0XgYufsj.png]
+第38回 チーム戦 優勝 わべ
+[IMG https://assets.st-note.com/img/1766373836-pYlQM1VTmFwjeyEbHs7IiAZq.png]
+第4回 チャレンジカップ 優勝 すてぃーらー
+[IMG https://assets.st-note.com/img/1774704957-Sn5pQUKFuG4waOZfTeE2WXYx.png]
+第41回 チーム戦 準優勝 るか
+[IMG https://assets.st-note.com/img/1775996742-YsHPUaCrzDOIb26hWJui45LR.png]
+寒波亭 エリア予選 大阪第一 優勝 わべ
+[IMG https://assets.st-note.com/img/1781265575-iy1CmekRAIFgOTS6UKqGPhvw.png]
+第45回 チーム戦 準優勝 さーにゃ
+[IMG https://assets.st-note.com/img/1782747601-5Yy41z8Ogudw6jFqNrcZWGtA.png]

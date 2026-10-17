@@ -1,0 +1,30 @@
+source_url: https://note.com/kanpatei1103/n/nb19fdaf547c7
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/nb19fdaf547c7 (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ編
+publish_at: 2023-03-14T15:04:22.000+09:00
+url: None
+いつもお世話になっております。
+寒波亭代表の寒波です。
+寒波亭ではマスタールール２でのゲートボールの大会を開催しております。
+過去開催の上位入賞デッキレシピ(優勝、準優勝)などがすぐに分かるように掲載しております。
+今後新たに参加される方や今後のデッキ開発にお役立ていただければ幸いです。
+※2025/08/2までの結果まで反映
+※掲載レシピが増えすぎたのでページを分けました。
+デッキ分布
+2023年まで
+2024年シーズン
+2025年シーズン
+デッキレシピ
+★[LINK https://note.com/kanpatei1103/n/n713aaa0840ac?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(代行天使)
+★[LINK https://note.com/kanpatei1103/n/n85b74efc5df1?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(兎ラギア)
+★[LINK https://note.com/kanpatei1103/n/n0f37341b55c1?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(暗黒界)
+★[LINK https://note.com/kanpatei1103/n/n16d42d0521cd?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(ジャンド)
+★[LINK https://note.com/kanpatei1103/n/na7893c2f37af?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(カラクリ)
+★[LINK https://note.com/kanpatei1103/n/n619990881a0a?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(マシンガジェット)
+★[LINK https://note.com/kanpatei1103/n/nd3d9dfc2d1b1?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(TGガジェット)
+★[LINK https://note.com/kanpatei1103/n/n2e586efe5d8c?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(HEROビート)
+★[LINK https://note.com/kanpatei1103/n/nfc869a48b378?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(アライブHERO+ピュアHERO）
+★[LINK https://note.com/kanpatei1103/n/ne38a2114aece?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(六武衆)
+★[LINK https://note.com/kanpatei1103/n/n78c9ff12657e?magazine_key=mfff21d019d0c] 寒波亭 資料室 デッキレシピ(その他)

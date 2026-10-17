@@ -1,0 +1,57 @@
+source_url: https://note.com/kanpatei1103/n/na7893c2f37af
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/na7893c2f37af (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(カラクリ)
+publish_at: 2024-08-27T04:02:47.000+09:00
+url: None
+第3回 個人戦 優勝(8-0) 反町隆史
+[IMG https://assets.st-note.com/img/1756876587-8IcQT9A3FidYRK4VXDMjeh5o.jpg]
+第5回 チーム戦 準優勝 そーま
+サイドデッキ 14枚
+※デッキ不備(未発売カード カラクリ無双八壱八採用)のため
+[IMG https://assets.st-note.com/img/1724698451164-46roKbMaX9.png]
+第6回 個人戦 準優勝 どっぺる
+[IMG https://assets.st-note.com/img/1724698543671-EcnAm8Wwiv.png]
+第7回 チーム戦 準優勝 のり
+[IMG https://assets.st-note.com/img/1724698557970-Bc3cy6iLHS.png]
+第9回 チーム戦 準優勝 タバスコ
+[IMG https://assets.st-note.com/img/1724698573370-r30FrltBBX.png]
+第1回 チャレンジカップ 準優勝 まるお
+[IMG https://assets.st-note.com/img/1724698586267-U8kc73LOrJ.png]
+5人でCS! 優勝 反町隆史
+[IMG https://assets.st-note.com/img/1724698600836-ndWBw0fnvX.png]
+5人でCS! 優勝 もすと
+[IMG https://assets.st-note.com/img/1724698614925-etA31TrctL.png]
+5人でCS! 優勝 araki
+[IMG https://assets.st-note.com/img/1724698634352-Eewy85f0pA.png]
+第12回 チーム戦 優勝 うめめ
+[IMG https://assets.st-note.com/img/1724698648384-pKjV02tNkT.png]
+第12回 チーム戦 準優勝 まるお
+[IMG https://assets.st-note.com/img/1724698662171-IM5e24N2PP.png]
+第14回 チーム戦 優勝 もすと
+[IMG https://assets.st-note.com/img/1724698678697-myRSi9VELX.png]
+第14回 チーム戦 準優勝 ぺんぎん、さぼてん(同一構築)
+[IMG https://assets.st-note.com/img/1724698690331-yL2W9vCeY7.png]
+第16回 チーム戦 優勝 まるお
+[IMG https://assets.st-note.com/img/1724698706870-ZIVuaiA02n.png]
+第20回 チーム戦 優勝 さぼてん
+[IMG https://assets.st-note.com/img/1724698742003-q3tD4Usq49.png]
+第20回 チーム戦 優勝 ぺんぎん
+[IMG https://assets.st-note.com/img/1724698776419-itVZ06hrv8.png]
+第2回 チャレンジカップ 優勝 キャリア
+[IMG https://assets.st-note.com/img/1724698869496-iRWB9mUXJq.png]
+第21回 チーム戦 準優勝(8-0) にん
+[IMG https://assets.st-note.com/img/1724698939112-aktptngLpg.png]
+第23回 チーム戦 優勝 シンヤ
+[IMG https://assets.st-note.com/img/1729134044-ryV26AGCJjzbFaoLhEmB35g0.png]
+第27回 チーム戦 優勝 らーばぁ
+[IMG https://assets.st-note.com/img/1741630873-IrJe8F74jXkVmi21padHDTlg.png]
+第27回 チーム戦 準優勝 じゃんく
+[IMG https://assets.st-note.com/img/1741631080-JzG3hD67mCjfPQv08gKdtV2I.png]
+5人でCS 2025 優勝 ヨズア
+[IMG https://assets.st-note.com/img/1763868924-QIEFgunmtzD5XWNyHqYT2cpK.png]
+第38回 チーム戦 準優勝 ちだ
+[IMG https://assets.st-note.com/img/1766374138-JQflvErVT9nS0b3AsuMwLaD1.png]
+メモリアル2025 Winter with 福福トレカ 準優勝 シンヤ
+[IMG https://assets.st-note.com/img/1774366768-RzfsdXGaqZJ1iIQHhDjol3Au.png]

@@ -1,0 +1,67 @@
+source_url: https://note.com/kanpatei1103/n/nd3d9dfc2d1b1
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/nd3d9dfc2d1b1 (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(TGガジェット)
+publish_at: 2024-08-27T04:12:05.000+09:00
+url: None
+第5回 チーム戦 準優勝 遮那
+[IMG https://assets.st-note.com/img/1724699192944-8uiyWq9z9X.png]
+第10回 チーム戦 優勝 ハネマン
+[IMG https://assets.st-note.com/img/1724699206624-oiReugUs70.png]
+第10回 チーム戦 準優勝 いっとー
+[IMG https://assets.st-note.com/img/1724699220171-XBrmToH9K9.png]
+第10回 チーム戦 優勝 つぼ
+[IMG https://assets.st-note.com/img/1724699235388-XVWZRHxZIW.png]
+第11回 個人戦 優勝 つぼ
+[IMG https://assets.st-note.com/img/1724699249325-PeceMzuRbO.png]
+第12回 チーム戦 準優勝 みらーふぉーす
+[IMG https://assets.st-note.com/img/1746421854-xfrNT2LynU4p5viQV90hlY6t.png]
+第16回 チーム戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699286311-lcD6l3mWAI.png]
+第16回 チーム戦 優勝 にき
+[IMG https://assets.st-note.com/img/1724699299750-mDg4b3IrYF.png]
+第17回 個人戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699313005-MxlD4Gr0Sd.png]
+第17回 個人戦 準優勝 riphei
+[IMG https://assets.st-note.com/img/1724699333687-wqQbOo9KmP.png]
+第18回 チーム戦 準優勝 にき
+[IMG https://assets.st-note.com/img/1724699350105-hTy6G6E3mX.png]
+第18回 チーム戦 準優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699364345-V9oM02Xpys.png]
+第20回 チーム戦 準優勝 ripheni
+[IMG https://assets.st-note.com/img/1724699409510-dmnr2cZLpQ.png]
+第24回 チーム戦 優勝 みらーふぉーす
+[IMG https://assets.st-note.com/img/1735112917-ieWm2OVtozGcp5A7jaMyl6rh.png]
+第27回 3人チーム戦 優勝 ぷちもす
+[IMG https://assets.st-note.com/img/1741630980-UYCrvOwF1K0GceZIsLfal2qD.png]
+第3回 寒波亭mini 優勝 ripheni
+[IMG https://assets.st-note.com/img/1741631222-CZjIEYqiFe4WNHvupDt3bxnB.png]
+第27回 3人チーム戦 準優勝 ヤンクン
+[IMG https://assets.st-note.com/img/1741631191-OLpZ5R8wvi3JqCYIcEjly2ob.png]
+第1回 寒波亭 with 博多ドラグーン 個人戦 準優勝 くりすま
+[IMG https://assets.st-note.com/img/1741630613-bOy3nQ0UvChR2z1w5aJekTX6.png]
+第29回 チーム戦 優勝 ohkami
+[IMG https://assets.st-note.com/img/1746421816-6Bq8Pm3eJFoax0QHjy2b1Mhz.png]
+第30回 個人戦 優勝 さるぅ
+[IMG https://assets.st-note.com/img/1746421758-g473ibdGpPEzl50mw9cWJfk2.png]
+グランド2025 優勝 みらーふぉーす
+[IMG https://assets.st-note.com/img/1746423056-W2dAnVm3IoROgkuLtfDJaBXb.png]
+第31回 チーム戦 優勝 jing jing
+[IMG https://assets.st-note.com/img/1747623412-VAMui7P8pbKsZLkaYHxJtnRf.jpg]
+第33回 チーム戦 優勝 さるぅ
+[IMG https://assets.st-note.com/img/1754133839-Q6U8fWh1ouvECZwiPxKebnM3.png]
+第6回mini 個人戦 優勝 高柳
+[IMG https://assets.st-note.com/img/1757128962-YURFCizh8BaLPy3uEK9IrTSd.png]
+第33回 チーム戦 準優勝 ohkami
+[IMG https://assets.st-note.com/img/1754133809-rCBV2RIvL7Qbau3s8m5JPT4w.png]
+第34回 チーム戦 優勝 まるお
+[IMG https://assets.st-note.com/img/1756830463-3dbC7YPDQJ96r2telfHOnsNZ.png]
+5人でCS 2025 優勝 くりすま
+[IMG https://assets.st-note.com/img/1763867730-3UBkzHmoivPf4ldnpbwDsGeJ.png]
+第38回 チーム戦 優勝 さるぅ
+[IMG https://assets.st-note.com/img/1766373528-WEsKAl0ihb65OURycoudaq3n.png]
+第5回 博多ドラグーン 3人チーム戦 優勝 ゆき
+[IMG https://assets.st-note.com/img/1777088178-0U38MNtA5Gxw1pWbQ2C7ESrR.png]
+[IMG https://assets.st-note.com/img/1777088177-lIFAWZCkwzgrXdJYymtvGUeS.png]
+[IMG https://assets.st-note.com/img/1777088172-rijNoZDU0VugAHa5dBs3kIYJ.png]

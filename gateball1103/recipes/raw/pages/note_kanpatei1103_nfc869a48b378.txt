@@ -1,0 +1,41 @@
+source_url: https://note.com/kanpatei1103/n/nfc869a48b378
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/nfc869a48b378 (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(アライブHERO+ピュアHERO）
+publish_at: 2024-08-27T04:19:30.000+09:00
+url: None
+第7回 チーム戦 準優勝 くりすま、からふる(同一構築)
+[IMG https://assets.st-note.com/img/1724699828303-x7hdXLjHxR.png]
+第8回 個人戦 準優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699841212-CFFhXPrlsp.png]
+第9回 チーム戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699854350-EAKuz5XH2J.png]
+寒波亭 グランド2023 個人戦 準優勝 からふる
+[IMG https://assets.st-note.com/img/1756859786-fg9uHnY3kqLatFJZpKA8UB0D.png]
+第11回　個人戦 準優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699868903-Ppz02RZltc.png]
+第1回 寒波亭 mini　個人戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1724699895272-nmPROeYCee.png]
+第24回　チーム戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1735112987-AM5fbT0Hm7nK1Gol3rRyXhuj.png]
+第24回　チーム戦 優勝 南の四天王
+[IMG https://assets.st-note.com/img/1735113005-CHnJzkZMD3yh2FcP7b8I5sKq.png]
+第28回 個人戦 準優勝 ごみ王子
+[IMG https://assets.st-note.com/img/1741630792-1yxcBkCZfFTbiEsGdztao3H6.png]
+第31回 チーム戦 優勝 G
+[IMG https://assets.st-note.com/img/1747623261-fJcUzpjtRXYHiKuM9F6yTI1Z.jpg]
+第32回 個人戦 優勝 リュリューシュ
+[IMG https://assets.st-note.com/img/1748914329-tXuRzxe4H5AoDvyB2mjYSTMQ.png]
+第33回 チーム戦 優勝 ごみ王子
+[IMG https://assets.st-note.com/img/1754133444-VN0piP2wrsD3fH1AedgoOcCT.png]
+第33回 チーム戦 準優勝 くりすま
+[IMG https://assets.st-note.com/img/1754133726-8FZBKmIPTrsCiHDgtEGwjSh9.png]
+第36回 チーム戦 優勝 TAKERU
+[IMG https://assets.st-note.com/img/1760457545-kGXcZzCvt0Pxu4JndAsT2epj.png]
+第37回 個人戦 優勝 くりすま
+[IMG https://assets.st-note.com/img/1763867860-KBYpaU2WT5MtqR1iEOvh4Gwg.png]
+5人でCS 2025 優勝 ごみ王子
+[IMG https://assets.st-note.com/img/1763867922-9ZebhzcyNJEC6Wr20pmVwOA7.png]
+第43回 チーム戦 準優勝 南の四天王
+[IMG https://assets.st-note.com/img/1777820340-g4UvckDpmuWj6QSo0Nq8iGTL.png]

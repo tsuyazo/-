@@ -1,0 +1,74 @@
+source_url: https://note.com/kanpatei1103/n/nd52eecef5fa9
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/nd52eecef5fa9 (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 過去大会デッキ分布編 2026年シーズン
+publish_at: 2026-04-12T21:20:15.000+09:00
+url: None
+いつもお世話になっております。
+寒波亭代表の寒波です。
+寒波亭ではマスタールール２でのゲートボールの大会を開催しております。
+過去開催のデッキ分布がすぐに分かるように掲載することにしました。
+今後新たに参加される方や今後のデッキ開発にお役立ていただければ幸いです。
+関東開催結果
+第41回大会
+優勝 クイック、デブリ、ワーム
+参加者 44チーム(132名)
+[IMG https://assets.st-note.com/img/1775996408-YK5zEdMtwjxFs20BOUav64gN.png]
+第42回大会
+優勝 暗黒界 準優勝 兎ラギア
+参加者 66名
+[IMG https://assets.st-note.com/img/1777110915-4KDRlMyawgmLiro6USXHVscj.png]
+第43回大会
+優勝 旋風BF、旋風BF、墓地BF
+参加者 41チーム(123名)
+[IMG https://assets.st-note.com/img/1777818906-LK7rTQsv3ONCzjwmFkdDS0fu.png]
+第44回大会
+優勝 マシンガジェ 準優勝 代行天使
+参加者 69名
+[IMG https://assets.st-note.com/img/1779033004-M0f19zF7o5lkmZbgJ62GEPNC.png]
+第45回大会
+優勝 兎ラギア、暗黒界、墓守
+参加者 43チーム(129名)
+[IMG https://assets.st-note.com/img/1782051838-PaLdgkZjz6ihOuf7NoyrweBc.png]
+第46回大会
+優勝 兎ラギア 準優勝 代行天使
+参加者 75名
+[IMG https://assets.st-note.com/img/1784540828-pwc45ouiBL1OtFjDG39lbnQa.png]
+第47回大会
+優勝 六武衆、剣闘獣、クイック
+参加者 25チーム(75名)
+[IMG https://assets.st-note.com/img/1785554717-Tb9MO7iNzRvDG38lxqLdp5wr.png]
+第48回大会
+優勝 代行天使 準優勝 TG代行天使
+参加者 38名
+[IMG https://assets.st-note.com/img/1791105246-gRjHm0U7PyfE4toMkusiTOb9.png]
+第49回大会
+優勝 兎ラギア×3
+参加者 27チーム(81名)
+[IMG https://assets.st-note.com/img/1791105198-sOo37NJRXpmIEAPjYuQCkHvU.png]
+地方開催結果
+第5回 寒波亭 with 博多ドラグーン 3人チーム戦
+優勝 代行天使、TGガジェ、暗黒界
+参加者 22チーム(66名)
+[IMG https://assets.st-note.com/img/1776572405-wtjh78s2c50az3WI4LbgTdRU.png]
+エリア予選大阪第一
+優勝 六武衆 準優勝 代行天使
+参加者 62名
+[IMG https://assets.st-note.com/img/1780887244-YX9xbVEpKr2RonCAGcPWuyU3.png]
+エリア予選 福岡第一
+優勝  暗黒界 準優勝 TGガジェット
+参加者 49名
+[IMG https://assets.st-note.com/img/1783133725-qzuY5oct7ELRrmhnkJs41pNC.png]
+エリア予選 北海道
+優勝  デブリ 準優勝 代行天使
+参加者 26名
+[IMG https://assets.st-note.com/img/1789966324-yZS5onAB3P0OXzDFKWvI6jM7.png]
+エリア予選 愛知
+優勝  デブリ 準優勝 代行天使
+参加者 57名
+[IMG https://assets.st-note.com/img/1791105175-mPEj5vsbTDkYyWMKiLRQpG6a.png]
+上位入賞者イベント開催結果
+優勝  HEROビート 準優勝 代行天使
+参加者 34名
+[IMG https://assets.st-note.com/img/1789967036-uW8Be37SCXJdwKn5tvaOVUYP.png]

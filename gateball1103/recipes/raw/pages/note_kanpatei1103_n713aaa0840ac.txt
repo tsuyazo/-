@@ -1,0 +1,73 @@
+source_url: https://note.com/kanpatei1103/n/n713aaa0840ac
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/n713aaa0840ac (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(代行天使)
+publish_at: 2024-08-27T03:24:39.000+09:00
+url: None
+第1回 個人戦 優勝 もすと
+[IMG https://assets.st-note.com/img/1728067401-TVIrlCKq51UdcX98MHSzuQEJ.png]
+第3回 個人戦 準優勝 わりとかるめ
+[IMG https://assets.st-note.com/img/1724696751464-PY5F5zZRjr.png]
+第5回 チーム戦 準優勝 にき
+[IMG https://assets.st-note.com/img/1724696766612-cFBcEODvs6.png]
+第9回 チーム戦 準優勝 ぬるま湯
+[IMG https://assets.st-note.com/img/1724696784175-FGUJ1GPBd8.png]
+第15回 個人戦 準優勝 CNDLMN
+[IMG https://assets.st-note.com/img/1746419803-HMV7ElADYrORxmQF0KX69yTo.png]
+第19回 個人戦 優勝 ごみ王子
+[IMG https://assets.st-note.com/img/1724696819239-Gdam6JFEmA.png]
+寒波亭グランド2024 個人戦 優勝 とみ
+[IMG https://assets.st-note.com/img/1756859348-m0oPID49HJ1MbxRp3NeB7wur.png]
+第21回 チーム戦 優勝 よずあ
+[IMG https://assets.st-note.com/img/1746419851-HLo5hcrkD3dmFSuWlIqy1ZfQ.png]
+第23回 チーム戦 優勝 モッフル
+[IMG https://assets.st-note.com/img/1729133919-utdwCjm82HakrhfIPvBNA6W9.png]
+第23回 チーム戦 優勝 ネオ酢
+[IMG https://assets.st-note.com/img/1729133954-l8nB1V9zg6mqfCO5K2dTvJYi.png]
+第23回 チーム戦 準優勝 よずあ
+[IMG https://assets.st-note.com/img/1729134123-ufpQxqdP8nLYcKJe1s9tgH2U.png]
+第24回 チーム戦 準優勝 Chocobig
+[IMG https://assets.st-note.com/img/1735113393-qkG2PVmvhoTKF8Wsr6C5jB3e.png]
+第26回 個人戦 優勝 よずあ
+[IMG https://assets.st-note.com/img/1735113103-Q4CLfJmoRUrFBi5Oh0A218Tb.png]
+第27回 チーム戦 準優勝 ぐんそー
+[IMG https://assets.st-note.com/img/1741631124-YSyXm9srJo5HM2wVazAF0LPq.png]
+第29回 チーム戦 準優勝 よずあ
+[IMG https://assets.st-note.com/img/1746420047-tiUzAbLD5of7CWGBXV12nxdq.png]
+第3回チャレンジカップ 個人戦 準優勝 じろ
+[IMG https://assets.st-note.com/img/1746423197-TH69xe3VDnKJmR7LwXBakqAg.png]
+第31回 チーム戦 準優勝 だいすけ
+[IMG https://assets.st-note.com/img/1747623921-CDlc0QIeG9hZUw1SnmvHsKo4.jpg]
+第31回 チーム戦 準優勝 きたじま
+[IMG https://assets.st-note.com/img/1747623944-BrWX5a6AbVl2i1fEvTQ7DR0I.jpg]
+第33回 チーム戦 優勝 アーク
+[IMG https://assets.st-note.com/img/1754133562-w5xohnF6mpTrtEC2VfM8vyeG.png]
+第33回 チーム戦 準優勝 きょろろ
+[IMG https://assets.st-note.com/img/1754133603-6fhbyu5zE8QY9FIowAB4Ztic.png]
+第37回 個人戦 準優勝 イツキ
+[IMG https://assets.st-note.com/img/1763867475-RsJVxa7cISv8k1fYzrQn9pGw.png]
+5人でCS 2025 チーム戦 パイナポー竜崎
+[IMG https://assets.st-note.com/img/1763867595-qrbkdcTXy3UOI5C6SYhQjl9V.png]
+第4回 博多ドラグーン 個人戦 優勝 ゴミのもんしょう
+[IMG https://assets.st-note.com/img/1766374032-LkUgi9tRn7vymsEcwJjXrAbq.png]
+第41回 チーム戦 準優勝 とっく
+[IMG https://assets.st-note.com/img/1775996695-xGTq9DPS4LwcMK3lZ820FfCA.png]
+第5回 博多ドラグーン チーム戦 優勝 マイクロン
+[IMG https://assets.st-note.com/img/1777087991-5VTxXbGK7se3tyh0RZ4oWi6Y.png]
+第5回 博多ドラグーン チーム戦 準優勝 すぎた
+[IMG https://assets.st-note.com/img/1777088058-3ZAJMP2clyDuUTW1YOrXRSzV.png]
+第43回 チーム戦 準優勝 アーク
+[IMG https://assets.st-note.com/img/1777820002-KfA5MRuzZXxDlT1dowBjp4hY.png]
+第44回 個人戦 準優勝 えんぼ
+[IMG https://assets.st-note.com/img/1779033251-OYwcduDRyWsJ7neprBQ4v5Ib.png]
+寒波亭 エリア予選 大阪第一 準優勝 クロー
+[IMG https://assets.st-note.com/img/1781265614-4AceYlIZn8wsPR2hMKHWS9ra.png]
+第45回 チーム戦 準優勝 シルフ
+[IMG https://assets.st-note.com/img/1782747512-v7Z0dITkwsPRbmJD4QK9LGpX.png]
+第46回 個人戦 準優勝 キリンリキ
+[IMG https://assets.st-note.com/img/1784540775-uqBKksY9QIetbO4H5mUnP2VA.png]
+寒波亭 エリア予選 北海道 準優勝 カイクウ
+[IMG https://assets.st-note.com/img/1789967370-FV9KYoALjOfSxspyu6WX1MP3.png]
+寒波亭 グランド予選1次予選本戦 準優勝 えんぼ
+[IMG https://assets.st-note.com/img/1789967457-fFREUe0dsuxg2iqrpVl37tH4.png]

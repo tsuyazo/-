@@ -1,0 +1,117 @@
+source_url: https://note.com/kanpatei1103/n/n78c9ff12657e
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/n78c9ff12657e (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(その他)
+publish_at: 2024-08-27T04:40:20.000+09:00
+url: None
+★デブリHERO
+第6回 個人 ベスト4 もすと
+[IMG https://assets.st-note.com/img/1724700153417-kXW8R2EP6N.png]
+★植物HERO
+第32回 個人 ベスト4 キリンリキ
+[IMG https://assets.st-note.com/img/1748914676-kM75XbDZwRqAcFNl9YQBOfCr.png]
+★スクラップ
+第1回 チャレンジカップ ベスト4 へびいちご
+[IMG https://assets.st-note.com/img/1724700173003-SnpbrEPpLR.png]
+★ドラグニティ
+第6回 個人戦 ベスト8 ミナミ
+[IMG https://assets.st-note.com/img/1724700268802-bFPQoiYwiJ.png]
+第21回 チーム戦 優勝 chin (1-7)
+[IMG https://assets.st-note.com/img/1746419226-N2ZW6sJfKujvU4l5VHobtMQp.png]
+第8回 寒波亭mini 準優勝 ジグザグ
+[IMG https://assets.st-note.com/img/1770782514-yagOGkExvtQXBdHnSme4FiLj.png]
+★アライブ剣闘獣
+第6回 出場 からふる
+[IMG https://assets.st-note.com/img/1724700509489-jdWgoE8Btz.png]
+★TG植物アンデ
+第3回 ベスト8 サブロー
+[IMG https://assets.st-note.com/img/1724700525466-nsMr07cDal.png]
+第21回 チーム戦 ベスト4 高橋
+[IMG https://assets.st-note.com/img/1746419312-cVdLIMzfsDaF6WQk5OYSGR8T.png]
+★TGアンデ
+第31回 チーム戦 ベスト4 たかはし🌈
+[IMG https://assets.st-note.com/img/1747622354-zbnXfrVAiey5KJNOHcg1MtPw.jpg]
+★インフェルニティ
+第10回 チーム戦 (個人成績 6-0) shocker
+[IMG https://assets.st-note.com/img/1724700542510-4qlI9uGM7m.png]
+第3回 寒波亭mini with 準優勝 イマダワタル
+[IMG https://assets.st-note.com/img/1741631312-Yl0HPw4vt8AKm5hVzfgxJbZa.png]
+第3回チャレンジカップ ベスト16 棗
+[IMG https://assets.st-note.com/img/1746419139-24nolxIT5KijGaYbXkP93WJm.png]
+第32回個人戦 ベスト8 ヒョウハク
+[IMG https://assets.st-note.com/img/1748772453-63PLlVuiFtESRYv9bdngxwG0.png]
+★魔轟神
+第12回 ベスト4 飲むヨーグルト
+[IMG https://assets.st-note.com/img/1746419382-YZvjCRieVxFrudGf1B7qUJyL.png]
+★ワーム
+第16回 チーム戦 準優勝 しゃろみら
+[IMG https://assets.st-note.com/img/1724700671946-tY0YO86W15.png]
+第41回 チーム戦 優勝 しゃろみら
+[IMG https://assets.st-note.com/img/1775996641-T8FyD1lqe93AobvLhtfprX5a.png]
+★スキドレギアバレー
+第17回 個人戦 ベスト4 ななき
+[IMG https://assets.st-note.com/img/1724700801487-hsShtukiMz.png]
+★旋風BF
+第21回 チーム戦 優勝 みんまや
+[IMG https://assets.st-note.com/img/1746419504-3FE4vAglefbLu7cjxsmMGSwZ.png]
+第22回 個人戦 ベスト4 スケッチ
+[IMG https://assets.st-note.com/img/1725954193-RDIj1gxHtdrq5ZOyphkvTlMV.png]
+第23回 チーム戦 準優勝 みんまや
+[IMG https://assets.st-note.com/img/1729134207-rz0GniadcOeNmD4ChoxkRVyL.png]
+第1回 寒波亭 with 博多ドラグーン 個人戦 優勝 Steven
+[IMG https://assets.st-note.com/img/1741630466-dpsrC7xzqKmXW0RnSPNuMfUb.png]
+第29回 チーム戦 準優勝 みんまや
+[IMG https://assets.st-note.com/img/1746419683-sdrtkaeI18Sif0HOyzL4wRlo.png]
+第39回 個人戦 優勝 みんまや
+[IMG https://assets.st-note.com/img/1768060174-UZrTJbVa6QtEKcyOnR3Y1d2f.png]
+第43回 チーム戦 優勝 ヒョウハク
+[IMG https://assets.st-note.com/img/1777819052-k8FN63pRr71E5CwxBghV9TDJ.png]
+第43回 チーム戦 優勝 みんまや
+[IMG https://assets.st-note.com/img/1777819033-kFqXo25r8UM73GjHQT0aRxl9.png]
+★墓地BF
+第43回 チーム戦 優勝 ごわす
+[IMG https://assets.st-note.com/img/1777819860-OhcneqafbGtYUSyEWTFzI96v.png]
+★TGビート
+第2回 チャレンジカップ 準優勝 あど
+[IMG https://assets.st-note.com/img/1724780796291-m2M49ryPaM.png]
+★エレキ
+第21回 チーム戦 ベスト4 炭火焼き
+[IMG https://assets.st-note.com/img/1746418738-ohadB89pOv3fzMrkXIVPSl06.png]
+第4回チャレンジカップ 決勝トナメ進出 すみやき
+[IMG https://assets.st-note.com/img/1774367144-IAgFXYl6dPzasi05MNWLCjc3.png]
+★墓守
+第3回チャレンジカップ ベスト8 ななき
+[IMG https://assets.st-note.com/img/1746419028-8ANSsdZ54ziG1rtTvHWK9ce6.png]
+第36回 寒波亭 ベスト4 ななき
+[IMG https://assets.st-note.com/img/1760457185-Vmp1CDJIG4ykzMFrQ6EwLlxc.png]
+5人でCS 2025 寒波亭 準優勝 ななき
+[IMG https://assets.st-note.com/img/1763866225-ASoGWOsezYvNQf6t3IqiwRX0.png]
+第45回 寒波亭 チーム戦 優勝 ななき
+[IMG https://assets.st-note.com/img/1782747150-gqteIBPbMKvpuFwUSTaiR3Ok.png]
+★カオスジェネクス
+第3回チャレンジカップ ベスト8 以外
+[IMG https://assets.st-note.com/img/1746419421-RtSumMb5X6Zvqyi02KrEJQhI.png]
+★マシンナーズギアバレー
+第4回 寒波亭mini with すぱいらる 準優勝 Aspirin
+[IMG https://assets.st-note.com/img/1746420820-gBNGbDuv8eQc1ioLX96HFWPz.png]
+★ラヴァル
+第29回 チーム戦 ベスト4 fumi
+[IMG https://assets.st-note.com/img/1746426126-Ox0pMhugXDNPbmjf6d9Ha4UJ.png]
+5人でCS 2025 準優勝 ババコンガ
+[IMG https://assets.st-note.com/img/1763866480-NfH47wybu1ZEF6MdBV0laqK9.png]
+★ジュラック
+グランド2025 出場　ごみ王子
+[IMG https://assets.st-note.com/img/1746425946-xo43ky7qnOilegZus5atcQKd.png]
+★クイック
+第36回 寒波亭 準優勝 みどり
+[IMG https://assets.st-note.com/img/1760457331-UtPpVBq4LFHuWKo9MOIhzQjd.png]
+5人でCS 2025 準優勝 ニア
+[IMG https://assets.st-note.com/img/1763866318-H1gYh9koLzMy87pvjDU0WqbI.png]
+第41回 寒波亭 優勝 もすと
+[IMG https://assets.st-note.com/img/1775996599-Us59ver1CuiKlmDZycGhQYnE.png]
+第5回 寒波亭 with 博多ドラグーン 準優勝 Kratos
+[IMG https://assets.st-note.com/img/1777087278-FWLa7DVqTdEKC4zpIj1ohJH3.png]
+★カエル帝
+5人でCS 2025 準優勝 ブルータス
+[IMG https://assets.st-note.com/img/1763866567-04xfz2V38KZyvDTQOiroYEHt.png]

@@ -1,0 +1,27 @@
+source_url: https://note.com/kanpatei1103/n/n2e586efe5d8c
+HTTP 200 (HTML) / 本文は https://note.com/api/v3/notes/n2e586efe5d8c (HTTP 200) のJSONから抽出
+[IMG ...] は本文中の画像の位置とURL
+
+# 寒波亭 資料室 デッキレシピ(HEROビート)
+publish_at: 2024-08-27T04:16:19.000+09:00
+url: None
+第5回 チーム戦 優勝 のごろう
+[IMG https://assets.st-note.com/img/1724699634869-6UNNHyPCa3.png]
+第8回 個人戦 優勝 俺のブリザード
+[IMG https://assets.st-note.com/img/1724699651684-GE8DooDGcO.png]
+第14回 チーム戦 準優勝 ストラウス
+[IMG https://assets.st-note.com/img/1724699668566-GN1EXub5BC.png]
+第18回 チーム戦 優勝 まぬーさ
+[IMG https://assets.st-note.com/img/1724699682458-Nxbx9WMdig.png]
+第19回 個人戦 準優勝 choco big
+[IMG https://assets.st-note.com/img/1724699696477-MWv2fyxiQr.png]
+第20回 チーム戦 優勝 ストラウス
+[IMG https://assets.st-note.com/img/1724699726887-g9t7rneL8I.png]
+第24回 チーム戦 準優勝 Zihoon
+[IMG https://assets.st-note.com/img/1735113276-ie9d6uCcABSayIfOkW5s4Qpz.png]
+第24回 チーム戦 準優勝 Nogari
+[IMG https://assets.st-note.com/img/1735113337-3f4jg1kE2z5FGcB96xda8RUA.png]
+第26回 個人戦 準優勝ちけだ
+[IMG https://assets.st-note.com/img/1735113066-wcDo81zEbBvenN3TJ9lUhMRk.png]
+寒波亭 グランド予選1次予選本戦 優勝 ストラウス
+[IMG https://assets.st-note.com/img/1789967156-bZpJAyMBgTVniNX3z6omLs4l.png]

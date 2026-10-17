@@ -1,0 +1,3705 @@
+[
+  {
+    "archetype": "兎ラギア",
+    "title": "ラギア",
+    "event": "寒波亭 第46回 個人戦",
+    "date": null,
+    "placing": "優勝",
+    "player": "エトー",
+    "source_url": "https://note.com/kanpatei1103/n/n85b74efc5df1",
+    "main": [
+      {
+        "name": "魔導戦士 ブレイカー",
+        "count": 3
+      },
+      {
+        "name": "ライオウ",
+        "count": 3
+      },
+      {
+        "name": "N・グラン・モール",
+        "count": 1
+      },
+      {
+        "name": "レスキューラビット",
+        "count": 3
+      },
+      {
+        "name": "ジェネティック・ワーウルフ",
+        "count": 3
+      },
+      {
+        "name": "セイバーザウルス",
+        "count": 3
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "禁じられた聖槍",
+        "count": 3
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 3
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 3
+      },
+      {
+        "name": "次元幽閉",
+        "count": 2
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "No.16 色の支配者ショック・ルーラー",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "ヴァイロン・ディシグマ",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "エヴォルカイザー・ラギア",
+        "count": 2
+      },
+      {
+        "name": "カチコチドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "異次元の女戦士",
+        "count": 2
+      },
+      {
+        "name": "フォッシル・ダイナ パキケファロ",
+        "count": 1
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 1
+      },
+      {
+        "name": "禁じられた聖杯",
+        "count": 2
+      },
+      {
+        "name": "マクロコスモス",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "連鎖除外",
+        "count": 1,
+        "uncertain": true
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1784540699-RoSHJWUm9wDxzlCMPQAh2eZX.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "代行天使",
+    "title": "えんぼ 9/20寒波",
+    "event": "寒波亭 グランド予選1次予選本戦",
+    "date": "2026-09-20",
+    "placing": "準優勝",
+    "player": "えんぼ",
+    "source_url": "https://note.com/kanpatei1103/n/n713aaa0840ac",
+    "main": [
+      {
+        "name": "神秘の代行者 アース",
+        "count": 3
+      },
+      {
+        "name": "創造の代行者 ヴィーナス",
+        "count": 3
+      },
+      {
+        "name": "神聖なる球体",
+        "count": 3
+      },
+      {
+        "name": "マスター・ヒュペリオン",
+        "count": 3
+      },
+      {
+        "name": "ヘカテリス",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "大天使クリスティア",
+        "count": 2
+      },
+      {
+        "name": "朱光の宣告者",
+        "count": 3,
+        "uncertain": true
+      },
+      {
+        "name": "オネスト",
+        "count": 1
+      },
+      {
+        "name": "ジェルエンデュオ",
+        "count": 3
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ハリケーン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "神の居城－ヴァルハラ",
+        "count": 1
+      },
+      {
+        "name": "禁じられた聖槍",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "王宮の勅命",
+        "count": 3
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "ダイガスタ・フェニクス",
+        "count": 2
+      },
+      {
+        "name": "ダイガスタ・スフィアード",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "ガチガチガンテツ",
+        "count": 1
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "No.30 破滅のアシッド・ゴーレム",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "大地の騎士ガイアナイト",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 1
+      },
+      {
+        "name": "アームズ・エイド",
+        "count": 1,
+        "uncertain": true
+      }
+    ],
+    "side": [
+      {
+        "name": "N・グラン・モール",
+        "count": 1
+      },
+      {
+        "name": "閃光の追放者",
+        "count": 3,
+        "uncertain": true
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 3
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 3
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1789967457-fFREUe0dsuxg2iqrpVl37tH4.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true,
+    "note": "元画像が750px幅と低解像度で、カード名の文字はほぼ判読できない。イラスト・レベル・属性と、同じ寒波亭の他レシピ画像（高解像度）で判読できた同一カードとの照合で特定した。uncertain=true のカードはイラストからの推定を含む。日付は画像見出しの「9/20」による（年は画像アップロード日 2026-09-21 から推定）。"
+  },
+  {
+    "archetype": "HERO（アライブHERO）",
+    "title": "アライブHERO",
+    "event": "寒波亭 第43回 チーム戦",
+    "date": null,
+    "placing": "準優勝（チーム）",
+    "player": "南の四天王",
+    "source_url": "https://note.com/kanpatei1103/n/nfc869a48b378",
+    "main": [
+      {
+        "name": "E・HERO エアーマン",
+        "count": 1
+      },
+      {
+        "name": "E・HERO アナザー・ネオス",
+        "count": 3
+      },
+      {
+        "name": "E・HERO バブルマン",
+        "count": 3
+      },
+      {
+        "name": "E・HERO オーシャン",
+        "count": 1
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "未来融合－フューチャー・フュージョン",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "ミラクル・フュージョン",
+        "count": 3
+      },
+      {
+        "name": "E－エマージェンシーコール",
+        "count": 3
+      },
+      {
+        "name": "ヒーローアライブ",
+        "count": 3
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "デュアルスパーク",
+        "count": 3
+      },
+      {
+        "name": "超融合",
+        "count": 3
+      },
+      {
+        "name": "R－ライトジャスティス",
+        "count": 2
+      },
+      {
+        "name": "サイクロン",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "ヒーロー・ブラスト",
+        "count": 3
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "次元幽閉",
+        "count": 1
+      },
+      {
+        "name": "くず鉄のかかし",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "E・HERO ガイア",
+        "count": 2
+      },
+      {
+        "name": "E・HERO アブソルートZero",
+        "count": 2
+      },
+      {
+        "name": "E・HERO エスクリダオ",
+        "count": 1
+      },
+      {
+        "name": "E・HERO The シャイニング",
+        "count": 3
+      },
+      {
+        "name": "E・HERO ノヴァマスター",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "E・HERO Great TORNADO",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "No.16 色の支配者ショック・ルーラー",
+        "count": 1
+      },
+      {
+        "name": "ヴァイロン・ディシグマ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "D.D.クロウ",
+        "count": 2
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 1
+      },
+      {
+        "name": "N・グラン・モール",
+        "count": 1
+      },
+      {
+        "name": "ニュードリュア",
+        "count": 1
+      },
+      {
+        "name": "オネスト",
+        "count": 1
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 1
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "群雄割拠",
+        "count": 2
+      },
+      {
+        "name": "異次元からの帰還",
+        "count": 1
+      },
+      {
+        "name": "くず鉄のかかし",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1777820340-g4UvckDpmuWj6QSo0Nq8iGTL.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "TGガジェット",
+    "title": "寒波亭0419",
+    "event": "第5回 寒波亭 with 博多ドラグーン 3人チーム戦",
+    "date": "2026-04-19",
+    "placing": "優勝（チーム）",
+    "player": "ゆき",
+    "source_url": "https://note.com/kanpatei1103/n/nd3d9dfc2d1b1",
+    "main": [
+      {
+        "name": "グリーン・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "レッド・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "イエロー・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "TG ストライカー",
+        "count": 3
+      },
+      {
+        "name": "TG ワーウルフ",
+        "count": 3
+      },
+      {
+        "name": "ゴブリンドバーグ",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "トラゴエディア",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 2
+      },
+      {
+        "name": "貪欲な壺",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "地砕き",
+        "count": 1
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "トゥルース・リインフォース",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 3
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "（判読不能）",
+        "count": 2
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "つり天井",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "発条機甲ゼンマイスター",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "No.16 色の支配者ショック・ルーラー",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "XX－セイバー ガトムズ",
+        "count": 1
+      },
+      {
+        "name": "ダークエンド・ドラゴン",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "大地の騎士ガイアナイト",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "TG ワンダー・マジシャン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "メタモルポット",
+        "count": 2,
+        "uncertain": true
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 2
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 2
+      },
+      {
+        "name": "ヂェミナイ・デビル",
+        "count": 2,
+        "uncertain": true
+      },
+      {
+        "name": "A・O・J D.D.チェッカー",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "レベル制限B地区",
+        "count": 1
+      },
+      {
+        "name": "昇天の黒角笛",
+        "count": 2
+      },
+      {
+        "name": "御前試合",
+        "count": 1
+      },
+      {
+        "name": "（判読不能）",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1777088172-rijNoZDU0VugAHa5dBs3kIYJ.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true,
+    "note": "note上では同じキャプション（第5回 博多ドラグーン 3人チーム戦 優勝 ゆき）で3枚の画像が掲載されているが、3枚ともバイト単位で同一ファイル（md5 b7dbf2a2…）。カード名の文字はつぶれており、メイン5段目の罠2枚（拳のイラスト）とサイドの罠1枚（青い顔と稲妻のイラスト）は判読できなかったため「（判読不能）」とした（枚数は画像どおり）。日付は画像見出し「寒波亭0419」による。"
+  },
+  {
+    "archetype": "デブリダンディ",
+    "title": "らいたろ",
+    "event": "寒波亭 エリア予選 北海道",
+    "date": null,
+    "placing": "優勝",
+    "player": "らいたろ",
+    "source_url": "https://note.com/kanpatei1103/n/n16d42d0521cd",
+    "main": [
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 3
+      },
+      {
+        "name": "カオス・ソーサラー",
+        "count": 3
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 2
+      },
+      {
+        "name": "ローンファイア・ブロッサム",
+        "count": 2
+      },
+      {
+        "name": "カードガンナー",
+        "count": 2
+      },
+      {
+        "name": "グローアップ・バルブ",
+        "count": 1
+      },
+      {
+        "name": "スポーア",
+        "count": 1
+      },
+      {
+        "name": "ダンディライオン",
+        "count": 1
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "ジャンク・シンクロン",
+        "count": 1
+      },
+      {
+        "name": "デブリ・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "キラー・トマト",
+        "count": 1
+      },
+      {
+        "name": "ライトロード・マジシャン ライラ",
+        "count": 1
+      },
+      {
+        "name": "ドッペル・ウォリアー",
+        "count": 1
+      },
+      {
+        "name": "トラゴエディア",
+        "count": 1
+      },
+      {
+        "name": "素早いビッグハムスター",
+        "count": 1
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "スケープ・ゴート",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "ハリケーン",
+        "count": 1
+      },
+      {
+        "name": "おろかな埋葬",
+        "count": 1
+      },
+      {
+        "name": "光の援軍",
+        "count": 1
+      },
+      {
+        "name": "ワン・フォー・ワン",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "リミット・リバース",
+        "count": 3
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "フォーミュラ・シンクロン",
+        "count": 3
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 2
+      },
+      {
+        "name": "アームズ・エイド",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "C・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "アーカナイト・マジシャン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "虚空海竜リヴァイエール",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "D.D.クロウ",
+        "count": 2
+      },
+      {
+        "name": "魔導戦士 ブレイカー",
+        "count": 2
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "地砕き",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "王宮のお触れ",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1789967687-iGFSynjEsdfP9Y8aAwxk6DHm.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "クイックダンディ",
+    "title": "クイックダンディウォリアー",
+    "event": "第5回 寒波亭 with 博多ドラグーン",
+    "date": null,
+    "placing": "準優勝",
+    "player": "Kratos",
+    "source_url": "https://note.com/kanpatei1103/n/n78c9ff12657e",
+    "main": [
+      {
+        "name": "クイック・シンクロン",
+        "count": 3
+      },
+      {
+        "name": "ジャンク・シンクロン",
+        "count": 3
+      },
+      {
+        "name": "ドッペル・ウォリアー",
+        "count": 3
+      },
+      {
+        "name": "アンノウン・シンクロン",
+        "count": 1
+      },
+      {
+        "name": "レベル・スティーラー",
+        "count": 3
+      },
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 3
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 3
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "ダンディライオン",
+        "count": 1
+      },
+      {
+        "name": "グローアップ・バルブ",
+        "count": 2
+      },
+      {
+        "name": "成金ゴブリン",
+        "count": 3
+      },
+      {
+        "name": "貪欲な壺",
+        "count": 3
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "調律",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ハリケーン",
+        "count": 1
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "おろかな埋葬",
+        "count": 1
+      },
+      {
+        "name": "ワン・フォー・ワン",
+        "count": 1
+      },
+      {
+        "name": "光の援軍",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "フォーミュラ・シンクロン",
+        "count": 2
+      },
+      {
+        "name": "アームズ・エイド",
+        "count": 1
+      },
+      {
+        "name": "ジャンク・ウォリアー",
+        "count": 1
+      },
+      {
+        "name": "ドリル・ウォリアー",
+        "count": 2
+      },
+      {
+        "name": "ジャンク・アーチャー",
+        "count": 1
+      },
+      {
+        "name": "ジャンク・デストロイヤー",
+        "count": 1
+      },
+      {
+        "name": "ロード・ウォリアー",
+        "count": 1
+      },
+      {
+        "name": "シューティング・クェーサー・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "素早いビッグハムスター",
+        "count": 1
+      },
+      {
+        "name": "エレクトリック・ワーム",
+        "count": 1
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 2
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 2
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 3
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "王宮のお触れ",
+        "count": 3
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1777087278-FWLa7DVqTdEKC4zpIj1ohJH3.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true,
+    "note": "記事『寒波亭 資料室 デッキレシピ(その他)』の「★クイック」節に掲載。キャプションは「第5回 寒波亭 with 博多ドラグーン 準優勝 Kratos」で個人戦/チーム戦の別は書かれていない。"
+  },
+  {
+    "archetype": "六武衆",
+    "title": "6/21 六武衆",
+    "event": "寒波亭 第45回 チーム戦",
+    "date": "2026-06-21",
+    "placing": "準優勝（チーム）",
+    "player": "さーにゃ",
+    "source_url": "https://note.com/kanpatei1103/n/ne38a2114aece",
+    "main": [
+      {
+        "name": "六武衆の師範",
+        "count": 2
+      },
+      {
+        "name": "六武衆の影武者",
+        "count": 3
+      },
+      {
+        "name": "真六武衆－キザン",
+        "count": 3
+      },
+      {
+        "name": "真六武衆－カゲキ",
+        "count": 3
+      },
+      {
+        "name": "六武衆の露払い",
+        "count": 2
+      },
+      {
+        "name": "六武衆－ヤイチ",
+        "count": 1
+      },
+      {
+        "name": "六武衆のご隠居",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "六武の門",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "紫炎の狼煙",
+        "count": 3
+      },
+      {
+        "name": "六武衆の結束",
+        "count": 3
+      },
+      {
+        "name": "六武衆の荒行",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 1
+      },
+      {
+        "name": "諸刃の活人剣術",
+        "count": 3
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 1
+      },
+      {
+        "name": "トゥルース・リインフォース",
+        "count": 1
+      },
+      {
+        "name": "究極・背水の陣",
+        "count": 1
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 1
+      },
+      {
+        "name": "六尺瓊勾玉",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "A・O・J ディサイシブ・アームズ",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "大地の騎士ガイアナイト",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "真六武衆－シエン",
+        "count": 2
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "No.30 破滅のアシッド・ゴーレム",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 2
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 2
+      },
+      {
+        "name": "六武衆－ヤイチ",
+        "count": 1
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "次元幽閉",
+        "count": 1
+      },
+      {
+        "name": "群雄割拠",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1782747601-5Yy41z8Ogudw6jFqNrcZWGtA.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true,
+    "note": "日付は画像見出し「6/21 六武衆」による（年は画像アップロード日 2026-06-30 から推定）。"
+  },
+  {
+    "archetype": "暗黒界",
+    "title": "暗黒界",
+    "event": "寒波亭 第45回 チーム戦",
+    "date": null,
+    "placing": "優勝（チーム）",
+    "player": "なの",
+    "source_url": "https://note.com/kanpatei1103/n/n0f37341b55c1",
+    "main": [
+      {
+        "name": "暗黒界の龍神 グラファ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の術師 スノウ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の狩人 ブラウ",
+        "count": 3
+      },
+      {
+        "name": "魔轟神レイヴン",
+        "count": 2
+      },
+      {
+        "name": "暗黒界の尖兵 ベージ",
+        "count": 2
+      },
+      {
+        "name": "暗黒界の武神 ゴルド",
+        "count": 1
+      },
+      {
+        "name": "暗黒界の軍神 シルバ",
+        "count": 1
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "暗黒界の門",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の取引",
+        "count": 3
+      },
+      {
+        "name": "墓穴の道連れ",
+        "count": 3
+      },
+      {
+        "name": "成金ゴブリン",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の雷",
+        "count": 1
+      },
+      {
+        "name": "おろかな埋葬",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "手札抹殺",
+        "count": 1
+      },
+      {
+        "name": "ハリケーン",
+        "count": 1
+      },
+      {
+        "name": "闇のデッキ破壊ウイルス",
+        "count": 3
+      },
+      {
+        "name": "スキルドレイン",
+        "count": 2
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "E・HERO エスクリダオ",
+        "count": 1
+      },
+      {
+        "name": "E・HERO The シャイニング",
+        "count": 1
+      },
+      {
+        "name": "V・HERO アドレイション",
+        "count": 1
+      },
+      {
+        "name": "大地の騎士ガイアナイト",
+        "count": 1
+      },
+      {
+        "name": "エンシェント・フェアリー・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "デーモン・カオス・キング",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "天刑王 ブラック・ハイランダー",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "メンタルスフィア・デーモン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "魔轟神レヴュアタン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の策士 グリン",
+        "count": 1
+      },
+      {
+        "name": "魔轟神レイヴン",
+        "count": 1
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "トラゴエディア",
+        "count": 1
+      },
+      {
+        "name": "超融合",
+        "count": 2
+      },
+      {
+        "name": "サイクロン",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "魔のデッキ破壊ウイルス",
+        "count": 2
+      },
+      {
+        "name": "昇天の黒角笛",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1782747202-D5TXfHRiPh7uFpIbLEnSVcly.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "カラクリ",
+    "title": "26.03.08. 寒波亭メモリアル2025Winter　シンヤ(カラクリ)",
+    "event": "メモリアル2025 Winter with 福福トレカ",
+    "date": "2026-03-08",
+    "placing": "準優勝",
+    "player": "シンヤ",
+    "source_url": "https://note.com/kanpatei1103/n/na7893c2f37af",
+    "main": [
+      {
+        "name": "カラクリ商人 壱七七",
+        "count": 3
+      },
+      {
+        "name": "カラクリ参謀 弐四八",
+        "count": 2
+      },
+      {
+        "name": "カラクリ小町 弐弐四",
+        "count": 3
+      },
+      {
+        "name": "カラクリ忍者 九壱九",
+        "count": 2,
+        "uncertain": true
+      },
+      {
+        "name": "カラクリ兵 弐参六",
+        "count": 3
+      },
+      {
+        "name": "カラクリ守衛 参壱参",
+        "count": 1
+      },
+      {
+        "name": "借カラクリ蔵",
+        "count": 3
+      },
+      {
+        "name": "簡易融合",
+        "count": 3
+      },
+      {
+        "name": "ハリケーン",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "我が身を盾に",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "カラクリ解体新書",
+        "count": 3
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "トラップ・スタン",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "メカ・ザウルス",
+        "count": 1
+      },
+      {
+        "name": "カルボナーラ戦士",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "カラクリ大将軍 無零怒",
+        "count": 2
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "カラクリ将軍 無零",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・ランドオルス",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・ビースト",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "カラクリ忍者 参参九",
+        "count": 1,
+        "uncertain": true
+      },
+      {
+        "name": "グレイブ・スクワーマー",
+        "count": 1
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 1
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "くず鉄のかかし",
+        "count": 1
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "御前試合",
+        "count": 1
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 1
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1774366768-RzfsdXGaqZJ1iIQHhDjol3Au.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true,
+    "note": "カラクリ忍者の型番（九壱九／参参九）は画像の文字がつぶれており、字形（同じ字の並び方）とレベル表示から判断した。"
+  },
+  {
+    "archetype": "BF（旋風BF）",
+    "title": "ふつーの旋風BF",
+    "event": "寒波亭 第43回 チーム戦",
+    "date": null,
+    "placing": "優勝（チーム）",
+    "player": "ヒョウハク",
+    "source_url": "https://note.com/kanpatei1103/n/n78c9ff12657e",
+    "main": [
+      {
+        "name": "ダーク・アームド・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "BF－蒼炎のシュラ",
+        "count": 3
+      },
+      {
+        "name": "BF－黒槍のブラスト",
+        "count": 3
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "BF－月影のカルート",
+        "count": 1
+      },
+      {
+        "name": "BF－疾風のゲイル",
+        "count": 1
+      },
+      {
+        "name": "BF－極北のブリザード",
+        "count": 3
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "魂を削る死霊",
+        "count": 2
+      },
+      {
+        "name": "キラー・トマト",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "黒い旋風",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "ゴッドバードアタック",
+        "count": 2
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "デルタ・クロウ－アンチ・リバース",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "BF－アーマード・ウィング",
+        "count": 1
+      },
+      {
+        "name": "BF－アームズ・ウィング",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "大地の騎士ガイアナイト",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "A・O・J ディサイシブ・アームズ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "スノーマンイーター",
+        "count": 3
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 1
+      },
+      {
+        "name": "N・グラン・モール",
+        "count": 1
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 1
+      },
+      {
+        "name": "次元幽閉",
+        "count": 3
+      },
+      {
+        "name": "御前試合",
+        "count": 3
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1777819052-k8FN63pRr71E5CwxBghV9TDJ.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "BF（墓地BF）",
+    "title": "ごわす",
+    "event": "寒波亭 第43回 チーム戦",
+    "date": null,
+    "placing": "優勝（チーム）",
+    "player": "ごわす",
+    "source_url": "https://note.com/kanpatei1103/n/n78c9ff12657e",
+    "main": [
+      {
+        "name": "BF－暁のシロッコ",
+        "count": 3
+      },
+      {
+        "name": "BF－大旆のヴァーユ",
+        "count": 3
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "BF－疾風のゲイル",
+        "count": 1
+      },
+      {
+        "name": "終末の騎士",
+        "count": 3
+      },
+      {
+        "name": "ダーク・グレファー",
+        "count": 1
+      },
+      {
+        "name": "ダーク・アームド・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ゾンビキャリア",
+        "count": 1
+      },
+      {
+        "name": "カードガンナー",
+        "count": 2
+      },
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 2
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "闇の誘惑",
+        "count": 1
+      },
+      {
+        "name": "異次元からの埋葬",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 1
+      },
+      {
+        "name": "ゴッドバードアタック",
+        "count": 2
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 2
+      },
+      {
+        "name": "くず鉄のかかし",
+        "count": 2
+      }
+    ],
+    "extra": [
+      {
+        "name": "BF－アームズ・ウィング",
+        "count": 2
+      },
+      {
+        "name": "BF－アーマード・ウィング",
+        "count": 2
+      },
+      {
+        "name": "BF－孤高のシルバー・ウィンド",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 1
+      },
+      {
+        "name": "ドッペルゲンガー",
+        "count": 1
+      },
+      {
+        "name": "N・グラン・モール",
+        "count": 1
+      },
+      {
+        "name": "D.D.クロウ",
+        "count": 1
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "デルタ・クロウ－アンチ・リバース",
+        "count": 1
+      },
+      {
+        "name": "昇天の黒角笛",
+        "count": 1
+      },
+      {
+        "name": "ダスト・シュート",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 1
+      },
+      {
+        "name": "魔のデッキ破壊ウイルス",
+        "count": 2
+      }
+    ],
+    "image_url": "https://assets.st-note.com/img/1777819860-OhcneqafbGtYUSyEWTFzI96v.png",
+    "source": "note（寒波亭 資料室）掲載のデッキ画像（遊戯王ニューロンのスクリーンショット）を目視で書き起こし",
+    "placing_confirmed": true
+  },
+  {
+    "archetype": "兎ラギア",
+    "title": "1103寒波亭@兎ラギア",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=29&request_locale=ja",
+    "main": [
+      {
+        "name": "セイバーザウルス",
+        "count": 3
+      },
+      {
+        "name": "ジェネティック・ワーウルフ",
+        "count": 3
+      },
+      {
+        "name": "レスキューラビット",
+        "count": 3
+      },
+      {
+        "name": "ライオウ",
+        "count": 3
+      },
+      {
+        "name": "ジュラック・グアイバ",
+        "count": 3
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "禁じられた聖槍",
+        "count": 2
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "禁じられた聖杯",
+        "count": 3
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "次元幽閉",
+        "count": 2
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 3
+      }
+    ],
+    "extra": [
+      {
+        "name": "エヴォルカイザー・ラギア",
+        "count": 2
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 2
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "カチコチドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ヴァイロン・ディシグマ",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "スノーマンイーター",
+        "count": 2
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "サイファー・スカウター",
+        "count": 2
+      },
+      {
+        "name": "魔導戦士 ブレイカー",
+        "count": 3
+      },
+      {
+        "name": "次元の裂け目",
+        "count": 3
+      },
+      {
+        "name": "連鎖除外",
+        "count": 1
+      },
+      {
+        "name": "強制脱出装置",
+        "count": 2
+      }
+    ],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "代行天使",
+    "title": "1103寒波亭@代行天使",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=33&request_locale=ja",
+    "main": [
+      {
+        "name": "神秘の代行者 アース",
+        "count": 3
+      },
+      {
+        "name": "創造の代行者 ヴィーナス",
+        "count": 3
+      },
+      {
+        "name": "マスター・ヒュペリオン",
+        "count": 3
+      },
+      {
+        "name": "神聖なる球体",
+        "count": 3
+      },
+      {
+        "name": "TG ストライカー",
+        "count": 3
+      },
+      {
+        "name": "TG ワーウルフ",
+        "count": 3
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "ジャンク・シンクロン",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "トラップ・スタン",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      }
+    ],
+    "extra": [
+      {
+        "name": "ガチガチガンテツ",
+        "count": 1
+      },
+      {
+        "name": "虚空海竜リヴァイエール",
+        "count": 1
+      },
+      {
+        "name": "ダイガスタ・フェニクス",
+        "count": 2
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "No.30 破滅のアシッド・ゴーレム",
+        "count": 1
+      },
+      {
+        "name": "アームズ・エイド",
+        "count": 1
+      },
+      {
+        "name": "TG ワンダー・マジシャン",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "神海竜ギシルノドン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "スノーマンイーター",
+        "count": 3
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "パペット・プラント",
+        "count": 3
+      },
+      {
+        "name": "ライオウ",
+        "count": 3
+      },
+      {
+        "name": "連鎖除外",
+        "count": 2
+      },
+      {
+        "name": "昇天の黒角笛",
+        "count": 1
+      }
+    ],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "HERO",
+    "title": "1103寒波亭@HERO",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=34&request_locale=ja",
+    "main": [
+      {
+        "name": "E・HERO エアーマン",
+        "count": 1
+      },
+      {
+        "name": "E・HERO アナザー・ネオス",
+        "count": 3
+      },
+      {
+        "name": "ライオウ",
+        "count": 3
+      },
+      {
+        "name": "オネスト",
+        "count": 1
+      },
+      {
+        "name": "E・HERO バブルマン",
+        "count": 1
+      },
+      {
+        "name": "E・HERO キャプテン・ゴールド",
+        "count": 1
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "E－エマージェンシーコール",
+        "count": 3
+      },
+      {
+        "name": "デュアルスパーク",
+        "count": 3
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "超融合",
+        "count": 1
+      },
+      {
+        "name": "ミラクル・フュージョン",
+        "count": 3
+      },
+      {
+        "name": "摩天楼 －スカイスクレイパー－",
+        "count": 1
+      },
+      {
+        "name": "ヒーロー・ブラスト",
+        "count": 3
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "次元幽閉",
+        "count": 3
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "E・HERO ガイア",
+        "count": 1
+      },
+      {
+        "name": "E・HERO アブソルートZero",
+        "count": 1
+      },
+      {
+        "name": "E・HERO The シャイニング",
+        "count": 3
+      },
+      {
+        "name": "E・HERO Great TORNADO",
+        "count": 1
+      },
+      {
+        "name": "E・HERO ノヴァマスター",
+        "count": 1
+      },
+      {
+        "name": "E・HERO エスクリダオ",
+        "count": 1
+      },
+      {
+        "name": "V・HERO アドレイション",
+        "count": 1
+      },
+      {
+        "name": "波動竜騎士 ドラゴエクィテス",
+        "count": 1
+      },
+      {
+        "name": "覇魔導士アーカナイト・マジシャン",
+        "count": 1
+      }
+    ],
+    "side": [],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "暗黒界",
+    "title": "1103寒波亭@暗黒界",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=35&request_locale=ja",
+    "main": [
+      {
+        "name": "暗黒界の龍神 グラファ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の術師 スノウ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の尖兵 ベージ",
+        "count": 3
+      },
+      {
+        "name": "暗黒界の狩人 ブラウ",
+        "count": 3
+      },
+      {
+        "name": "魂を削る死霊",
+        "count": 1
+      },
+      {
+        "name": "魔轟神レイヴン",
+        "count": 2
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "BF－精鋭のゼピュロス",
+        "count": 1
+      },
+      {
+        "name": "暗黒界の取引",
+        "count": 1
+      },
+      {
+        "name": "暗黒界の門",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "手札抹殺",
+        "count": 1
+      },
+      {
+        "name": "おろかな埋葬",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 1
+      },
+      {
+        "name": "墓穴の道連れ",
+        "count": 3
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      },
+      {
+        "name": "マインドクラッシュ",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "魔轟神レイジオン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "天刑王 ブラック・ハイランダー",
+        "count": 1
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "メンタルスフィア・デーモン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "エンシェント・フェアリー・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "No.30 破滅のアシッド・ゴーレム",
+        "count": 1
+      },
+      {
+        "name": "虚空海竜リヴァイエール",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 2
+      },
+      {
+        "name": "魂を削る死霊",
+        "count": 1
+      },
+      {
+        "name": "暗黒界の取引",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 3
+      },
+      {
+        "name": "魔のデッキ破壊ウイルス",
+        "count": 2
+      },
+      {
+        "name": "御前試合",
+        "count": 3
+      },
+      {
+        "name": "透破抜き",
+        "count": 2
+      }
+    ],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "カラクリ",
+    "title": "1103寒波亭@カラクリ",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=36&request_locale=ja",
+    "main": [
+      {
+        "name": "カラクリ守衛 参壱参",
+        "count": 1
+      },
+      {
+        "name": "カラクリ参謀 弐四八",
+        "count": 2
+      },
+      {
+        "name": "カラクリ小町 弐弐四",
+        "count": 3
+      },
+      {
+        "name": "カラクリ商人 壱七七",
+        "count": 3
+      },
+      {
+        "name": "カラクリ忍者 九壱九",
+        "count": 2
+      },
+      {
+        "name": "カラクリ兵 弐参六",
+        "count": 3
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "カラクリ解体新書",
+        "count": 3
+      },
+      {
+        "name": "借カラクリ蔵",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 2
+      },
+      {
+        "name": "禁じられた聖槍",
+        "count": 2
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "トラップ・スタン",
+        "count": 2
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 2
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "カラクリ将軍 無零",
+        "count": 2
+      },
+      {
+        "name": "カラクリ大将軍 無零怒",
+        "count": 2
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・ビースト",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・ランドオルス",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 2
+      }
+    ],
+    "side": [
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "メンタルスフィア・デーモン",
+        "count": 1
+      }
+    ],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "ガジェット（緊急テレポート型）",
+    "title": "1103寒波亭@ガジェット",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=37&request_locale=ja",
+    "main": [
+      {
+        "name": "マシンナーズ・カノン",
+        "count": 1
+      },
+      {
+        "name": "マシンナーズ・フォートレス",
+        "count": 3
+      },
+      {
+        "name": "イエロー・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "グリーン・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "レッド・ガジェット",
+        "count": 3
+      },
+      {
+        "name": "マシンナーズ・ギアフレーム",
+        "count": 3
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "貪欲な壺",
+        "count": 2
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "強欲で謙虚な壺",
+        "count": 3
+      },
+      {
+        "name": "禁じられた聖槍",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "盗賊の七つ道具",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "次元幽閉",
+        "count": 3
+      },
+      {
+        "name": "リビングデッドの呼び声",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "No.11 ビッグ・アイ",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 2
+      },
+      {
+        "name": "カチコチドラゴン",
+        "count": 1
+      },
+      {
+        "name": "イビリチュア・メロウガイスト",
+        "count": 2
+      },
+      {
+        "name": "No.39 希望皇ホープ",
+        "count": 2
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 2
+      },
+      {
+        "name": "ヴァイロン・ディシグマ",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      }
+    ],
+    "side": [],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。コメント: 昔ながらの緊急テレガジェットです。"
+  },
+  {
+    "archetype": "六武衆",
+    "title": "1103寒波亭@六武衆",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=38&request_locale=ja",
+    "main": [
+      {
+        "name": "真六武衆－カゲキ",
+        "count": 3
+      },
+      {
+        "name": "真六武衆－キザン",
+        "count": 3
+      },
+      {
+        "name": "六武衆－ザンジ",
+        "count": 1
+      },
+      {
+        "name": "六武衆の影武者",
+        "count": 3
+      },
+      {
+        "name": "六武衆のご隠居",
+        "count": 1
+      },
+      {
+        "name": "六武衆の師範",
+        "count": 2
+      },
+      {
+        "name": "六武衆の露払い",
+        "count": 1
+      },
+      {
+        "name": "六武衆－ヤイチ",
+        "count": 1
+      },
+      {
+        "name": "紫炎の狼煙",
+        "count": 3
+      },
+      {
+        "name": "六武衆の荒行",
+        "count": 2
+      },
+      {
+        "name": "六武衆の結束",
+        "count": 3
+      },
+      {
+        "name": "六武の門",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "月の書",
+        "count": 1
+      },
+      {
+        "name": "諸刃の活人剣術",
+        "count": 3
+      },
+      {
+        "name": "神の警告",
+        "count": 2
+      },
+      {
+        "name": "神の宣告",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "砂塵の大竜巻",
+        "count": 2
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "真六武衆－シエン",
+        "count": 2
+      },
+      {
+        "name": "ナチュル・ビースト",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・ランドオルス",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "虚空海竜リヴァイエール",
+        "count": 1
+      },
+      {
+        "name": "No.17 リバイス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "インヴェルズ・ローチ",
+        "count": 1
+      },
+      {
+        "name": "ジェムナイト・パール",
+        "count": 1
+      },
+      {
+        "name": "A・O・J ディサイシブ・アームズ",
+        "count": 1
+      }
+    ],
+    "side": [
+      {
+        "name": "パペット・プラント",
+        "count": 2
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 1
+      },
+      {
+        "name": "次元の裂け目",
+        "count": 3
+      },
+      {
+        "name": "禁じられた聖杯",
+        "count": 3
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "王宮のお触れ",
+        "count": 3
+      },
+      {
+        "name": "連鎖除外",
+        "count": 1
+      },
+      {
+        "name": "王宮の弾圧",
+        "count": 1
+      }
+    ],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  },
+  {
+    "archetype": "TGカオス",
+    "title": "1103寒波亭@TGカオス",
+    "event": null,
+    "date": null,
+    "placing": null,
+    "player": "寒波亭（登録者）",
+    "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=40&request_locale=ja",
+    "main": [
+      {
+        "name": "冥府の使者ゴーズ",
+        "count": 1
+      },
+      {
+        "name": "ライトロード・マジシャン ライラ",
+        "count": 2
+      },
+      {
+        "name": "ライトロード・ハンター ライコウ",
+        "count": 2
+      },
+      {
+        "name": "トラゴエディア",
+        "count": 1
+      },
+      {
+        "name": "デブリ・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "クリッター",
+        "count": 1
+      },
+      {
+        "name": "カオス・ソーサラー",
+        "count": 3
+      },
+      {
+        "name": "カードガンナー",
+        "count": 2
+      },
+      {
+        "name": "エフェクト・ヴェーラー",
+        "count": 3
+      },
+      {
+        "name": "TG ストライカー",
+        "count": 3
+      },
+      {
+        "name": "TG ラッシュ・ライノ",
+        "count": 1
+      },
+      {
+        "name": "TG ワーウルフ",
+        "count": 3
+      },
+      {
+        "name": "サイバー・ドラゴン",
+        "count": 2
+      },
+      {
+        "name": "増援",
+        "count": 1
+      },
+      {
+        "name": "精神操作",
+        "count": 1
+      },
+      {
+        "name": "死者蘇生",
+        "count": 1
+      },
+      {
+        "name": "光の援軍",
+        "count": 1
+      },
+      {
+        "name": "サイクロン",
+        "count": 2
+      },
+      {
+        "name": "ブラック・ホール",
+        "count": 1
+      },
+      {
+        "name": "奈落の落とし穴",
+        "count": 2
+      },
+      {
+        "name": "TG1－EM1",
+        "count": 2
+      },
+      {
+        "name": "激流葬",
+        "count": 1
+      },
+      {
+        "name": "マインドクラッシュ",
+        "count": 1
+      },
+      {
+        "name": "聖なるバリア －ミラーフォース－",
+        "count": 1
+      }
+    ],
+    "extra": [
+      {
+        "name": "A・O・J カタストル",
+        "count": 1
+      },
+      {
+        "name": "TG ワンダー・マジシャン",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 ブリューナク",
+        "count": 1
+      },
+      {
+        "name": "氷結界の龍 トリシューラ",
+        "count": 1
+      },
+      {
+        "name": "ブラック・ローズ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スクラップ・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "スターダスト・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "C・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "TG ハイパー・ライブラリアン",
+        "count": 1
+      },
+      {
+        "name": "虚空海竜リヴァイエール",
+        "count": 1
+      },
+      {
+        "name": "A・O・J ディサイシブ・アームズ",
+        "count": 1
+      },
+      {
+        "name": "ナチュル・パルキオン",
+        "count": 1
+      },
+      {
+        "name": "キメラテック・フォートレス・ドラゴン",
+        "count": 1
+      },
+      {
+        "name": "アーカナイト・マジシャン",
+        "count": 1
+      },
+      {
+        "name": "アームズ・エイド",
+        "count": 1
+      }
+    ],
+    "side": [],
+    "source": "Konami公式デッキDB（遊戯王ニューロン）の公開デッキページのテキストから抽出",
+    "placing_confirmed": false,
+    "note": "寒波亭が公式DBに登録した参考デッキ。ページ上に大会名・順位・使用者の記載はなく、入賞記録とは紐付けられない。"
+  }
+]
