@@ -11,6 +11,7 @@
 | [decklists.md](decklists.md) | 10デッキのレシピ（メイン40枚＋エクストラ） |
 | [decks.md](decks.md) | 環境分析、各デッキの解説、相性表、使ったデータ |
 | `data/cards.json` `data/decks.json` | 上記の機械可読データ（`ref` は開発用の参照元カード名） |
+| `game/index.html` | 遊べるデュエル盤（ブラウザで開くだけ。`game/template.html` から `tools/build_game.py` で生成） |
 | `tools/` | 生成スクリプト一式 |
 
 ## 10デッキ
@@ -39,6 +40,7 @@
 cd tools
 curl -L -o cards.cdb https://raw.githubusercontent.com/ProjectIgnis/BabelCDB/master/cards.cdb
 python3 build.py cards.cdb   # data/ と *.md を作り直す
+python3 build_game.py        # game/index.html を作り直す
 ```
 
 ## 注意点・未確定の部分

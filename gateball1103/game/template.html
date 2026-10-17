@@ -1,0 +1,803 @@
+<title>ゲートボール1103 デュエル盤</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* Layout: one-screen duel table — opponent above, you below, hand docked at the bottom. Single dark walnut theme by design. */
+:root{
+  --table:#211813; --felt:#2d221b; --slot:#382a21; --line:#4d3c2f;
+  --ink:#f2e8d8; --muted:#b8a48c; --brass:#d6a94f; --brassInk:#2a1d0c;
+  --hurt:#e0604f; --heal:#7fbf86;
+  --c-normal:#d9bb62; --c-effect:#cf7e45; --c-fusion:#8f63b5; --c-synchro:#ece8dc; --c-xyz:#2b2a31;
+  --c-spell:#2f8c78; --c-trap:#b14a7f; --c-token:#8a8f96; --c-back:#5a3b26;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--table);color:var(--ink);font-family:var(--body);font-size:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  font-variant-numeric:tabular-nums;overscroll-behavior:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+#app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;min-height:100%;padding-block:8px}
+
+/* ---- setup ---- */
+.setup{display:flex;flex-direction:column;gap:18px;padding-block:20px 32px}
+.brand{font-family:var(--display);font-size:clamp(34px,10vw,52px);line-height:1;letter-spacing:.02em;color:var(--brass);margin:0}
+.brand small{display:block;font-family:var(--body);font-size:13px;color:var(--muted);letter-spacing:.2em;margin-top:8px}
+.seat{background:var(--felt);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.seat h2{margin:0;font-family:var(--display);font-size:18px;font-weight:400}
+.decks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.deckbtn{text-align:left;border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.deckbtn b{font-size:13px}
+.deckbtn span{font-size:11px;color:var(--muted)}
+.deckbtn.on{border-color:var(--brass);background:#4a3720}
+.tier{font-family:var(--display);font-size:11px;color:var(--brass)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chipbtn{border:1px solid var(--line);background:var(--slot);border-radius:999px;padding:7px 12px;font-size:13px}
+.chipbtn.on{border-color:var(--brass);color:var(--brass)}
+.big{border:none;background:var(--brass);color:var(--brassInk);font-family:var(--display);font-size:18px;padding:14px;border-radius:6px;width:100%}
+.ghost{border:1px solid var(--line);background:none;border-radius:6px;padding:12px;width:100%}
+.note{font-size:12px;color:var(--muted);line-height:1.7;margin:0}
+
+/* ---- board ---- */
+.side{display:flex;flex-direction:column;gap:4px}
+.piles{display:flex;gap:4px;flex-wrap:wrap}
+.pile{flex:1 1 0;min-width:0;border:1px solid var(--line);background:var(--felt);border-radius:4px;padding:3px 4px;font-size:11px;display:flex;justify-content:space-between;gap:4px;white-space:nowrap;overflow:hidden}
+.pile b{font-size:12px}
+.pile.fz{flex:2 1 0;text-overflow:ellipsis}
+.zones{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.cell{aspect-ratio:1/1;background:var(--slot);border-radius:4px;display:grid;place-items:center;position:relative;border:1px dashed var(--line);min-width:0}
+.cell.st{background:#30251d}
+.tile{width:72%;height:100%;border-radius:3px;padding:3px;display:flex;flex-direction:column;justify-content:space-between;
+  font-size:9px;line-height:1.2;overflow:hidden;border:1px solid rgba(0,0,0,.35);position:relative;color:#1b130e;text-align:left;background:var(--c-effect)}
+.tile .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:700;word-break:break-all}
+.tile .st{font-size:8.5px;white-space:nowrap;letter-spacing:-.02em}
+.tile.def{transform:rotate(90deg)}
+.tile.t-通常{background:var(--c-normal)} .tile.t-効果{background:var(--c-effect)} .tile.t-融合{background:var(--c-fusion);color:#fff}
+.tile.t-同調{background:var(--c-synchro)} .tile.t-重ね{background:var(--c-xyz);color:#efe6d6} .tile.t-魔法{background:var(--c-spell);color:#fff}
+.tile.t-罠{background:var(--c-trap);color:#fff} .tile.t-トークン{background:var(--c-token)}
+.tile.back{background:repeating-linear-gradient(45deg,var(--c-back) 0 6px,#4a2f1e 6px 12px);border-color:#7a5536}
+.tile.down::after{content:"裏";position:absolute;right:2px;bottom:2px;font-size:9px;background:rgba(0,0,0,.55);color:#fff;padding:0 3px;border-radius:2px}
+.badges{position:absolute;left:-2px;top:-4px;display:flex;gap:2px;z-index:2}
+.bdg{font-size:9px;background:var(--brass);color:var(--brassInk);border-radius:3px;padding:0 3px;font-weight:700}
+.bdg.neg{background:#6b6f78;color:#fff}
+.bdg.mod{background:#e9d9b8}
+.mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;padding:6px 0}
+.lp{font-family:var(--display);font-size:22px;line-height:1}
+.lp small{display:block;font-family:var(--body);font-size:10px;color:var(--muted)}
+.lp.r{text-align:right}
+.lp.cur{color:var(--brass)}
+.phase{display:flex;flex-direction:column;align-items:center;gap:2px}
+.phase .t{font-size:10px;color:var(--muted)}
+.phase .p{font-family:var(--display);font-size:15px;border:1px solid var(--brass);color:var(--brass);background:none;border-radius:4px;padding:4px 10px}
+.logline{font-size:11px;color:var(--muted);text-align:center;min-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:none;background:none;width:100%}
+.hand{display:flex;gap:6px;overflow-x:auto;padding:6px 2px 4px;min-height:96px}
+.hand .tile{width:62px;flex:0 0 62px;height:88px;font-size:10px}
+.hand .tile .st{font-size:9px}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding-top:4px;padding-bottom:max(6px,env(safe-area-inset-bottom,0px))}
+.tools button{border:1px solid var(--line);background:var(--felt);border-radius:4px;padding:9px 2px;font-size:12px}
+.tools .go{background:var(--brass);color:var(--brassInk);border-color:var(--brass);font-weight:700}
+.who{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+
+/* ---- sheet / modal ---- */
+.scrim{position:fixed;inset:0;background:rgba(10,6,4,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--felt);border-top:2px solid var(--brass);width:100%;max-width:560px;max-height:82%;overflow-y:auto;border-radius:10px 10px 0 0;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:18px;text-wrap:balance}
+.meta{font-size:12px;color:var(--muted)}
+.ctext{font-size:13px;line-height:1.75;white-space:pre-wrap;background:var(--slot);padding:10px;border-radius:4px;margin:0}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.acts button{border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:10px 6px;font-size:13px;text-align:center}
+.acts button.pri{background:var(--brass);color:var(--brassInk);border-color:var(--brass);font-weight:700}
+.acts button.dan{border-color:#7e3a32}
+.acts button:disabled{opacity:.38;cursor:not-allowed}
+.why{font-size:11px;color:var(--muted)}
+.steps{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:12px}
+.steps button{border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:6px 8px;font-size:12px;min-width:44px}
+.steps b{min-width:40px;text-align:center}
+.list{display:flex;flex-direction:column;gap:4px}
+.li{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:6px;text-align:left;width:100%}
+.li.on{border-color:var(--brass);background:#4a3720}
+.li .sw{width:10px;align-self:stretch;border-radius:2px;flex:0 0 10px}
+.li .tx{min-width:0;display:flex;flex-direction:column;gap:2px}
+.li .tx b{font-size:13px}
+.li .tx span{font-size:11px;color:var(--muted)}
+.form{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;font-size:13px}
+.form input,.form select{background:var(--slot);border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:8px;font-size:16px;width:100%;font-family:inherit}
+.curtain{position:fixed;inset:0;z-index:40;background:var(--table);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.curtain .brand{font-size:40px}
+.win{border:2px solid var(--brass);border-radius:6px;padding:10px;text-align:center;font-family:var(--display);color:var(--brass);background:var(--felt)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:50;max-width:90%}
+.logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
+.logbox div{border-bottom:1px solid var(--line);padding-block:2px}
+@media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
+</style>
+
+<div id="app"></div>
+<div id="layer"></div>
+
+<script>
+const DATA = __DATA__;
+const C = {}; DATA.cards.forEach(c => C[c.code] = c);
+const PH = ['ドロー','スタンバイ','メイン1','バトル','メイン2','エンド'];
+const EXTRA_TYPES = ['融合','同調','重ね'];
+const SAVE_KEY = 'gb1103-duel';
+let S = null;           // デュエル状態
+let setup = {deck:['rabbit','agent'], first:'rand', curtain:true, assist:true};
+let ui = {curtain:false};
+
+/* ---------- 基本ユーティリティ ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const num = v => (typeof v === 'number' ? v : 0);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function loadSave(){ try{ const s=localStorage.getItem(SAVE_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
+function cd(u){ const i=S.inst[u]; return i.tok || C[i.code]; }
+function pname(p){ return S.p[p].name; }
+function log(msg){ S.log.push(`[${S.turn}] ${msg}`); }
+function onField(i){ return i.zone==='mz'||i.zone==='sz'||i.zone==='fz'; }
+function lvl(u){ const c=cd(u), i=S.inst[u]; return c.subtype==='重ね' ? 0 : num(c.level)+(i.lm||0); }
+function atkOf(u){ const c=cd(u), i=S.inst[u]; return Math.max(0, num(c.atk)+i.am); }
+function defOf(u){ const c=cd(u), i=S.inst[u]; return Math.max(0, num(c.def_)+i.dm); }
+function isTuner(u){ return (cd(u).tags||[]).includes('調律'); }
+function isMain(){ return S.phase===2||S.phase===4; }
+function label(u){ const i=S.inst[u]; return i.face==='down' && i.ctrl!==S.view && onField(i) ? '裏側のカード' : `「${cd(u).name}」`; }
+
+/* ---------- デュエル開始 ---------- */
+function newDuel(){
+  S = {n:0, inst:{}, turn:1, tp:0, phase:0, ns:false, view:0, log:[], win:null,
+       assist:setup.assist, curtain:setup.curtain, p:[]};
+  setup.deck.forEach((key,p)=>{
+    const d = DATA.decks[key];
+    const P = {name:`P${p+1}`, deckKey:key, lp:8000, deck:[], hand:[], gy:[], ban:[], extra:[], mz:[null,null,null,null,null], sz:[null,null,null,null,null], fz:null};
+    S.p.push(P);
+    d.main.forEach(([n,code])=>{ for(let k=0;k<n;k++) P.deck.push(mk(code,p,'deck')); });
+    d.extra.forEach(([n,code])=>{ for(let k=0;k<n;k++) P.extra.push(mk(code,p,'extra')); });
+    shuffle(P.deck);
+  });
+  S.tp = setup.first==='rand' ? (Math.random()<.5?0:1) : (setup.first==='p1'?0:1);
+  S.view = S.tp;
+  log(`デュエル開始：${pname(0)}【${DATA.decks[setup.deck[0]].name}】 vs ${pname(1)}【${DATA.decks[setup.deck[1]].name}】`);
+  log(`先攻は${pname(S.tp)}`);
+  for(let k=0;k<5;k++){ draw(0,true); draw(1,true); }
+  draw(S.tp);  // 先攻1ターン目もドローする（1103ルール）
+  ui.curtain = S.curtain;
+  render();
+}
+function mk(code, owner, zone){
+  const u = 'u'+(S.n++);
+  S.inst[u] = {u, code, owner, ctrl:owner, zone, face:'down', pos:'atk', am:0, dm:0, lm:0, ctr:0, mats:[], parent:null,
+               setT:-1, sumT:-1, atkd:false, pc:false, neg:false, tok:null};
+  return u;
+}
+
+/* ---------- カード移動 ---------- */
+function freeSlot(p, zone){ return S.p[p][zone].indexOf(null); }
+function detach(u){
+  const i = S.inst[u];
+  if(i.zone==='mz'||i.zone==='sz'){ const a=S.p[i.ctrl][i.zone]; a[a.indexOf(u)]=null; }
+  else if(i.zone==='fz'){ S.p[i.ctrl].fz=null; }
+  else if(i.zone==='mat'){ const par=S.inst[i.parent]; par.mats.splice(par.mats.indexOf(u),1); i.parent=null; }
+  else { const a=S.p[i.owner][i.zone]; const k=a.indexOf(u); if(k>=0) a.splice(k,1); }
+}
+// zone: hand/deck/gy/ban/extra/mz/sz/fz。o: {p, pos, face, bottom, shuffle}
+function move(u, zone, o={}){
+  const i = S.inst[u];
+  const p = o.p ?? i.owner;
+  if((zone==='mz'||zone==='sz') && !(onField(i) && i.zone===zone && i.ctrl===p) && freeSlot(p,zone)<0){
+    toast(zone==='mz'?'モンスターゾーンに空きがありません':'魔法・罠ゾーンに空きがありません'); return false;
+  }
+  const wasField = onField(i);
+  detach(u);
+  if(wasField){
+    i.mats.slice().forEach(m=>move(m,'gy'));
+    i.am=0; i.dm=0; i.lm=0; i.ctr=0; i.atkd=false; i.pc=false; i.neg=false;
+  }
+  if(i.tok && zone!=='mz'){ delete S.inst[u]; return true; }
+  if(EXTRA_TYPES.includes(cd(u).subtype) && (zone==='hand'||zone==='deck')) zone='extra';
+  i.zone = zone;
+  if(zone==='mz'||zone==='sz'||zone==='fz'){
+    i.ctrl = p; const P = S.p[p];
+    if(zone==='fz'){ if(P.fz) move(P.fz,'gy'); P.fz=u; }
+    else P[zone][freeSlot(p,zone)] = u;
+    i.face = o.face||'up'; i.pos = o.pos||'atk';
+  } else {
+    i.ctrl = i.owner;
+    const a = S.p[i.owner][zone];
+    if(zone==='deck'){ if(o.bottom) a.push(u); else if(o.shuffle){ a.push(u); shuffle(a); } else a.unshift(u); }
+    else a.push(u);
+    i.face = (zone==='gy'||zone==='ban') ? 'up' : 'down';
+  }
+  return true;
+}
+function attachMat(u, parent){
+  detach(u); const i=S.inst[u];
+  if(i.tok){ delete S.inst[u]; return; }
+  i.mats.slice().forEach(m=>move(m,'gy'));
+  Object.assign(i,{zone:'mat', parent, ctrl:S.inst[parent].ctrl, am:0, dm:0, lm:0, ctr:0, mats:[], neg:false, face:'up'});
+  S.inst[parent].mats.push(u);
+}
+function draw(p, quiet){
+  const P = S.p[p];
+  if(!P.deck.length){ if(!quiet){ log(`${P.name}はデッキが0枚でドローできない`); finish(1-p,'デッキ切れ'); } return null; }
+  const u = P.deck.shift(); move(u,'hand');
+  if(!quiet) log(`${P.name}がドロー`);
+  return u;
+}
+function damage(p, v){
+  if(!v) return;
+  S.p[p].lp = Math.max(0, S.p[p].lp - v);
+  log(`${pname(p)}に${v}ダメージ（LP ${S.p[p].lp}）`);
+  if(S.p[p].lp<=0) finish(1-p,'LP0');
+}
+function finish(winner, why){ if(S.win==null){ S.win={p:winner, why}; log(`${pname(winner)}の勝利（${why}）`); } }
+
+/* ---------- ターン進行 ---------- */
+function nextPhase(){
+  if(S.win) return;
+  if(S.phase<5){ S.phase++; log(`${PH[S.phase]}フェイズ`); act(); return; }
+  const H = S.p[S.tp].hand;
+  if(H.length>6){
+    const need = H.length-6;
+    S.view = S.tp;
+    picker({title:`手札が${H.length}枚です。${need}枚捨ててください`, items:H.slice(), min:need, max:need,
+      actions:[{label:'捨ててターン終了', pri:true, fn:sel=>{ sel.forEach(u=>move(u,'gy')); log(`${pname(S.tp)}は手札上限で${need}枚捨てた`); endTurn(); }}]});
+    return;
+  }
+  endTurn();
+}
+function endTurn(){
+  Object.values(S.inst).forEach(i=>{ i.atkd=false; i.pc=false; });
+  S.turn++; S.tp = 1-S.tp; S.ns=false; S.phase=0;
+  log(`――― ターン${S.turn}：${pname(S.tp)} ―――`);
+  draw(S.tp);
+  if(S.curtain){ S.view=S.tp; ui.curtain=true; } else S.view=S.tp;
+  closeLayer(); act();
+}
+function act(){ save(); render(); }
+
+/* ---------- 描画 ---------- */
+function render(){
+  const app = $('#app');
+  if(!S){ app.innerHTML = setupHTML(); return; }
+  const me = S.view, op = 1-me;
+  app.innerHTML = `
+    ${S.win?`<div class="win">${esc(pname(S.win.p))}の勝利（${esc(S.win.why)}） <button class="chipbtn" data-a="menu">メニュー</button></div>`:''}
+    <div class="side opp">${pilesHTML(op)}${zonesHTML(op,'sz')}${zonesHTML(op,'mz')}</div>
+    <div class="mid">
+      <div class="lp ${S.tp===op?'cur':''}"><small>${esc(pname(op))}${S.tp===op?'（ターン中）':''}</small>${S.p[op].lp}</div>
+      <div class="phase"><span class="t">ターン${S.turn}</span><button class="p" data-a="next" aria-label="次のフェイズへ">${PH[S.phase]} ▶</button></div>
+      <div class="lp r ${S.tp===me?'cur':''}"><small>${esc(pname(me))}${S.tp===me?'（ターン中）':''}</small>${S.p[me].lp}</div>
+    </div>
+    <button class="logline" data-a="log">${esc(S.log[S.log.length-1]||'')}</button>
+    <div class="side mine">${zonesHTML(me,'mz')}${zonesHTML(me,'sz')}${pilesHTML(me)}</div>
+    <div class="hand">${S.p[me].hand.map(u=>tileHTML(u,me)).join('') || '<span class="note">手札なし</span>'}</div>
+    <div class="tools">
+      <button class="go" data-a="next">${S.phase===5?'ターン終了':'次のフェイズ'}</button>
+      <button data-a="draw">ドロー</button>
+      <button data-a="exsum">EX召喚</button>
+      <button data-a="more">その他</button>
+    </div>`;
+  if(ui.curtain) showCurtain();
+}
+function pilesHTML(p){
+  const P=S.p[p];
+  const fz = P.fz ? `<button class="pile fz" data-u="${P.fz}"><span>F</span><b>${esc(cd(P.fz).name)}</b></button>` : `<span class="pile fz"><span>フィールド</span><b>—</b></span>`;
+  return `<div class="piles">${fz}
+    <button class="pile" data-a="deck" data-p="${p}"><span>デッキ</span><b>${P.deck.length}</b></button>
+    <button class="pile" data-a="extra" data-p="${p}"><span>EX</span><b>${P.extra.length}</b></button>
+    <button class="pile" data-a="gy" data-p="${p}"><span>墓地</span><b>${P.gy.length}</b></button>
+    <button class="pile" data-a="ban" data-p="${p}"><span>除外</span><b>${P.ban.length}</b></button>
+    <span class="pile"><span>手札</span><b>${P.hand.length}</b></span></div>`;
+}
+function zonesHTML(p, zone){
+  return `<div class="zones">${S.p[p][zone].map(u=>`<div class="cell ${zone==='sz'?'st':''}">${u?tileHTML(u,S.view):''}</div>`).join('')}</div>`;
+}
+function tileHTML(u, viewer){
+  const i=S.inst[u], c=cd(u);
+  const hidden = (i.zone==='hand' && i.owner!==viewer) || (i.face==='down' && onField(i) && i.ctrl!==viewer);
+  const def = i.zone==='mz' && i.pos==='def';
+  if(hidden) return `<button class="tile back ${def?'def':''}" data-u="${u}" aria-label="裏側のカード"></button>`;
+  const t = c.category==='モンスター' ? (i.tok?'トークン':c.subtype) : c.category;
+  let st = '';
+  if(c.category==='モンスター'){
+    const lv = c.subtype==='重ね' ? `R${c.level}` : `★${lvl(u)}`;
+    st = `${lv}<br>${i.zone==='mz'?atkOf(u):num(c.atk)}/${i.zone==='mz'?defOf(u):num(c.def_)}`;
+  } else st = c.subtype;
+  const b = [];
+  if(i.mats.length) b.push(`<span class="bdg">素${i.mats.length}</span>`);
+  if(i.ctr) b.push(`<span class="bdg">C${i.ctr}</span>`);
+  if(i.neg) b.push(`<span class="bdg neg">無効</span>`);
+  if(i.am||i.dm||i.lm) b.push(`<span class="bdg mod">補</span>`);
+  return `<button class="tile t-${t} ${def?'def':''} ${i.face==='down'&&onField(i)?'down':''}" data-u="${u}" aria-label="${esc(c.name)}">
+    ${b.length?`<span class="badges">${b.join('')}</span>`:''}<span class="nm">${esc(c.name)}</span><span class="st">${st}</span></button>`;
+}
+
+/* ---------- セットアップ画面 ---------- */
+const TIER = {rabbit:'S',agent:'S',hero:'A',tg_gadget:'A',debris_plant:'A',quick_plant:'A',six_samurai:'A',dark_world:'B',karakuri:'B',blackwing:'B〜A'};
+function setupHTML(){
+  const saved = loadSave();
+  const seat = p => `<section class="seat"><h2>P${p+1}のデッキ</h2><div class="decks">
+    ${Object.entries(DATA.decks).map(([k,d])=>`<button class="deckbtn ${setup.deck[p]===k?'on':''}" data-a="pick" data-p="${p}" data-k="${k}">
+      <span class="tier">Tier ${TIER[k]}</span><b>${esc(d.name)}</b><span>参照：${esc(d.ref)}</span></button>`).join('')}
+    </div><button class="chipbtn" data-a="recipe" data-k="${setup.deck[p]}">このデッキのレシピを見る</button></section>`;
+  return `<div class="setup">
+    <h1 class="brand">ゲートボール1103<small>DUEL TABLE — 2011.03 REGULATION</small></h1>
+    ${saved && !saved.win ? `<button class="big" data-a="resume">続きから（ターン${saved.turn}）</button>`:''}
+    ${seat(0)}${seat(1)}
+    <section class="seat"><h2>設定</h2>
+      <div class="row"><span class="note">先攻</span>
+        ${[['rand','ランダム'],['p1','P1'],['p2','P2']].map(([k,l])=>`<button class="chipbtn ${setup.first===k?'on':''}" data-a="first" data-k="${k}">${l}</button>`).join('')}</div>
+      <div class="row"><button class="chipbtn ${setup.curtain?'on':''}" data-a="tgl" data-k="curtain">ターン交代で画面を隠す</button>
+        <button class="chipbtn ${setup.assist?'on':''}" data-a="tgl" data-k="assist">ルール補助</button></div>
+      <p class="note">1台の端末を2人で交互に使う対戦盤です。召喚・戦闘ダメージ・フェイズ・手札上限は自動、カード効果は効果文を見て手動で処理します（カードをタップ）。「ルール補助」をオフにすると、召喚権やセットしたターンの制限を無視して操作できます。</p>
+    </section>
+    <button class="big" data-a="start">デュエル開始</button></div>`;
+}
+
+/* ---------- レイヤー（シート・モーダル） ---------- */
+function closeLayer(){ $('#layer').innerHTML=''; }
+function sheet(html){ $('#layer').innerHTML = `<div class="scrim" data-a="close"><div class="sheet" role="dialog">${html}</div></div>`; }
+function showCurtain(){
+  $('#layer').innerHTML = `<div class="curtain"><div class="brand">${esc(pname(S.view))}</div>
+    <p class="note">${esc(pname(S.view))}の画面です。相手に見えないようにしてからタップしてください。</p>
+    <button class="big" style="max-width:320px" data-a="uncurtain">表示する</button></div>`;
+}
+let ACTS = [];
+function actsHTML(list){
+  ACTS = list;
+  return `<div class="acts">${list.map((a,k)=>`<button class="${a.pri?'pri':''} ${a.dan?'dan':''}" data-act="${k}" ${a.dis?'disabled':''} title="${esc(a.dis||'')}">${esc(a.label)}</button>`).join('')}</div>`
+    + (list.some(a=>a.dis)?`<p class="why">押せない操作：${[...new Set(list.filter(a=>a.dis).map(a=>a.dis))].map(esc).join('／')}（ルール補助オフで解除）</p>`:'');
+}
+function rule(ok, reason){ return (!S.assist || ok) ? null : reason; }
+function metaLine(u){
+  const c=cd(u);
+  if(c.category!=='モンスター') return `${c.subtype}${c.category}`;
+  const t=[c.subtype, ...(c.tags||[])].join('・');
+  const lv = c.subtype==='重ね' ? `ランク${c.level}` : `レベル${c.level}`;
+  return `${c.attribute}属性／${c.race}／${t}／${lv}／攻${c.atk} 守${c.def_}`;
+}
+
+/* ---------- カード操作 ---------- */
+function openCard(u){
+  const i=S.inst[u]; if(!i) return;
+  const c=cd(u);
+  const hidden = (i.zone==='hand' && i.owner!==S.view) || (i.face==='down' && onField(i) && i.ctrl!==S.view);
+  const L = [];
+  const mine = (onField(i)? i.ctrl : i.owner) === S.view;
+  const myTurn = S.tp === (onField(i)? i.ctrl : i.owner);
+  const isMon = c.category==='モンスター';
+  const isEx = EXTRA_TYPES.includes(c.subtype);
+  const who = onField(i)? i.ctrl : i.owner;
+
+  if(i.zone==='hand'){
+    if(!mine){ sheet(`<h3>相手の手札</h3><p class="note">中身は見えません。</p>${actsHTML([
+      {label:'ランダムに1枚捨てさせる', fn:()=>{ const H=S.p[who].hand; const r=H[Math.floor(Math.random()*H.length)]; move(r,'gy'); log(`${pname(who)}の手札から${label(r)}が捨てられた`); }},
+      {label:'閉じる', fn:()=>{}}])}`); return; }
+    if(isMon){
+      const need = num(c.level)>=7?2:num(c.level)>=5?1:0;
+      const nsBlock = rule(myTurn&&isMain()&&!S.ns, '召喚はメインフェイズに1回');
+      L.push({label: need?`アドバンス召喚（リリース${need}）`:'通常召喚', pri:true, dis:nsBlock, fn:()=>normalSummon(u,need,'up')});
+      L.push({label: need?`アドバンスセット（リリース${need}）`:'セット', dis:nsBlock, fn:()=>normalSummon(u,need,'down')});
+      if(need) L.push({label:'リリースなしで召喚（効果）', dis:nsBlock, fn:()=>normalSummon(u,0,'up')});
+      L.push({label:'特殊召喚（攻撃表示）', fn:()=>ss(u,'atk')});
+      L.push({label:'特殊召喚（守備表示）', fn:()=>ss(u,'def')});
+    } else if(c.category==='魔法'){
+      const ok = myTurn && (c.subtype==='速攻' || isMain());
+      const why = rule(ok, c.subtype==='速攻'?'手札の速攻魔法は自分のターンのみ':'魔法は自分のメインフェイズに');
+      if(c.subtype==='通常'||c.subtype==='速攻') L.push({label:'発動（解決後に墓地へ）', pri:true, dis:why, fn:()=>{ log(`${pname(who)}が${label(u)}を発動`); move(u,'gy'); }});
+      L.push({label: c.subtype==='フィールド'?'発動（フィールドゾーンへ）':'発動（場に出す）', pri:!(c.subtype==='通常'||c.subtype==='速攻'), dis:why, fn:()=>activateFromHand(u)});
+      L.push({label:'セット', dis:rule(myTurn&&isMain(),'セットは自分のメインフェイズに'), fn:()=>setST(u)});
+    } else {
+      L.push({label:'セット', pri:true, dis:rule(myTurn&&isMain(),'セットは自分のメインフェイズに'), fn:()=>setST(u)});
+      L.push({label:'手札から発動（効果で許可）', fn:()=>activateFromHand(u)});
+    }
+    L.push({label:'効果を発動（手札で）', fn:()=>log(`${pname(who)}が手札の${label(u)}の効果を発動`)});
+    L.push({label:'捨てる（墓地へ）', fn:()=>{ move(u,'gy'); log(`${pname(who)}が${label(u)}を捨てた`); }});
+    L.push({label:'除外', fn:()=>{ move(u,'ban'); log(`${label(u)}を除外`); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ move(u,'deck'); log(`${pname(who)}が手札1枚をデッキの上に戻した`); }});
+    L.push({label:'デッキに戻してシャッフル', fn:()=>{ move(u,'deck',{shuffle:true}); log(`${pname(who)}が手札1枚をデッキに戻した`); }});
+    L.push({label:'相手に見せる（ログ）', fn:()=>log(`${pname(who)}が手札の「${c.name}」を公開`)});
+  }
+  else if(i.zone==='mz'){
+    if(!hidden && mine){
+      const base = myTurn && isMain() && i.sumT!==S.turn && !i.pc && !i.atkd;
+      if(i.face==='down') L.push({label:'反転召喚', pri:true, dis:rule(base,'召喚・セットしたターンや変更済みは不可'), fn:()=>{ i.face='up'; i.pos='atk'; i.pc=true; log(`${pname(who)}が「${c.name}」を反転召喚`); }});
+      else L.push({label:i.pos==='atk'?'守備表示にする':'攻撃表示にする', dis:rule(base,'召喚したターン・攻撃後・変更済みは不可'), fn:()=>{ i.pos=i.pos==='atk'?'def':'atk'; i.pc=true; log(`「${c.name}」を${i.pos==='atk'?'攻撃':'守備'}表示に変更`); }});
+      L.push({label:'攻撃する', pri:true, dis:rule(myTurn&&S.phase===3&&i.face==='up'&&i.pos==='atk'&&!i.atkd&&S.turn>1, S.turn===1?'先攻1ターン目は攻撃できない':'バトルフェイズに攻撃表示で1回'), fn:()=>attack(u)});
+    }
+    if(!hidden) L.push({label:'効果を発動（ログ）', fn:()=>log(`「${c.name}」の効果を発動`)});
+    if(i.mats.length) L.push({label:`重ね素材を取り除く（${i.mats.length}）`, fn:()=>detachMats(u)});
+    L.push({label:'破壊（墓地へ）', dan:true, fn:()=>{ log(`${label(u)}を破壊`); move(u,'gy'); }});
+    L.push({label:'リリース（墓地へ）', fn:()=>{ log(`${label(u)}をリリース`); move(u,'gy'); }});
+    L.push({label:'除外', fn:()=>{ log(`${label(u)}を除外`); move(u,'ban'); }});
+    L.push({label:'持ち主の手札へ', fn:()=>{ log(`${label(u)}を手札に戻した`); move(u,'hand'); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ log(`${label(u)}をデッキの上に戻した`); move(u,'deck'); }});
+    L.push({label:'デッキに戻してシャッフル', fn:()=>{ log(`${label(u)}をデッキに戻した`); move(u,'deck',{shuffle:true}); }});
+    L.push({label:'表示形式を変える（効果）', fn:()=>{ if(i.face==='down'){ i.face='up'; i.pos='def'; } else i.pos=i.pos==='atk'?'def':'atk'; log(`${label(u)}の表示形式を変更（効果）`); }});
+    L.push({label:'裏側守備表示にする', fn:()=>{ i.face='down'; i.pos='def'; i.am=0; i.dm=0; i.neg=false; log(`「${c.name}」を裏側守備表示にした`); }});
+    if(i.face==='down') L.push({label:'表にする（リバース）', fn:()=>{ i.face='up'; log(`「${c.name}」がリバース`); }});
+    L.push({label:'コントロールを相手に移す', fn:()=>{ const to=1-i.ctrl; if(move(u,'mz',{p:to,pos:i.pos,face:i.face})) log(`「${c.name}」のコントロールが${pname(to)}に移った`); }});
+    L.push({label:i.neg?'効果無効を解除':'効果無効の印をつける', fn:()=>{ i.neg=!i.neg; log(`「${c.name}」の効果${i.neg?'を無効':'無効を解除'}`); }});
+  }
+  else if(i.zone==='sz'||i.zone==='fz'){
+    if(mine && i.face==='down'){
+      const ok = c.category==='罠' ? i.setT<S.turn : (c.subtype==='速攻' ? i.setT<S.turn : (myTurn&&isMain()));
+      const why = rule(ok, c.category==='罠'||c.subtype==='速攻' ? 'セットしたターンは発動できない' : 'セットした魔法は自分のメインフェイズに');
+      const once = c.subtype==='通常'||c.subtype==='速攻'||c.subtype==='カウンター';
+      if(once) L.push({label:'発動（解決後に墓地へ）', pri:true, dis:why, fn:()=>{ log(`${pname(who)}が「${c.name}」を発動`); move(u,'gy'); }});
+      L.push({label:'発動（場に残す）', pri:!once, dis:why, fn:()=>{ i.face='up'; log(`${pname(who)}が「${c.name}」を発動`); }});
+    }
+    if(i.face==='up'){
+      L.push({label:'効果を発動（ログ）', fn:()=>log(`「${c.name}」の効果を発動`)});
+      L.push({label:'解決して墓地へ', fn:()=>{ move(u,'gy'); log(`「${c.name}」を墓地へ`); }});
+    }
+    L.push({label:'破壊（墓地へ）', dan:true, fn:()=>{ log(`${label(u)}を破壊`); move(u,'gy'); }});
+    L.push({label:'持ち主の手札へ', fn:()=>{ log(`${label(u)}を手札に戻した`); move(u,'hand'); }});
+    L.push({label:'除外', fn:()=>{ log(`${label(u)}を除外`); move(u,'ban'); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ log(`${label(u)}をデッキの上に戻した`); move(u,'deck'); }});
+    if(i.face==='down' && mine) L.push({label:'表にする（確認）', fn:()=>{ i.face='up'; log(`「${c.name}」を表にした`); }});
+  }
+  else { // deck / gy / ban / extra のリストから
+    if(isMon){
+      L.push({label:'特殊召喚（攻撃表示）', pri:true, dis: rule(!isEx || i.zone!=='extra','EXからは同調・重ね・融合の手順で'), fn:()=>ss(u,'atk')});
+      L.push({label:'特殊召喚（守備表示）', dis: rule(!isEx || i.zone!=='extra','EXからは同調・重ね・融合の手順で'), fn:()=>ss(u,'def')});
+      if(i.zone==='deck') L.push({label:'裏側守備で特殊召喚', fn:()=>ss(u,'def','down')});
+    } else if(i.zone!=='hand'){
+      L.push({label:'場に出す（表側）', fn:()=>{ if(move(u, c.subtype==='フィールド'?'fz':'sz')) log(`「${c.name}」を場に出した`); }});
+      L.push({label:'セットする', fn:()=>setST(u,true)});
+    }
+    if(i.zone!=='hand' && !isEx) L.push({label:'手札に加える', pri:!isMon, fn:()=>{ const from=i.zone; move(u,'hand'); log(`${pname(i.owner)}が${from==='deck'?'デッキ':from==='gy'?'墓地':'除外'}から「${c.name}」を手札に加えた`); }});
+    if(i.zone!=='gy') L.push({label:'墓地へ送る', fn:()=>{ move(u,'gy'); log(`「${c.name}」を墓地へ送った`); }});
+    if(i.zone!=='ban') L.push({label:'除外', fn:()=>{ move(u,'ban'); log(`「${c.name}」を除外`); }});
+    if(i.zone!=='deck' && !isEx){ L.push({label:'デッキの一番上へ', fn:()=>{ move(u,'deck'); log(`「${c.name}」をデッキの上に置いた`); }});
+      L.push({label:'デッキに戻してシャッフル', fn:()=>{ move(u,'deck',{shuffle:true}); log(`「${c.name}」をデッキに戻した`); }}); }
+    if(i.zone==='deck') L.push({label:'デッキの一番下へ', fn:()=>{ move(u,'deck',{bottom:true}); log(`デッキのカード1枚をデッキの一番下へ`); }});
+    if(isEx && i.zone!=='extra') L.push({label:'エクストラデッキへ戻す', fn:()=>{ move(u,'extra'); log(`「${c.name}」をEXに戻した`); }});
+  }
+
+  let tune = '';
+  if(i.zone==='mz' && !hidden){
+    tune = `<div class="steps"><span>攻</span>${[-1000,-100,100,1000].map(v=>`<button data-mod="am" data-v="${v}">${v>0?'+':''}${v}</button>`).join('')}<b>${atkOf(u)}</b></div>
+      <div class="steps"><span>守</span>${[-1000,-100,100,1000].map(v=>`<button data-mod="dm" data-v="${v}">${v>0?'+':''}${v}</button>`).join('')}<b>${defOf(u)}</b></div>
+      <div class="steps"><span>攻守</span><button data-mod="half">半分</button><button data-mod="zero">0にする</button><button data-mod="reset">補正リセット</button>
+        ${c.subtype!=='重ね'?`<span>レベル</span><button data-mod="lm" data-v="-1">−1</button><b>${lvl(u)}</b><button data-mod="lm" data-v="1">＋1</button>`:''}</div>`;
+  }
+  if(onField(i)) tune += `<div class="steps"><span>カウンター</span><button data-mod="ctr" data-v="-1">−</button><b>${i.ctr}</b><button data-mod="ctr" data-v="1">＋</button></div>`;
+  ui.cur = u;
+  const matsList = i.mats.length ? `<p class="meta">重ね素材：${i.mats.map(m=>esc(cd(m).name)).join('、')}</p>` : '';
+  const zoneName = {hand:'手札',mz:'モンスターゾーン',sz:'魔法・罠ゾーン',fz:'フィールドゾーン',deck:'デッキ',gy:'墓地',ban:'除外',extra:'エクストラデッキ'}[i.zone];
+  sheet(hidden ? `<h3>裏側のカード</h3><p class="meta">${esc(pname(who))}の${zoneName}</p>${tune}${actsHTML(L)}`
+    : `<h3>${esc(c.name)}${c.limit&&c.limit!=='無制限'?` <span class="tier">【${esc(c.limit)}】</span>`:''}</h3>
+      <p class="meta">${esc(metaLine(u))} ・ ${esc(pname(i.owner))}の${zoneName}${i.ctrl!==i.owner&&onField(i)?`（${esc(pname(i.ctrl))}がコントロール）`:''}</p>
+      <p class="ctext">${esc(c.text)}</p>${matsList}${tune}${actsHTML(L)}`);
+}
+function modCard(kind, v){
+  const u=ui.cur, i=S.inst[u]; if(!i) return;
+  const c=cd(u);
+  if(kind==='am'||kind==='dm'||kind==='lm'||kind==='ctr') i[kind]=Math.max(kind==='ctr'?0:-99999, i[kind]+v);
+  if(kind==='half'){ i.am -= Math.ceil(atkOf(u)/2); i.dm -= Math.ceil(defOf(u)/2); }
+  if(kind==='zero'){ i.am = -num(c.atk); i.dm = -num(c.def_); }
+  if(kind==='reset'){ i.am=0; i.dm=0; i.lm=0; }
+  if(kind!=='ctr') log(`「${c.name}」の数値を変更（攻${atkOf(u)} 守${defOf(u)}${c.subtype!=='重ね'?` ★${lvl(u)}`:''}）`);
+  save(); render(); openCard(u);
+}
+
+function normalSummon(u, need, face){
+  const c=cd(u), me=S.inst[u].owner;
+  const go = () => {
+    if(!move(u,'mz',{p:me, face, pos:face==='down'?'def':'atk'})) return;
+    S.ns=true; S.inst[u].sumT=S.turn;
+    log(face==='down' ? `${pname(me)}がモンスターをセット` : `${pname(me)}が「${c.name}」を召喚`);
+    act();
+  };
+  if(!need){ go(); return; }
+  const mons = S.p[me].mz.filter(Boolean);
+  if(mons.length<need){ toast(`リリースするモンスターが${need}体必要です`); return; }
+  picker({title:`リリースするモンスターを${need}体選択`, items:mons, min:need, max:need,
+    actions:[{label:'リリースして召喚', pri:true, fn:sel=>{ sel.forEach(t=>{ log(`${label(t)}をリリース`); move(t,'gy'); }); go(); }}]});
+}
+function ss(u, pos, face='up'){
+  const i=S.inst[u], c=cd(u), from=i.zone;
+  const p = S.view;  // 操作している側の場に出す
+  if(move(u,'mz',{p, pos, face})){ i.sumT=S.turn; log(`${pname(p)}が${face==='down'?'モンスター':`「${c.name}」`}を${{hand:'手札',gy:'墓地',ban:'除外',deck:'デッキ',extra:'EX'}[from]||''}から特殊召喚（${pos==='atk'?'攻撃':'守備'}）`); }
+  act();
+}
+function setST(u, fromList){
+  const c=cd(u), me=S.inst[u].owner;
+  const zone = c.subtype==='フィールド' ? 'fz' : 'sz';
+  if(move(u, zone, {p:me, face:'down'})){ S.inst[u].setT=S.turn; log(`${pname(me)}が魔法・罠をセット`); }
+  act();
+}
+function activateFromHand(u){
+  const c=cd(u), me=S.inst[u].owner;
+  if(move(u, c.subtype==='フィールド'?'fz':'sz', {p:me})){ log(`${pname(me)}が「${c.name}」を発動`); }
+  act();
+}
+function detachMats(u){
+  const i=S.inst[u];
+  picker({title:'取り除く重ね素材を選択', items:i.mats.slice(), min:1, max:i.mats.length,
+    actions:[{label:'取り除く（墓地へ）', pri:true, fn:sel=>{ sel.forEach(m=>move(m,'gy')); log(`「${cd(u).name}」の重ね素材を${sel.length}つ取り除いた`); }}]});
+}
+
+/* ---------- 戦闘 ---------- */
+function attack(a){
+  const me=S.inst[a].ctrl, op=1-me;
+  const targets = S.p[op].mz.filter(Boolean);
+  if(!targets.length){ battle(a,null); return; }
+  picker({title:'攻撃対象を選択', items:targets, min:1, max:1,
+    actions:[{label:'このモンスターに攻撃', pri:true, fn:sel=>battle(a,sel[0])},
+             {label:'直接攻撃（効果で可能な場合）', fn:()=>battle(a,null)}]});
+}
+function battle(a, t){
+  const A=S.inst[a], me=A.ctrl, op=1-me;
+  A.atkd=true;
+  const res = {kill:[], dmg:[0,0]};
+  let desc;
+  if(!t){ res.dmg[op]=atkOf(a); desc=`「${cd(a).name}」（攻${atkOf(a)}）の直接攻撃`; }
+  else {
+    const T=S.inst[t];
+    if(T.face==='down'){ T.face='up'; log(`「${cd(t).name}」がリバース`); }
+    const x=atkOf(a);
+    if(T.pos==='atk'){
+      const y=atkOf(t);
+      if(x>y){ res.kill.push(t); res.dmg[op]=x-y; }
+      else if(x<y){ res.kill.push(a); res.dmg[me]=y-x; }
+      else if(x>0){ res.kill.push(a,t); }
+      desc=`「${cd(a).name}」（攻${x}）→「${cd(t).name}」（攻${y}）`;
+    } else {
+      const y=defOf(t);
+      if(x>y) res.kill.push(t); else if(x<y) res.dmg[me]=y-x;
+      desc=`「${cd(a).name}」（攻${x}）→「${cd(t).name}」（守${y}）`;
+    }
+  }
+  log(`${pname(me)}の攻撃：${desc}`);
+  const box = u => `<label class="li ${res.kill.includes(u)?'on':''}"><input type="checkbox" id="k-${u}" data-kill="${u}" ${res.kill.includes(u)?'checked':''}> <span class="tx"><b>${esc(cd(u).name)}を破壊</b><span>${esc(pname(S.inst[u].ctrl))}のモンスター</span></span></label>`;
+  sheet(`<h3>ダメージ計算</h3><p class="meta">${esc(desc)}</p>
+    <p class="note">効果による破壊耐性・貫通・ダメージ0などは、ここで手直ししてから「適用」を押してください。</p>
+    ${t?`<div class="list">${[a,t].map(box).join('')}</div>`:''}
+    <div class="form"><label for="d0">${esc(pname(0))}へのダメージ</label><input id="d0" type="number" inputmode="numeric" value="${res.dmg[0]}">
+      <label for="d1">${esc(pname(1))}へのダメージ</label><input id="d1" type="number" inputmode="numeric" value="${res.dmg[1]}"></div>
+    ${actsHTML([{label:'適用', pri:true, keep:true, fn:()=>{
+        document.querySelectorAll('[data-kill]').forEach(cb=>{ if(cb.checked && S.inst[cb.dataset.kill]){ log(`「${cd(cb.dataset.kill).name}」が戦闘で破壊された`); move(cb.dataset.kill,'gy'); } });
+        damage(0, Math.max(0,parseInt($('#d0').value)||0)); damage(1, Math.max(0,parseInt($('#d1').value)||0));
+        closeLayer(); act(); }},
+      {label:'攻撃を無効にする', keep:true, fn:()=>{ log('攻撃は無効になった'); closeLayer(); act(); }}])}`);
+}
+
+/* ---------- エクストラデッキからの召喚 ---------- */
+function exSummonMenu(){
+  const me=S.view;
+  sheet(`<h3>エクストラデッキから召喚</h3><p class="meta">${esc(pname(me))}の場のモンスターを素材にします。</p>${actsHTML([
+    {label:'同調召喚（シンクロ）', pri:true, fn:()=>setTimeout(()=>synchro(me))},
+    {label:'重ね召喚（エクシーズ）', pri:true, fn:()=>setTimeout(()=>xyz(me))},
+    {label:'融合召喚', fn:()=>setTimeout(()=>fusion(me))},
+    {label:'エクストラデッキを見る', fn:()=>setTimeout(()=>viewPile(me,'extra'))}])}`);
+}
+function placeEx(u, me, pos, mats, how){
+  const ok = move(u,'mz',{p:me,pos});
+  if(!ok) return false;
+  S.inst[u].sumT=S.turn; log(`${pname(me)}が「${cd(u).name}」を${how}（${pos==='atk'?'攻撃':'守備'}表示）`);
+  return true;
+}
+function synchro(me){
+  const mons = S.p[me].mz.filter(u=>u && S.inst[u].face==='up' && cd(u).subtype!=='重ね');
+  picker({title:'同調素材を選択（調律1体＋それ以外）', items:mons, min:2, max:5,
+    actions:[{label:'次へ', pri:true, fn:sel=>{
+      const tuners=sel.filter(isTuner).length, sum=sel.reduce((s,u)=>s+lvl(u),0);
+      const cands=S.p[me].extra.filter(u=>cd(u).subtype==='同調' && (!S.assist || num(cd(u).level)===sum));
+      const warn = tuners!==1 ? `調律が${tuners}体です（通常は1体）。` : '';
+      if(!cands.length){ toast(`レベル合計${sum}の同調モンスターがEXにありません`); return; }
+      setTimeout(()=>picker({title:`レベル合計${sum}：召喚する同調モンスター`, note:warn+'素材の種類指定（「〇〇」＋…等）はカード文を確認してください。', items:cands, min:1, max:1,
+        actions:['atk','def'].map(pos=>({label:pos==='atk'?'攻撃表示で同調召喚':'守備表示で同調召喚', pri:pos==='atk', fn:s2=>{
+          const mats=sel.slice(); mats.forEach(m=>move(m,'gy'));
+          placeEx(s2[0],me,pos,mats,'同調召喚'); log(`同調素材：${mats.map(m=>S.inst[m]?`「${cd(m).name}」`:'トークン').join('、')}`); }}))}));
+    }}]});
+}
+function xyz(me){
+  const mons = S.p[me].mz.filter(u=>u && S.inst[u].face==='up' && cd(u).subtype!=='重ね' && !S.inst[u].tok);
+  picker({title:'重ね素材を選択（同じレベル）', note:'トークンは重ね素材にできません。', items:mons, min:2, max:5,
+    actions:[{label:'次へ', pri:true, fn:sel=>{
+      const levels=[...new Set(sel.map(lvl))];
+      if(S.assist && levels.length!==1){ toast('同じレベルのモンスターを選んでください'); return; }
+      const L=levels[0];
+      const cands=S.p[me].extra.filter(u=>{ const c=cd(u); if(c.subtype!=='重ね') return false; if(!S.assist) return true;
+        const m=c.text.match(/×(\d)/); return num(c.level)===L && (!m || +m[1]===sel.length); });
+      if(!cands.length){ toast(`ランク${L}・素材${sel.length}体の重ねモンスターがEXにありません`); return; }
+      setTimeout(()=>picker({title:`ランク${L}：召喚する重ねモンスター`, note:'種族などの素材指定はカード文を確認してください。', items:cands, min:1, max:1,
+        actions:['atk','def'].map(pos=>({label:pos==='atk'?'攻撃表示で重ね召喚':'守備表示で重ね召喚', pri:pos==='atk', fn:s2=>{
+          const x=s2[0]; const names=sel.map(m=>cd(m).name);
+          sel.forEach(m=>detach(m));
+          // 素材をいったん外してから本体を置き、素材として重ねる
+          sel.forEach(m=>{ const i=S.inst[m]; i.zone='limbo'; });
+          if(!move(x,'mz',{p:me,pos})){ sel.forEach(m=>{ S.inst[m].zone='gy'; S.p[S.inst[m].owner].gy.push(m); }); return; }
+          sel.forEach(m=>{ const i=S.inst[m]; Object.assign(i,{zone:'mat',parent:x,am:0,dm:0,lm:0,ctr:0,neg:false,face:'up'}); S.inst[x].mats.push(m); });
+          S.inst[x].sumT=S.turn; log(`${pname(me)}が「${cd(x).name}」を重ね召喚（素材：${names.join('、')}）`); }}))}));
+    }}]});
+}
+function fusion(me){
+  const fus=S.p[me].extra.filter(u=>cd(u).subtype==='融合');
+  if(!fus.length){ toast('EXに融合モンスターがありません'); return; }
+  picker({title:'融合召喚するモンスター', items:fus, min:1, max:1, actions:[{label:'次へ', pri:true, fn:s1=>{
+    const P=S.p[me];
+    const pool=[...P.hand, ...P.mz.filter(Boolean), ...P.gy];
+    setTimeout(()=>picker({title:'融合素材を選択（手札・場・墓地）', note:'「融合」なら手札・場から墓地へ、「奇跡の融合」なら場・墓地から除外します。', items:pool, min:1, max:4,
+      actions:[{label:'素材を墓地へ送って融合召喚', pri:true, fn:sel=>doFusion(s1[0],sel,'gy')},
+               {label:'素材を除外して融合召喚', fn:sel=>doFusion(s1[0],sel,'ban')}]}));
+  }}]});
+  function doFusion(f, sel, to){
+    const names=sel.map(m=>cd(m).name);
+    sel.forEach(m=>move(m,to));
+    if(placeEx(f,me,'atk',sel,'融合召喚')) log(`融合素材（${to==='gy'?'墓地へ':'除外'}）：${names.join('、')}`);
+  }
+}
+
+/* ---------- ピッカー ---------- */
+let PK = null;
+function picker(o){
+  PK = {...o, sel:[]};
+  drawPicker();
+}
+function drawPicker(){
+  const o=PK;
+  sheet(`<h3>${esc(o.title)}</h3>${o.note?`<p class="note">${esc(o.note)}</p>`:''}
+    <div class="list">${o.items.map(u=>{ const c=cd(u), i=S.inst[u]; const hid=(i.zone==='hand'&&i.owner!==S.view)||(i.face==='down'&&onField(i)&&i.ctrl!==S.view);
+      const sw=c.category==='モンスター'?(i.tok?'var(--c-token)':`var(--c-${{通常:'normal',効果:'effect',融合:'fusion',同調:'synchro',重ね:'xyz'}[c.subtype]||'effect'})`):(c.category==='魔法'?'var(--c-spell)':'var(--c-trap)');
+      const where={hand:'手札',mz:'場',sz:'場',gy:'墓地',ban:'除外',deck:'デッキ',extra:'EX',mat:'素材'}[i.zone]||'';
+      return `<button class="li ${o.sel.includes(u)?'on':''}" data-pk="${u}"><span class="sw" style="background:${hid?'var(--c-back)':sw}"></span><span class="tx"><b>${hid?'裏側のカード':esc(c.name)}</b><span>${hid?'':esc(metaLine(u))}${where?` ・ ${where}`:''}${i.zone==='mz'&&!hid?` ・ 攻${atkOf(u)} 守${defOf(u)}`:''}</span></span></button>`; }).join('') || '<p class="note">対象がありません</p>'}</div>
+    <p class="meta">選択 ${o.sel.length}／${o.min===o.max?o.min:`${o.min}〜${o.max}`}</p>
+    ${actsHTML([...o.actions.map(a=>({...a, dis:(o.sel.length<o.min||o.sel.length>o.max)?'選択数が足りません':null, fn:()=>a.fn(o.sel.slice())})), {label:'やめる', fn:()=>{}}])}`);
+}
+
+/* ---------- 一覧表示 ---------- */
+function viewPile(p, zone){
+  const P=S.p[p];
+  const own = p===S.view;
+  if((zone==='deck'||zone==='extra') && !own){ toast('相手のデッキは見られません'); return; }
+  let items = P[zone].slice();
+  if(zone==='deck') items.sort((a,b)=>cd(a).name.localeCompare(cd(b).name,'ja'));
+  const title = {deck:'デッキ（名前順・順番は非公開）', extra:'エクストラデッキ', gy:'墓地', ban:'除外'}[zone];
+  const tools = zone==='deck' ? [
+    {label:'シャッフル', fn:()=>{ shuffle(P.deck); log(`${P.name}がデッキをシャッフル`); }},
+    {label:'上から1枚墓地へ', fn:()=>{ const u=P.deck[0]; if(u){ move(u,'gy'); log(`デッキの上の「${cd(u).name}」を墓地へ`); } }},
+    {label:'上から3枚めくる', fn:()=>setTimeout(()=>{ const top=P.deck.slice(0,3); log(`${P.name}がデッキの上から${top.length}枚をめくった：${top.map(u=>cd(u).name).join('、')}`); listSheet(`デッキの上から${top.length}枚`, top, '上から順。選んだカードを操作できます。'); })},
+    {label:'上から5枚めくる', fn:()=>setTimeout(()=>{ const top=P.deck.slice(0,5); log(`${P.name}がデッキの上から${top.length}枚をめくった：${top.map(u=>cd(u).name).join('、')}`); listSheet(`デッキの上から${top.length}枚`, top, '上から順。'); })}] : [];
+  listSheet(`${P.name}の${title}（${items.length}）`, items, zone==='deck'?'カードを選ぶとサーチ・特殊召喚・墓地送りなどができます。操作後は必要に応じてシャッフルしてください。':'', tools);
+}
+function listSheet(title, items, note, tools=[]){
+  PK = {title, items, note, min:0, max:0, sel:[], list:true};
+  sheet(`<h3>${esc(title)}</h3>${note?`<p class="note">${esc(note)}</p>`:''}${tools.length?actsHTML(tools):''}
+    <div class="list">${items.map(u=>{ const c=cd(u);
+      return `<button class="li" data-open="${u}"><span class="sw" style="background:${c.category==='魔法'?'var(--c-spell)':c.category==='罠'?'var(--c-trap)':`var(--c-${{通常:'normal',効果:'effect',融合:'fusion',同調:'synchro',重ね:'xyz'}[c.subtype]||'effect'})`}"></span><span class="tx"><b>${esc(c.name)}</b><span>${esc(metaLine(u))}</span></span></button>`; }).join('') || '<p class="note">カードがありません</p>'}</div>`);
+}
+function recipeSheet(k){
+  const d=DATA.decks[k];
+  const part = (arr) => arr.map(([n,code])=>`<button class="li" data-show="${code}"><span class="tx"><b>${esc(C[code].name)} ×${n}</b><span>${esc(C[code].subtype)}${esc(C[code].category)}${C[code].limit!=='無制限'?` ・ ${esc(C[code].limit)}`:''}</span></span></button>`).join('');
+  sheet(`<h3>【${esc(d.name)}】レシピ</h3><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s,x)=>s+x[0],0)} ／ EX${d.extra.reduce((s,x)=>s+x[0],0)}</p>
+    <div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
+}
+function showCode(code){
+  const c=C[code];
+  const meta = c.category==='モンスター' ? `${c.attribute}属性／${c.race}／${[c.subtype,...(c.tags||[])].join('・')}／${c.subtype==='重ね'?'ランク':'レベル'}${c.level}／攻${c.atk} 守${c.def_}` : `${c.subtype}${c.category}`;
+  sheet(`<h3>${esc(c.name)}</h3><p class="meta">${esc(meta)}</p><p class="ctext">${esc(c.text)}</p>`);
+}
+
+/* ---------- その他メニュー ---------- */
+function moreMenu(){
+  sheet(`<h3>その他の操作</h3>${actsHTML([
+    {label:'視点を相手に切り替え', pri:true, fn:()=>{ S.view=1-S.view; if(S.curtain) ui.curtain=true; }},
+    {label:'LPを変更', fn:()=>setTimeout(lpSheet)},
+    {label:'トークンを生成', fn:()=>setTimeout(tokenSheet)},
+    {label:'コイントス', fn:()=>log(`コイントス：${Math.random()<.5?'表':'裏'}`)},
+    {label:'サイコロ', fn:()=>log(`サイコロ：${1+Math.floor(Math.random()*6)}`)},
+    {label:'ログを見る', fn:()=>setTimeout(logSheet)},
+    {label:'自分のデッキ', fn:()=>setTimeout(()=>viewPile(S.view,'deck'))},
+    {label:`ルール補助：${S.assist?'オン':'オフ'}`, fn:()=>{ S.assist=!S.assist; toast(`ルール補助を${S.assist?'オン':'オフ'}にしました`); }},
+    {label:`交代時に隠す：${S.curtain?'オン':'オフ'}`, fn:()=>{ S.curtain=!S.curtain; }},
+    {label:'メニューに戻る', dan:true, fn:()=>setTimeout(menuSheet)}])}`);
+}
+function menuSheet(){
+  sheet(`<h3>デュエルを終了しますか？</h3><p class="note">「デッキ選択に戻る」を押すと、このデュエルの続きは消えます。</p>${actsHTML([
+    {label:'デッキ選択に戻る', dan:true, fn:()=>{ clearSave(); S=null; }},
+    {label:'同じデッキで再戦', pri:true, fn:()=>{ setup.deck=[S.p[0].deckKey,S.p[1].deckKey]; newDuel(); }},
+    {label:'続ける', fn:()=>{}}])}`);
+}
+function lpSheet(){
+  sheet(`<h3>LPを変更</h3><div class="form">
+    <label for="lpP">プレイヤー</label><select id="lpP">${[0,1].map(p=>`<option value="${p}" ${p===S.view?'selected':''}>${esc(pname(p))}（${S.p[p].lp}）</option>`).join('')}</select>
+    <label for="lpV">数値</label><input id="lpV" type="number" inputmode="numeric" value="1000"></div>
+    ${actsHTML([
+      {label:'ダメージ', pri:true, fn:()=>damage(+$('#lpP').value, Math.max(0,parseInt($('#lpV').value)||0))},
+      {label:'回復', fn:()=>{ const p=+$('#lpP').value, v=Math.max(0,parseInt($('#lpV').value)||0); S.p[p].lp+=v; log(`${pname(p)}が${v}回復（LP ${S.p[p].lp}）`); }},
+      {label:'LPを払う（コスト）', fn:()=>{ const p=+$('#lpP').value, v=Math.max(0,parseInt($('#lpV').value)||0); S.p[p].lp=Math.max(0,S.p[p].lp-v); log(`${pname(p)}が${v}LPを払った（LP ${S.p[p].lp}）`); if(S.p[p].lp<=0) finish(1-p,'LP0'); }},
+      {label:'半分を払う', fn:()=>{ const p=+$('#lpP').value, v=Math.floor(S.p[p].lp/2); S.p[p].lp-=v; log(`${pname(p)}がLPの半分（${v}）を払った（LP ${S.p[p].lp}）`); }}])}`);
+}
+const TOKENS = [
+  {name:'綿毛トークン', race:'植物族', attribute:'風', level:1, atk:0, def_:0, pos:'def'},
+  {name:'分身トークン', race:'戦士族', attribute:'闇', level:1, atk:400, def_:400, pos:'atk'},
+  {name:'冥門の残光トークン', race:'天使族', attribute:'光', level:7, atk:0, def_:0, pos:'atk'},
+];
+function tokenSheet(){
+  sheet(`<h3>トークンを生成</h3><div class="form">
+    <label for="tkK">種類</label><select id="tkK">${TOKENS.map((t,k)=>`<option value="${k}">${esc(t.name)}</option>`).join('')}<option value="x">その他</option></select>
+    <label for="tkN">名前</label><input id="tkN" type="text" value="${esc(TOKENS[0].name)}">
+    <label for="tkL">レベル</label><input id="tkL" type="number" value="1">
+    <label for="tkA">攻撃力</label><input id="tkA" type="number" value="0">
+    <label for="tkD">守備力</label><input id="tkD" type="number" value="0">
+    <label for="tkC">数</label><input id="tkC" type="number" value="1" min="1" max="5">
+    <label for="tkP">表示形式</label><select id="tkP"><option value="def">守備表示</option><option value="atk">攻撃表示</option></select></div>
+    ${actsHTML([{label:`${pname(S.view)}の場に生成`, pri:true, fn:()=>{
+      const k=$('#tkK').value, base=k==='x'?{race:'—',attribute:'—'}:TOKENS[+k];
+      const n=Math.min(5,Math.max(1,parseInt($('#tkC').value)||1));
+      for(let j=0;j<n;j++){
+        const u=mk('token',S.view,'limbo');
+        S.inst[u].tok={name:$('#tkN').value||'トークン', category:'モンスター', subtype:'トークン', tags:[], race:base.race, attribute:base.attribute,
+          level:parseInt($('#tkL').value)||1, atk:parseInt($('#tkA').value)||0, def_:parseInt($('#tkD').value)||0, text:'トークン（フィールドを離れると消える）', limit:'無制限'};
+        if(freeSlot(S.view,'mz')<0){ delete S.inst[u]; toast('モンスターゾーンに空きがありません'); break; }
+        const P=S.p[S.view]; Object.assign(S.inst[u],{zone:'mz',ctrl:S.view,face:'up',pos:$('#tkP').value,sumT:S.turn}); P.mz[freeSlot(S.view,'mz')]=u;
+      }
+      log(`${pname(S.view)}が「${$('#tkN').value}」を${n}体特殊召喚`); }}])}`);
+  $('#tkK').addEventListener('change', e=>{ const t=TOKENS[+e.target.value]; if(!t) return; $('#tkN').value=t.name; $('#tkL').value=t.level; $('#tkA').value=t.atk; $('#tkD').value=t.def_; $('#tkP').value=t.pos; });
+  // 初期値を最初のプリセットに合わせる
+  $('#tkP').value=TOKENS[0].pos;
+}
+function logSheet(){
+  sheet(`<h3>ログ</h3><div class="logbox">${S.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`);
+}
+
+/* ---------- 入力 ---------- */
+document.addEventListener('click', e=>{
+  const t=e.target;
+  if(t.classList && t.classList.contains('scrim')){ closeLayer(); return; }
+  const actBtn=t.closest('[data-act]');
+  if(actBtn){
+    const a=ACTS[+actBtn.dataset.act]; if(!a||a.dis) return;
+    const before=$('#layer').innerHTML;
+    a.fn();                                   // 入力欄を読む操作があるので、閉じる前に実行する
+    if(!a.keep && $('#layer').innerHTML===before) closeLayer();
+    if(S) save();
+    render(); return;
+  }
+  const pk=t.closest('[data-pk]');
+  if(pk){ const u=pk.dataset.pk, s=PK.sel; const k=s.indexOf(u); if(k>=0) s.splice(k,1); else { if(PK.max===1) s.length=0; if(s.length<PK.max) s.push(u); } drawPicker(); return; }
+  const op=t.closest('[data-open]'); if(op){ openCard(op.dataset.open); return; }
+  const sh=t.closest('[data-show]'); if(sh){ showCode(sh.dataset.show); return; }
+  const md=t.closest('[data-mod]'); if(md){ modCard(md.dataset.mod, +(md.dataset.v||0)); return; }
+  const cu=t.closest('[data-u]'); if(cu && S){ openCard(cu.dataset.u); return; }
+  const b=t.closest('[data-a]'); if(!b) return;
+  const a=b.dataset.a;
+  if(a==='close') return;
+  if(!S){
+    if(a==='pick'){ setup.deck[+b.dataset.p]=b.dataset.k; }
+    if(a==='first') setup.first=b.dataset.k;
+    if(a==='tgl') setup[b.dataset.k]=!setup[b.dataset.k];
+    if(a==='recipe'){ recipeSheet(b.dataset.k); return; }
+    if(a==='start'){ newDuel(); return; }
+    if(a==='resume'){ S=loadSave(); ui.curtain=S.curtain; render(); return; }
+    render(); return;
+  }
+  if(a==='uncurtain'){ ui.curtain=false; closeLayer(); render(); return; }
+  if(a==='next') nextPhase();
+  else if(a==='draw'){ draw(S.view); act(); }
+  else if(a==='exsum') exSummonMenu();
+  else if(a==='more') moreMenu();
+  else if(a==='log') logSheet();
+  else if(a==='menu') menuSheet();
+  else if(['deck','extra','gy','ban'].includes(a)) viewPile(+b.dataset.p, a);
+});
+
+/* ---------- 起動 ---------- */
+function start(data){
+  if(data && data.S){ S=data.S; setup=data.setup||setup; }
+  render();
+}
+window.claude?.hot?.snapshot?.(()=>({S, setup}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>

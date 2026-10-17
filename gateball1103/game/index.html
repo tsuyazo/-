@@ -1,0 +1,803 @@
+<title>ゲートボール1103 デュエル盤</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* Layout: one-screen duel table — opponent above, you below, hand docked at the bottom. Single dark walnut theme by design. */
+:root{
+  --table:#211813; --felt:#2d221b; --slot:#382a21; --line:#4d3c2f;
+  --ink:#f2e8d8; --muted:#b8a48c; --brass:#d6a94f; --brassInk:#2a1d0c;
+  --hurt:#e0604f; --heal:#7fbf86;
+  --c-normal:#d9bb62; --c-effect:#cf7e45; --c-fusion:#8f63b5; --c-synchro:#ece8dc; --c-xyz:#2b2a31;
+  --c-spell:#2f8c78; --c-trap:#b14a7f; --c-token:#8a8f96; --c-back:#5a3b26;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--table);color:var(--ink);font-family:var(--body);font-size:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  font-variant-numeric:tabular-nums;overscroll-behavior:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+#app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;min-height:100%;padding-block:8px}
+
+/* ---- setup ---- */
+.setup{display:flex;flex-direction:column;gap:18px;padding-block:20px 32px}
+.brand{font-family:var(--display);font-size:clamp(34px,10vw,52px);line-height:1;letter-spacing:.02em;color:var(--brass);margin:0}
+.brand small{display:block;font-family:var(--body);font-size:13px;color:var(--muted);letter-spacing:.2em;margin-top:8px}
+.seat{background:var(--felt);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.seat h2{margin:0;font-family:var(--display);font-size:18px;font-weight:400}
+.decks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.deckbtn{text-align:left;border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.deckbtn b{font-size:13px}
+.deckbtn span{font-size:11px;color:var(--muted)}
+.deckbtn.on{border-color:var(--brass);background:#4a3720}
+.tier{font-family:var(--display);font-size:11px;color:var(--brass)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chipbtn{border:1px solid var(--line);background:var(--slot);border-radius:999px;padding:7px 12px;font-size:13px}
+.chipbtn.on{border-color:var(--brass);color:var(--brass)}
+.big{border:none;background:var(--brass);color:var(--brassInk);font-family:var(--display);font-size:18px;padding:14px;border-radius:6px;width:100%}
+.ghost{border:1px solid var(--line);background:none;border-radius:6px;padding:12px;width:100%}
+.note{font-size:12px;color:var(--muted);line-height:1.7;margin:0}
+
+/* ---- board ---- */
+.side{display:flex;flex-direction:column;gap:4px}
+.piles{display:flex;gap:4px;flex-wrap:wrap}
+.pile{flex:1 1 0;min-width:0;border:1px solid var(--line);background:var(--felt);border-radius:4px;padding:3px 4px;font-size:11px;display:flex;justify-content:space-between;gap:4px;white-space:nowrap;overflow:hidden}
+.pile b{font-size:12px}
+.pile.fz{flex:2 1 0;text-overflow:ellipsis}
+.zones{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.cell{aspect-ratio:1/1;background:var(--slot);border-radius:4px;display:grid;place-items:center;position:relative;border:1px dashed var(--line);min-width:0}
+.cell.st{background:#30251d}
+.tile{width:72%;height:100%;border-radius:3px;padding:3px;display:flex;flex-direction:column;justify-content:space-between;
+  font-size:9px;line-height:1.2;overflow:hidden;border:1px solid rgba(0,0,0,.35);position:relative;color:#1b130e;text-align:left;background:var(--c-effect)}
+.tile .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:700;word-break:break-all}
+.tile .st{font-size:8.5px;white-space:nowrap;letter-spacing:-.02em}
+.tile.def{transform:rotate(90deg)}
+.tile.t-通常{background:var(--c-normal)} .tile.t-効果{background:var(--c-effect)} .tile.t-融合{background:var(--c-fusion);color:#fff}
+.tile.t-同調{background:var(--c-synchro)} .tile.t-重ね{background:var(--c-xyz);color:#efe6d6} .tile.t-魔法{background:var(--c-spell);color:#fff}
+.tile.t-罠{background:var(--c-trap);color:#fff} .tile.t-トークン{background:var(--c-token)}
+.tile.back{background:repeating-linear-gradient(45deg,var(--c-back) 0 6px,#4a2f1e 6px 12px);border-color:#7a5536}
+.tile.down::after{content:"裏";position:absolute;right:2px;bottom:2px;font-size:9px;background:rgba(0,0,0,.55);color:#fff;padding:0 3px;border-radius:2px}
+.badges{position:absolute;left:-2px;top:-4px;display:flex;gap:2px;z-index:2}
+.bdg{font-size:9px;background:var(--brass);color:var(--brassInk);border-radius:3px;padding:0 3px;font-weight:700}
+.bdg.neg{background:#6b6f78;color:#fff}
+.bdg.mod{background:#e9d9b8}
+.mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;padding:6px 0}
+.lp{font-family:var(--display);font-size:22px;line-height:1}
+.lp small{display:block;font-family:var(--body);font-size:10px;color:var(--muted)}
+.lp.r{text-align:right}
+.lp.cur{color:var(--brass)}
+.phase{display:flex;flex-direction:column;align-items:center;gap:2px}
+.phase .t{font-size:10px;color:var(--muted)}
+.phase .p{font-family:var(--display);font-size:15px;border:1px solid var(--brass);color:var(--brass);background:none;border-radius:4px;padding:4px 10px}
+.logline{font-size:11px;color:var(--muted);text-align:center;min-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:none;background:none;width:100%}
+.hand{display:flex;gap:6px;overflow-x:auto;padding:6px 2px 4px;min-height:96px}
+.hand .tile{width:62px;flex:0 0 62px;height:88px;font-size:10px}
+.hand .tile .st{font-size:9px}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding-top:4px;padding-bottom:max(6px,env(safe-area-inset-bottom,0px))}
+.tools button{border:1px solid var(--line);background:var(--felt);border-radius:4px;padding:9px 2px;font-size:12px}
+.tools .go{background:var(--brass);color:var(--brassInk);border-color:var(--brass);font-weight:700}
+.who{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+
+/* ---- sheet / modal ---- */
+.scrim{position:fixed;inset:0;background:rgba(10,6,4,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--felt);border-top:2px solid var(--brass);width:100%;max-width:560px;max-height:82%;overflow-y:auto;border-radius:10px 10px 0 0;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:18px;text-wrap:balance}
+.meta{font-size:12px;color:var(--muted)}
+.ctext{font-size:13px;line-height:1.75;white-space:pre-wrap;background:var(--slot);padding:10px;border-radius:4px;margin:0}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.acts button{border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:10px 6px;font-size:13px;text-align:center}
+.acts button.pri{background:var(--brass);color:var(--brassInk);border-color:var(--brass);font-weight:700}
+.acts button.dan{border-color:#7e3a32}
+.acts button:disabled{opacity:.38;cursor:not-allowed}
+.why{font-size:11px;color:var(--muted)}
+.steps{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:12px}
+.steps button{border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:6px 8px;font-size:12px;min-width:44px}
+.steps b{min-width:40px;text-align:center}
+.list{display:flex;flex-direction:column;gap:4px}
+.li{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:6px;text-align:left;width:100%}
+.li.on{border-color:var(--brass);background:#4a3720}
+.li .sw{width:10px;align-self:stretch;border-radius:2px;flex:0 0 10px}
+.li .tx{min-width:0;display:flex;flex-direction:column;gap:2px}
+.li .tx b{font-size:13px}
+.li .tx span{font-size:11px;color:var(--muted)}
+.form{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;font-size:13px}
+.form input,.form select{background:var(--slot);border:1px solid var(--line);color:var(--ink);border-radius:4px;padding:8px;font-size:16px;width:100%;font-family:inherit}
+.curtain{position:fixed;inset:0;z-index:40;background:var(--table);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.curtain .brand{font-size:40px}
+.win{border:2px solid var(--brass);border-radius:6px;padding:10px;text-align:center;font-family:var(--display);color:var(--brass);background:var(--felt)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:50;max-width:90%}
+.logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
+.logbox div{border-bottom:1px solid var(--line);padding-block:2px}
+@media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
+</style>
+
+<div id="app"></div>
+<div id="layer"></div>
+
+<script>
+const DATA = {"cards":[{"code":"GB-001","name":"C17 海竜リヴァイア","category":"モンスター","subtype":"重ね","level":3,"attribute":"水","race":"ドラゴン族","tags":[],"atk":2000,"def_":0,"text":"レベル3モンスター×2\n重ね素材の無いこのカードは相手に直接攻撃できない。1ターンに1度、このカードの重ね素材を1つ取り除いて発動できる。このカードの攻撃力は500アップする。","limit":"無制限"},{"code":"GB-002","name":"C19 氷河竜フリーズン","category":"モンスター","subtype":"重ね","level":5,"attribute":"水","race":"恐竜族","tags":[],"atk":2000,"def_":2500,"text":"レベル5モンスター×2\n1ターンに1度、自分フィールドの重ね召喚モンスターが重ね素材を取り除いて効果を発動する場合、取り除く重ね素材1つの代わりにこのカードの重ね素材を1つ取り除く事ができる。","limit":"無制限"},{"code":"GB-003","name":"C20 輝石の蟻王","category":"モンスター","subtype":"重ね","level":3,"attribute":"光","race":"昆虫族","tags":[],"atk":1800,"def_":1800,"text":"レベル3モンスター×2\n1ターンに1度、このカードの重ね素材を1つ取り除いて発動できる。自分フィールドの表側表示モンスターの攻撃力は300アップする。","limit":"無制限"},{"code":"GB-004","name":"C25 光学撮影機フォーカス","category":"モンスター","subtype":"重ね","level":6,"attribute":"光","race":"機械族","tags":[],"atk":2800,"def_":2400,"text":"レベル6モンスター×2\n1ターンに1度、このカードの重ね素材を1つ取り除き、相手フィールドのレベル5以上の表側表示の効果モンスター1体を対象として発動できる。そのモンスターの効果をターン終了時まで無効にする。この効果は相手ターンでも発動できる。","limit":"無制限"},{"code":"GB-005","name":"C30 破壊の酸液巨人","category":"モンスター","subtype":"重ね","level":3,"attribute":"水","race":"岩石族","tags":[],"atk":3000,"def_":3000,"text":"レベル3モンスター×2\n自分のスタンバイフェイズ毎に、このカードの重ね素材を1つ取り除くか、自分が2000ダメージを受ける。このカードがフィールドに表側表示で存在する限り、自分はモンスターを特殊召喚できない。重ね素材の無いこのカードは攻撃できない。","limit":"無制限"},{"code":"GB-006","name":"C34 電算魔獣テラバイト","category":"モンスター","subtype":"重ね","level":3,"attribute":"闇","race":"機械族","tags":[],"atk":0,"def_":2900,"text":"レベル3モンスター×3\n1ターンに1度、このカードの重ね素材を1つ取り除き、相手フィールドのレベル4以下の攻撃表示モンスター1体を対象として発動できる。そのモンスターのコントロールをエンドフェイズまで得る。","limit":"無制限"},{"code":"GB-007","name":"C39 希望の光騎士","category":"モンスター","subtype":"重ね","level":4,"attribute":"光","race":"戦士族","tags":[],"atk":2500,"def_":2000,"text":"レベル4モンスター×2\nモンスターの攻撃宣言時、このカードの重ね素材を1つ取り除いて発動できる。そのモンスターの攻撃を無効にする。重ね素材の無いこのカードが攻撃対象に選択された時、このカードを破壊する。","limit":"無制限"},{"code":"GB-008","name":"ギア人形・琥珀","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":[],"atk":1200,"def_":1200,"text":"このカードが召喚・特殊召喚に成功した時、自分のデッキから「ギア人形・翠」1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-009","name":"ギア人形・紅","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":[],"atk":1300,"def_":1500,"text":"このカードが召喚・特殊召喚に成功した時、自分のデッキから「ギア人形・琥珀」1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-010","name":"ギア人形・翠","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":[],"atk":1400,"def_":600,"text":"このカードが召喚・特殊召喚に成功した時、自分のデッキから「ギア人形・紅」1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-011","name":"サイキック・アンドロイド","category":"モンスター","subtype":"同調","level":5,"attribute":"光","race":"サイキック族","tags":[],"atk":2400,"def_":1700,"text":"調律＋調律以外のモンスター1体以上\n自分のエンドフェイズ毎に、自分フィールドのサイキック族モンスターの数×600LP回復する。","limit":"無制限"},{"code":"GB-012","name":"スクラップ・デストロイヤー","category":"モンスター","subtype":"同調","level":8,"attribute":"地","race":"戦士族","tags":[],"atk":2600,"def_":2500,"text":"「ハーモン・スクラップ」＋調律以外のモンスター1体以上\nこのカードが同調召喚に成功した時、同調素材とした調律以外のモンスターの数までフィールドのカードを対象として発動できる。そのカードを破壊する。","limit":"無制限"},{"code":"GB-013","name":"スクラップ・ファイター","category":"モンスター","subtype":"同調","level":5,"attribute":"闇","race":"戦士族","tags":[],"atk":2300,"def_":1300,"text":"「ハーモン・スクラップ」＋調律以外のモンスター1体以上\nこのカードが同調召喚に成功した時、このカードの攻撃力は、自分フィールドのレベル2以下のモンスターの攻撃力の合計分アップする。","limit":"無制限"},{"code":"GB-014","name":"ハーモン・クイック","category":"モンスター","subtype":"効果","level":5,"attribute":"風","race":"機械族","tags":["調律"],"atk":700,"def_":1400,"text":"このカードは手札のモンスター1体を墓地へ送り、手札から特殊召喚できる。このカードは同調召喚において、素材に指定された『ハーモン』調律の代わりにできる。このカードは、『ハーモン』調律を素材に指定した同調モンスターの同調召喚にしか使用できない。","limit":"無制限"},{"code":"GB-015","name":"ハーモン・スクラップ","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"戦士族","tags":["調律"],"atk":1300,"def_":500,"text":"このカードが召喚に成功した時、自分の墓地のレベル2以下のモンスター1体を対象として発動できる。そのモンスターを守備表示で特殊召喚する。この効果で特殊召喚したモンスターの効果は無効化される。","limit":"無制限"},{"code":"GB-016","name":"ハーモン・フォーミュラ","category":"モンスター","subtype":"同調","level":2,"attribute":"光","race":"機械族","tags":["調律"],"atk":200,"def_":1500,"text":"調律＋調律以外のモンスター1体\nこのカードは調律として扱う。このカードが同調召喚に成功した時、自分はデッキから1枚ドローできる。相手のメインフェイズに、このカードを含む自分フィールドのモンスターを同調素材として同調召喚できる（1チェーンに1度）。","limit":"無制限"},{"code":"GB-017","name":"ヴェールの巫女","category":"モンスター","subtype":"効果","level":1,"attribute":"光","race":"魔法使い族","tags":["調律"],"atk":0,"def_":0,"text":"相手のメインフェイズに、このカードを手札から墓地へ送り、相手フィールドの表側表示の効果モンスター1体を対象として発動できる。そのモンスターの効果をターン終了時まで無効にする。（相手ターンでも発動できる）","limit":"無制限"},{"code":"GB-018","name":"三眼の使い魔","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"悪魔族","tags":[],"atk":1000,"def_":600,"text":"このカードがフィールドから墓地へ送られた時、自分のデッキから攻撃力1500以下のモンスター1体を手札に加える。","limit":"制限"},{"code":"GB-019","name":"位喰いの羽虫","category":"モンスター","subtype":"効果","level":1,"attribute":"闇","race":"昆虫族","tags":[],"atk":600,"def_":0,"text":"このカードが墓地に存在する場合、自分フィールドのレベル5以上のモンスター1体を対象として発動できる。そのモンスターのレベルを1つ下げ、このカードを墓地から特殊召喚する。フィールドのこのカードは、アドバンス召喚以外のためにはリリースできない。","limit":"無制限"},{"code":"GB-020","name":"元素の勇士 ゲイルウィング","category":"モンスター","subtype":"効果","level":4,"attribute":"風","race":"戦士族","tags":[],"atk":1800,"def_":300,"text":"このカードが召喚・特殊召喚に成功した時、以下の効果から1つを選択して発動できる。●このカード以外の自分フィールドの『勇士』モンスターの数まで、フィールドの魔法・罠カードを選んで破壊する。●自分のデッキから『勇士』モンスター1体を手札に加える。","limit":"制限"},{"code":"GB-021","name":"元素の勇士 シャドウレイ","category":"モンスター","subtype":"融合","level":8,"attribute":"闇","race":"戦士族","tags":[],"atk":2500,"def_":2000,"text":"『元素の勇士』モンスター＋闇属性モンスター\nこのカードは融合召喚でのみエクストラデッキから特殊召喚できる。このカードの攻撃力は、自分の墓地の『元素の勇士』モンスターの数×100アップする。","limit":"無制限"},{"code":"GB-022","name":"元素の勇士 タイダル","category":"モンスター","subtype":"効果","level":4,"attribute":"水","race":"戦士族","tags":[],"atk":1500,"def_":1200,"text":"1ターンに1度、自分のスタンバイフェイズに、自分フィールドまたは墓地の『勇士』モンスター1体を対象として発動できる。そのモンスターを手札に戻す。","limit":"無制限"},{"code":"GB-023","name":"元素の勇士 テンペスト","category":"モンスター","subtype":"融合","level":8,"attribute":"風","race":"戦士族","tags":[],"atk":2800,"def_":2200,"text":"『元素の勇士』モンスター＋風属性モンスター\nこのカードは融合召喚でしか特殊召喚できない。このカードが融合召喚に成功した時、相手フィールドの表側表示モンスター全ての攻撃力・守備力を半分にする。","limit":"無制限"},{"code":"GB-024","name":"元素の勇士 ノヴァ・エイリアス","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"戦士族","tags":["デュアル"],"atk":1900,"def_":1300,"text":"（デュアル）このカードはフィールド・墓地に存在する限り通常モンスターとして扱う。フィールドで通常モンスター扱いのこのカードを再度召喚する事で、このカードは効果モンスター扱いとなり以下の効果を得る。●このカードはフィールドに存在する限り、カード名を「元素の勇士 ノヴァ」として扱う。","limit":"無制限"},{"code":"GB-025","name":"元素の勇士 フロストゼロ","category":"モンスター","subtype":"融合","level":8,"attribute":"水","race":"戦士族","tags":[],"atk":2500,"def_":2000,"text":"『勇士』モンスター＋水属性モンスター\nこのカードは融合召喚でのみエクストラデッキから特殊召喚できる。このカードの攻撃力は、フィールドの「元素の勇士 フロストゼロ」以外の水属性モンスターの数×500アップする。このカードがフィールドから離れた時、相手フィールドのモンスターを全て破壊する。","limit":"無制限"},{"code":"GB-026","name":"元素の勇士 プリズム","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"戦士族","tags":[],"atk":1700,"def_":1100,"text":"1ターンに1度、自分のエクストラデッキの融合モンスター1体を相手に見せ、そのモンスターにカード名が記された融合素材モンスター1体を自分のデッキから墓地へ送って発動できる。エンドフェイズまで、このカードは墓地へ送ったモンスターと同名カードとして扱う。","limit":"無制限"},{"code":"GB-027","name":"元素の勇士 ルミナス","category":"モンスター","subtype":"融合","level":8,"attribute":"光","race":"戦士族","tags":[],"atk":2600,"def_":2100,"text":"『元素の勇士』モンスター＋光属性モンスター\nこのカードは融合召喚でしか特殊召喚できない。このカードの攻撃力は、除外されている自分の『元素の勇士』モンスターの数×300アップする。このカードがフィールドから墓地へ送られた時、除外されている自分の『元素の勇士』モンスターを2体まで対象として手札に加える事ができる。","limit":"無制限"},{"code":"GB-028","name":"光玉ルミナ","category":"モンスター","subtype":"通常","level":2,"attribute":"光","race":"天使族","tags":[],"atk":500,"def_":500,"text":"（通常モンスター）神秘の光に包まれた魂。その美しい姿を見た者は夢が叶うという。","limit":"無制限"},{"code":"GB-029","name":"光翼の守護天使","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"天使族","tags":[],"atk":1100,"def_":1900,"text":"自分のメインフェイズに、フィールドの表側表示のこのカードを持ち主の手札に戻す事ができる。自分の光属性モンスターが戦闘を行うダメージステップ時に、このカードを手札から墓地へ送って発動できる。そのモンスターの攻撃力は、ターン終了時まで戦闘を行う相手モンスターの攻撃力分アップする。","limit":"制限"},{"code":"GB-030","name":"冥門の守護者","category":"モンスター","subtype":"効果","level":7,"attribute":"闇","race":"悪魔族","tags":[],"atk":2700,"def_":2500,"text":"自分フィールドにカードが存在しない場合に、相手がコントロールするカードによってダメージを受けた時、このカードを手札から特殊召喚できる。この効果で特殊召喚に成功した時、受けたダメージの種類により以下の効果を適用する。●戦闘ダメージ：自分フィールドに「冥門の残光トークン」（天使族・光・星7・攻/守？）1体を特殊召喚する。このトークンの攻撃力・守備力は、受けた戦闘ダメージと同じ数値になる。●効果ダメージ：受けたダメージと同じ数値のダメージを相手に与える。","limit":"制限"},{"code":"GB-031","name":"分身の剣士","category":"モンスター","subtype":"効果","level":2,"attribute":"闇","race":"戦士族","tags":[],"atk":800,"def_":800,"text":"自分の墓地のモンスターが特殊召喚に成功した時（ダメージステップ以外）、このカードを手札から特殊召喚できる。このカードが同調素材として墓地へ送られた時、自分フィールドに「分身トークン」（戦士族・闇・星1・攻/守400）2体を攻撃表示で特殊召喚できる。","limit":"無制限"},{"code":"GB-032","name":"剣牙竜サーベラス","category":"モンスター","subtype":"通常","level":4,"attribute":"地","race":"恐竜族","tags":[],"atk":1900,"def_":500,"text":"（通常モンスター）草原の巣でくつろぐ温厚な恐竜。ひとたび怒らせると手がつけられない。","limit":"無制限"},{"code":"GB-033","name":"創星使ウェヌス","category":"モンスター","subtype":"効果","level":3,"attribute":"光","race":"天使族","tags":[],"atk":1600,"def_":0,"text":"500LPを払って発動できる。手札・デッキから「光玉ルミナ」1体を特殊召喚する。","limit":"無制限"},{"code":"GB-034","name":"古精霊竜","category":"モンスター","subtype":"同調","level":7,"attribute":"光","race":"ドラゴン族","tags":[],"atk":2100,"def_":3000,"text":"調律＋調律以外のモンスター1体以上\n1ターンに1度、自分のメインフェイズに手札からレベル4以下のモンスター1体を特殊召喚できる。この効果を発動するターン、自分はバトルフェイズを行えない。1ターンに1度、フィールドのフィールド魔法カードを破壊し、自分は1000LP回復できる。その後、自分のデッキからフィールド魔法カード1枚を手札に加える事ができる。","limit":"無制限"},{"code":"GB-035","name":"墓守の盾兵","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"戦士族","tags":[],"atk":600,"def_":1300,"text":"相手ターンに、自分の墓地のこのカードを除外して発動できる。このターン、相手モンスター1体の攻撃を無効にする。","limit":"制限"},{"code":"GB-036","name":"増え続ける甲虫","category":"モンスター","subtype":"効果","level":2,"attribute":"地","race":"昆虫族","tags":[],"atk":500,"def_":200,"text":"このカードを手札から墓地へ送って発動できる。このターン、相手がモンスターを特殊召喚する度に、自分はデッキから1枚ドローする。この効果は相手ターンでも発動できる。（回数制限なし）","limit":"無制限"},{"code":"GB-037","name":"夜天竜ノクス","category":"モンスター","subtype":"同調","level":8,"attribute":"闇","race":"ドラゴン族","tags":[],"atk":2800,"def_":1600,"text":"調律＋調律以外のモンスター1体以上\n自分が効果ダメージを受ける場合、代わりにこのカードに黒羽カウンターを1つ置く。このカードの攻撃力は黒羽カウンターの数×700ダウンする。1ターンに1度、このカードの黒羽カウンターを全て取り除き、相手フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターの攻撃力を取り除いた数×700ダウンし、ダウンした数値分のダメージを相手に与える。","limit":"無制限"},{"code":"GB-038","name":"夜鴉 北嵐のブリザ","category":"モンスター","subtype":"効果","level":2,"attribute":"闇","race":"鳥獣族","tags":["調律"],"atk":1300,"def_":0,"text":"（調律）このカードは特殊召喚できない。このカードが召喚に成功した時、自分の墓地のレベル4以下の『夜鴉』モンスター1体を対象として発動できる。そのモンスターを表側守備表示で特殊召喚する。","limit":"無制限"},{"code":"GB-039","name":"夜鴉 大旗のヴァユ","category":"モンスター","subtype":"効果","level":1,"attribute":"闇","race":"鳥獣族","tags":["調律"],"atk":800,"def_":0,"text":"（調律）フィールドの表側表示のこのカードは同調素材にできない。このカードが墓地に存在する場合、自分の墓地の調律以外の『夜鴉』モンスター1体を対象として発動できる。このカードとそのモンスターを除外し、除外したモンスターのレベルの合計と同じレベルの『夜鴉』同調モンスター1体を、効果を無効にしてエクストラデッキから特殊召喚する。","limit":"無制限"},{"code":"GB-040","name":"夜鴉 旋風のガルム","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"鳥獣族","tags":["調律"],"atk":1300,"def_":400,"text":"（調律）自分フィールドに「夜鴉 旋風のガルム」以外の『夜鴉』モンスターが存在する場合、このカードは手札から特殊召喚できる。1ターンに1度、相手フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターの攻撃力・守備力を半分にする。","limit":"制限"},{"code":"GB-041","name":"夜鴉 暁天のシロコ","category":"モンスター","subtype":"効果","level":5,"attribute":"闇","race":"鳥獣族","tags":[],"atk":2000,"def_":900,"text":"相手フィールドにモンスターが存在し、自分フィールドにモンスターが存在しない場合、このカードはリリースなしで召喚できる。1ターンに1度、自分のメインフェイズ1に自分フィールドの『夜鴉』モンスター1体を対象として発動できる。そのモンスターの攻撃力は、ターン終了時まで、フィールドのそれ以外の『夜鴉』モンスターの攻撃力の合計分アップする。このターン、対象モンスター以外は攻撃できない。","limit":"無制限"},{"code":"GB-042","name":"夜鴉 月影のカラト","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"鳥獣族","tags":[],"atk":1400,"def_":1000,"text":"自分の『夜鴉』モンスターが戦闘を行うダメージステップ時に、このカードを手札から墓地へ送って発動できる。そのモンスターの攻撃力はターン終了時まで1400アップする。","limit":"制限"},{"code":"GB-043","name":"夜鴉 精鋭のゼフィ","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"鳥獣族","tags":[],"atk":1600,"def_":1000,"text":"このカードが墓地に存在する場合、自分フィールドの表側表示のカード1枚を手札に戻して発動できる。このカードを墓地から特殊召喚し、自分は400ダメージを受ける。（回数制限なし）","limit":"無制限"},{"code":"GB-044","name":"夜鴉 蒼炎のシュラク","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"鳥獣族","tags":[],"atk":1800,"def_":1200,"text":"このカードが戦闘で相手モンスターを破壊し墓地へ送った時、自分のデッキから攻撃力1500以下の『夜鴉』モンスター1体を特殊召喚できる。この効果で特殊召喚したモンスターの効果は無効化される。","limit":"無制限"},{"code":"GB-045","name":"夜鴉 銀翼のシルフィード","category":"モンスター","subtype":"同調","level":8,"attribute":"闇","race":"鳥獣族","tags":[],"atk":2800,"def_":2000,"text":"『夜鴉』調律＋調律以外のモンスター2体以上\nこのカードが同調召喚に成功した時、このカードの攻撃力より低い守備力を持つフィールドの表側表示モンスターを2体まで対象として破壊できる。この効果を発動するターン、自分はバトルフェイズを行えない。相手ターン毎に1度、自分フィールドの『夜鴉』モンスターが戦闘で破壊される場合、代わりにその破壊を無効にする。","limit":"無制限"},{"code":"GB-046","name":"夜鴉 黒槍のボラス","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"鳥獣族","tags":[],"atk":1700,"def_":800,"text":"自分フィールドに「夜鴉 黒槍のボラス」以外の『夜鴉』モンスターが存在する場合、このカードは手札から特殊召喚できる。このカードが守備表示モンスターを攻撃した場合、その守備力を攻撃力が超えた分だけ戦闘ダメージを与える。","limit":"無制限"},{"code":"GB-047","name":"夜鴉の武装翼","category":"モンスター","subtype":"同調","level":6,"attribute":"闇","race":"鳥獣族","tags":[],"atk":2300,"def_":1000,"text":"『夜鴉』調律＋調律以外のモンスター1体以上\nこのカードが守備表示モンスターを攻撃する場合、ダメージステップの間このカードの攻撃力は500アップし、その守備力を攻撃力が超えた分だけ戦闘ダメージを与える。","limit":"無制限"},{"code":"GB-048","name":"夜鴉の鎧将","category":"モンスター","subtype":"同調","level":7,"attribute":"闇","race":"鳥獣族","tags":[],"atk":2500,"def_":1500,"text":"『夜鴉』調律＋調律以外のモンスター1体以上\nこのカードは戦闘では破壊されず、このカードの戦闘によって発生する自分への戦闘ダメージは0になる。このカードが攻撃したモンスターに、ダメージステップ終了時に楔カウンターを1つ置く事ができる。楔カウンターを全て取り除いて発動できる。楔カウンターが置かれていたモンスターの攻撃力・守備力はターン終了時まで0になる。","limit":"無制限"},{"code":"GB-049","name":"大将軍 蒼月","category":"モンスター","subtype":"同調","level":5,"attribute":"闇","race":"戦士族","tags":[],"atk":2500,"def_":1400,"text":"戦士族調律＋調律以外の『武士団』モンスター1体以上\nこのカードは『蒼月』モンスターとしても扱う。1ターンに1度、相手が魔法・罠カードを発動した時、その発動を無効にし破壊できる。フィールドのこのカードが破壊される場合、代わりにこのカード以外の自分フィールドの『武士団』モンスター1体を破壊できる。","limit":"無制限"},{"code":"GB-050","name":"大熾天使アークリスタ","category":"モンスター","subtype":"効果","level":8,"attribute":"光","race":"天使族","tags":[],"atk":2800,"def_":2300,"text":"このカードは自分の墓地の天使族モンスターがちょうど4体の場合のみ、手札から特殊召喚できる。この方法で特殊召喚に成功した時、自分の墓地の天使族モンスター1体を対象として手札に加える。このカードがフィールドに表側表示で存在する限り、お互いにモンスターを特殊召喚できない。フィールドの表側表示のこのカードが墓地へ送られる場合、墓地へは行かずデッキの一番上に戻る。","limit":"準制限"},{"code":"GB-051","name":"孤高の炎花","category":"モンスター","subtype":"効果","level":3,"attribute":"炎","race":"植物族","tags":[],"atk":500,"def_":1400,"text":"1ターンに1度、自分フィールドの表側表示の植物族モンスター1体をリリースして発動できる。自分のデッキから植物族モンスター1体を特殊召喚する。","limit":"準制限"},{"code":"GB-052","name":"宿命の勇士 ナイトシェイド","category":"モンスター","subtype":"効果","level":6,"attribute":"闇","race":"戦士族","tags":[],"atk":800,"def_":800,"text":"自分の墓地のこのカードを除外して発動できる。自分のデッキから「宿命の勇士 ナイトシェイド」1体を特殊召喚する。","limit":"準制限"},{"code":"GB-053","name":"屍運びの調律者","category":"モンスター","subtype":"効果","level":2,"attribute":"闇","race":"アンデット族","tags":["調律"],"atk":400,"def_":200,"text":"このカードが墓地に存在する場合、手札を1枚デッキの一番上に戻して発動できる。このカードを墓地から特殊召喚する。この効果で特殊召喚したこのカードは、フィールドから離れた場合除外される。","limit":"制限"},{"code":"GB-054","name":"廃竜スクラップス","category":"モンスター","subtype":"同調","level":8,"attribute":"地","race":"ドラゴン族","tags":[],"atk":2800,"def_":2000,"text":"調律＋調律以外のモンスター1体以上\n1ターンに1度、自分及び相手フィールドのカードを1枚ずつ対象として発動できる。そのカードを破壊する。このカードが相手によって破壊され墓地へ送られた時、自分の墓地の同調モンスター以外の『廃材』モンスター1体を対象として特殊召喚できる。","limit":"無制限"},{"code":"GB-055","name":"弾倉兵器カートリッジ","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"機械族","tags":[],"atk":400,"def_":400,"text":"1ターンに1度、1〜3までの数を宣言して発動できる。宣言した数だけ自分のデッキの上からカードを墓地へ送り、このカードの攻撃力はターン終了時まで墓地へ送った枚数×500アップする。自分フィールドのこのカードが破壊され墓地へ送られた時、自分はデッキから1枚ドローする。","limit":"準制限"},{"code":"GB-056","name":"悲嘆の魔獣","category":"モンスター","subtype":"効果","level":10,"attribute":"闇","race":"悪魔族","tags":[],"atk":"?","def_":"?","text":"自分が戦闘ダメージを受けた時、このカードを手札から特殊召喚できる。このカードの攻撃力・守備力は自分の手札の数×600アップする。1ターンに1度、手札のモンスター1体を墓地へ送り、そのモンスターと同じレベルの相手フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターのコントロールを得る。1ターンに1度、自分の墓地のモンスター1体を対象として発動できる。このカードのレベルはターン終了時までそのモンスターと同じになる。","limit":"制限"},{"code":"GB-057","name":"救援の野ウサギ","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"獣族","tags":[],"atk":300,"def_":100,"text":"このカードはデッキから特殊召喚できない。自分フィールドの表側表示のこのカードを除外して発動できる。自分のデッキからレベル4以下の同名の通常モンスター2体を特殊召喚する。この効果で特殊召喚したモンスターはエンドフェイズに破壊される。","limit":"無制限"},{"code":"GB-058","name":"星使の主 ソル・マギステル","category":"モンスター","subtype":"効果","level":8,"attribute":"光","race":"天使族","tags":[],"atk":2700,"def_":2100,"text":"このカードは、自分の手札・フィールド・墓地の『星使』モンスター1体を除外して、手札から特殊召喚できる。1ターンに1度、自分の手札・フィールド・墓地の光属性・天使族モンスター1体を除外し、フィールドのカード1枚を対象として発動できる。そのカードを破壊する。フィールドに「天上の聖庭」が存在する場合、この効果は1ターンに2度まで使用できる。","limit":"無制限"},{"code":"GB-059","name":"極光流星竜オーロラガード","category":"モンスター","subtype":"同調","level":10,"attribute":"風","race":"ドラゴン族","tags":[],"atk":3300,"def_":2500,"text":"調律の同調モンスター＋「流星守護竜ステラガード」\n1ターンに1度、自分のデッキの上から5枚めくり、その中の調律の数までこのターン攻撃できる（めくったカードはデッキに戻しシャッフルする）。1ターンに1度、フィールドのカードを破壊する効果が発動した時、その効果を無効にし破壊できる。1ターンに1度、相手モンスターの攻撃宣言時、フィールドのこのカードを除外してその攻撃を無効にできる。この効果で除外したこのカードは、次のエンドフェイズに特殊召喚される。","limit":"無制限"},{"code":"GB-060","name":"機巧兵 型式二三六","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":[],"atk":1400,"def_":200,"text":"このカードは可能な限り攻撃しなければならない。フィールドの表側攻撃表示のこのカードが攻撃対象に選択された時、このカードを守備表示にする。このカードが戦闘で破壊され墓地へ送られた時、自分のデッキからレベル4以下の『機巧』モンスター1体を表側攻撃表示で特殊召喚できる。","limit":"無制限"},{"code":"GB-061","name":"機巧商人 型式一七七","category":"モンスター","subtype":"効果","level":2,"attribute":"地","race":"機械族","tags":[],"atk":500,"def_":1500,"text":"このカードは可能な限り攻撃しなければならない。フィールドの表側攻撃表示のこのカードが攻撃対象に選択された時、このカードを守備表示にする。このカードが召喚に成功した時、自分のデッキから『機巧』カード1枚を手札に加える事ができる。","limit":"無制限"},{"code":"GB-062","name":"機巧娘 型式二二四","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"機械族","tags":["調律"],"atk":0,"def_":1900,"text":"（調律）このカードは可能な限り攻撃しなければならない。フィールドの表側表示のこのカードが攻撃対象に選択された時、このカードの表示形式を変更する。このカードがフィールドに表側表示で存在する限り、1ターンに1度、自分のメインフェイズに通常召喚に加えて『機巧』モンスター1体を召喚できる。","limit":"無制限"},{"code":"GB-063","name":"機巧将軍 型式零零","category":"モンスター","subtype":"同調","level":7,"attribute":"地","race":"機械族","tags":[],"atk":2600,"def_":1900,"text":"調律＋調律以外の機械族モンスター1体以上\nこのカードが同調召喚に成功した時、自分のデッキから『機巧』モンスター1体を特殊召喚できる。1ターンに1度、フィールドのモンスター1体を対象として発動できる。そのモンスターの表示形式を変更する。","limit":"無制限"},{"code":"GB-064","name":"機巧忍者 型式七七四九","category":"モンスター","subtype":"効果","level":5,"attribute":"地","race":"機械族","tags":[],"atk":2200,"def_":1800,"text":"このカードは可能な限り攻撃しなければならない。フィールドの表側表示のこのカードが攻撃対象に選択された時、このカードの表示形式を変更する。このカードが召喚に成功した時、自分フィールドの表側守備表示の『機巧』モンスターの数だけ自分はデッキからドローできる。","limit":"無制限"},{"code":"GB-065","name":"機巧忍者 型式三三九","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"機械族","tags":[],"atk":1200,"def_":1200,"text":"このカードは可能な限り攻撃しなければならない。フィールドの表側攻撃表示のこのカードが攻撃対象に選択された時、このカードを守備表示にする。このカードがリバースした時、フィールドの表側表示モンスター1体を選んで墓地へ送る。このカードがリバースしたターン、このカードは相手に直接攻撃できる。","limit":"無制限"},{"code":"GB-066","name":"機巧忍者 型式九一九","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":[],"atk":1700,"def_":1500,"text":"このカードは可能な限り攻撃しなければならない。フィールドの表側表示のこのカードが攻撃対象に選択された時、このカードの表示形式を変更する。このカードが戦闘で相手モンスターを破壊し墓地へ送った時、自分の墓地のレベル4以下の『機巧』モンスター1体を選んで表側守備表示で特殊召喚する。","limit":"無制限"},{"code":"GB-067","name":"機巧番犬 型式三一三","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"機械族","tags":["調律"],"atk":600,"def_":1800,"text":"（調律）このカードは可能な限り攻撃しなければならない。フィールドの表側表示のこのカードが攻撃対象に選択された時、このカードの表示形式を変更する。このカードの戦闘によって自分が戦闘ダメージを受けた時、自分フィールドの表側表示の『機巧』モンスター全ての攻撃力・守備力はエンドフェイズまで800アップする。表側攻撃表示のこのカードは戦闘では破壊されない。","limit":"無制限"},{"code":"GB-068","name":"機巧軍師 型式二四八","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"機械族","tags":["調律"],"atk":500,"def_":1600,"text":"（調律）このカードは可能な限り攻撃しなければならない。フィールドの表側攻撃表示のこのカードが攻撃対象に選択された時、このカードを守備表示にする。このカードが召喚・特殊召喚に成功した時、フィールドのモンスター1体を選んで表示形式を変更する。","limit":"無制限"},{"code":"GB-069","name":"機巧鋼将軍 型式零零X","category":"モンスター","subtype":"同調","level":8,"attribute":"地","race":"機械族","tags":[],"atk":2800,"def_":1700,"text":"調律＋調律以外の機械族モンスター1体以上\nこのカードが同調召喚に成功した時、自分のデッキから『機巧』モンスター1体を特殊召喚できる。1ターンに1度、自分フィールドの『機巧』モンスターの表示形式が変更された時（表側表示のまま）、自分はデッキから1枚ドローする。","limit":"無制限"},{"code":"GB-070","name":"正義の機兵カタストロ","category":"モンスター","subtype":"同調","level":5,"attribute":"闇","race":"機械族","tags":[],"atk":2200,"def_":1200,"text":"調律＋調律以外のモンスター1体以上\nこのカードが闇属性以外の表側表示モンスターと戦闘を行う場合、ダメージ計算を行わずそのモンスターを破壊する。","limit":"無制限"},{"code":"GB-071","name":"武士団 斬撃のザンキ","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"戦士族","tags":[],"atk":1800,"def_":1300,"text":"自分フィールドにこのカード以外の『武士団』モンスターが存在する場合、このカードが攻撃したモンスターをダメージステップ終了時に破壊する。フィールドのこのカードが破壊される場合、代わりにこのカード以外の自分フィールドの『武士団』モンスター1体を破壊できる。","limit":"無制限"},{"code":"GB-072","name":"武士団の大師範","category":"モンスター","subtype":"効果","level":5,"attribute":"地","race":"戦士族","tags":[],"atk":2100,"def_":800,"text":"このカードは自分フィールドに1体しか表側表示で存在できない。自分フィールドに『武士団』モンスターが存在する場合、このカードは手札から特殊召喚できる。自分フィールドのこのカードが相手の効果で破壊された時、自分の墓地の『武士団』モンスター1体を対象として手札に加える。","limit":"無制限"},{"code":"GB-073","name":"武士団の影武者","category":"モンスター","subtype":"効果","level":2,"attribute":"地","race":"戦士族","tags":["調律"],"atk":400,"def_":1800,"text":"（調律）自分フィールドの表側表示の『武士団』モンスター1体のみを対象とする魔法・罠・効果モンスターの効果が発動した時、その対象をこのカードに移し替える事ができる（このカードが正しい対象となる場合のみ）。","limit":"無制限"},{"code":"GB-074","name":"武士団の長老","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"戦士族","tags":[],"atk":400,"def_":0,"text":"相手フィールドにモンスターが存在し、自分フィールドにモンスターが存在しない場合、このカードは手札から特殊召喚できる。","limit":"無制限"},{"code":"GB-075","name":"武装アーム","category":"モンスター","subtype":"同調","level":4,"attribute":"光","race":"機械族","tags":[],"atk":1800,"def_":1200,"text":"調律＋調律以外のモンスター1体以上\n1ターンに1度、このカードを装備カード扱いとしてフィールドのモンスター1体に装備するか、装備を解除して攻撃表示で特殊召喚できる。この効果で装備したモンスターの攻撃力は1000アップし、そのモンスターが戦闘で相手モンスターを破壊し墓地へ送った時、破壊したモンスターの元々の攻撃力分のダメージを相手に与える。","limit":"無制限"},{"code":"GB-076","name":"氷壁の龍トリスカル","category":"モンスター","subtype":"同調","level":9,"attribute":"水","race":"ドラゴン族","tags":[],"atk":2700,"def_":2000,"text":"調律＋調律以外のモンスター2体以上\nこのカードが同調召喚に成功した時、相手の手札（ランダムに1枚）・フィールド・墓地のカードをそれぞれ1枚まで選んで除外できる。","limit":"制限"},{"code":"GB-077","name":"氷壁の龍ブリュンガル","category":"モンスター","subtype":"同調","level":6,"attribute":"水","race":"海竜族","tags":[],"atk":2300,"def_":1400,"text":"調律＋調律以外のモンスター1体以上\n1ターンに1度、手札を任意の枚数墓地へ捨てて発動できる。捨てた枚数分だけフィールドのカードを選んで持ち主の手札に戻す。","limit":"制限"},{"code":"GB-078","name":"河竜ヒポザウル","category":"モンスター","subtype":"通常","level":4,"attribute":"水","race":"恐竜族","tags":[],"atk":1700,"def_":1500,"text":"（通常モンスター）巨体のくしゃみは嵐と見まがうほど。","limit":"無制限"},{"code":"GB-079","name":"流星守護竜ステラガード","category":"モンスター","subtype":"同調","level":8,"attribute":"風","race":"ドラゴン族","tags":[],"atk":2500,"def_":2000,"text":"調律＋調律以外のモンスター1体以上\nフィールドのカードを破壊する効果を持つカード・効果が発動した時、このカードをリリースして発動できる。その発動を無効にし破壊する。この効果を適用したターンのエンドフェイズに、この効果を発動するためにリリースしたこのカードを墓地から特殊召喚できる。","limit":"無制限"},{"code":"GB-080","name":"瓦礫竜デブリス","category":"モンスター","subtype":"効果","level":4,"attribute":"風","race":"ドラゴン族","tags":["調律"],"atk":1000,"def_":2000,"text":"このカードが召喚に成功した時、自分の墓地の攻撃力500以下のモンスター1体を対象として発動できる。そのモンスターを攻撃表示で特殊召喚する。この効果で特殊召喚したモンスターの効果は無効化される。このカードをドラゴン族以外の同調モンスターの同調素材にはできない。また、このカードを同調素材とする場合、他の同調素材にレベル4のモンスターは使用できない。","limit":"準制限"},{"code":"GB-081","name":"真・武士団 剛刃のキザシ","category":"モンスター","subtype":"効果","level":4,"attribute":"地","race":"戦士族","tags":[],"atk":1800,"def_":500,"text":"自分フィールドに「真・武士団 剛刃のキザシ」以外の『武士団』モンスターが存在する場合、このカードは手札から特殊召喚できる。自分フィールドにこのカード以外の『武士団』モンスターが2体以上存在する場合、このカードの攻撃力・守備力は300アップする。","limit":"無制限"},{"code":"GB-082","name":"真・武士団 双剣のカゲトキ","category":"モンスター","subtype":"効果","level":3,"attribute":"風","race":"戦士族","tags":[],"atk":200,"def_":2000,"text":"このカードが召喚に成功した時、手札からレベル4以下の『武士団』モンスター1体を特殊召喚できる。自分フィールドに「真・武士団 双剣のカゲトキ」以外の『武士団』モンスターが存在する限り、このカードの攻撃力は1500アップする。","limit":"無制限"},{"code":"GB-083","name":"真・武士団 水鎚のシナギ","category":"モンスター","subtype":"効果","level":3,"attribute":"水","race":"戦士族","tags":[],"atk":1500,"def_":1500,"text":"自分フィールドに「真・武士団 炎槍のミズカ」が存在する場合、このカードは手札から特殊召喚できる。フィールドのこのカードがリリースされた時、自分の墓地の「真・武士団 水鎚のシナギ」以外の『武士団』モンスター1体を対象として手札に加える。","limit":"無制限"},{"code":"GB-084","name":"真・武士団 炎槍のミズカ","category":"モンスター","subtype":"効果","level":3,"attribute":"炎","race":"戦士族","tags":[],"atk":1600,"def_":1000,"text":"自分フィールドに「真・武士団 水鎚のシナギ」が存在する場合、このカードは手札から特殊召喚できる。1ターンに1度、このカード以外の自分フィールドの『武士団』モンスター1体をリリースし、フィールドのカード1枚を対象として発動できる。そのカードを破壊する。","limit":"無制限"},{"code":"GB-085","name":"真・武士団 縁結のエニカ","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"戦士族","tags":[],"atk":1700,"def_":700,"text":"1ターンに1度、自分の墓地の『武士団』モンスター2体を除外し、フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターを持ち主の手札に戻す。この効果は相手ターンでも発動でき、自分フィールドにこのカード以外の『武士団』モンスターが存在する場合のみ発動・適用できる。自分フィールドにこのカード以外の『武士団』モンスターが2体以上存在する場合、このカードの攻撃力・守備力は500アップする。","limit":"無制限"},{"code":"GB-086","name":"秘星使テラ","category":"モンスター","subtype":"効果","level":2,"attribute":"光","race":"天使族","tags":["調律"],"atk":1000,"def_":800,"text":"このカードが召喚に成功した時、自分のデッキから「秘星使テラ」以外の『星使』モンスター1体を手札に加える事ができる。フィールドに「天上の聖庭」が存在する場合、代わりにデッキから「星使の主 ソル・マギステル」1体を手札に加える事もできる。","limit":"無制限"},{"code":"GB-087","name":"秘術の大魔導師","category":"モンスター","subtype":"同調","level":7,"attribute":"光","race":"魔法使い族","tags":[],"atk":400,"def_":1800,"text":"調律＋調律以外の魔法使い族モンスター1体以上\nこのカードが同調召喚に成功した時、このカードに魔力カウンターを2つ置く。このカードの攻撃力は、このカードの魔力カウンターの数×1000アップする。自分フィールドの魔力カウンターを1つ取り除いて、フィールドのカード1枚を対象として発動できる。そのカードを破壊する。","limit":"無制限"},{"code":"GB-088","name":"紅蓮の魔王竜","category":"モンスター","subtype":"同調","level":8,"attribute":"闇","race":"ドラゴン族","tags":[],"atk":3000,"def_":2000,"text":"調律＋調律以外のモンスター1体以上\nこのカードが相手フィールドの守備表示モンスターを攻撃した場合、ダメージ計算後に相手フィールドの守備表示モンスターを全て破壊する。このカードのコントローラーのエンドフェイズに、このカード以外の自分フィールドのモンスターで、このターン攻撃宣言をしていないモンスターを全て破壊する。","limit":"無制限"},{"code":"GB-089","name":"終焉の騎士","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"戦士族","tags":[],"atk":1400,"def_":1200,"text":"このカードが召喚・反転召喚・特殊召喚に成功した時、自分のデッキから闇属性モンスター1体を墓地へ送る事ができる。","limit":"無制限"},{"code":"GB-090","name":"綿毛の獅子花","category":"モンスター","subtype":"効果","level":3,"attribute":"地","race":"植物族","tags":[],"atk":300,"def_":300,"text":"このカードが墓地へ送られた時、自分フィールドに「綿毛トークン」（植物族・風・星1・攻/守0）2体を守備表示で特殊召喚する。このトークンは特殊召喚されたターン、アドバンス召喚のためにはリリースできない。","limit":"制限"},{"code":"GB-091","name":"育ちの球根","category":"モンスター","subtype":"効果","level":1,"attribute":"地","race":"植物族","tags":["調律"],"atk":100,"def_":100,"text":"このカードが墓地に存在する場合、自分のデッキの一番上のカードを墓地へ送って発動できる。このカードを墓地から特殊召喚する。この効果はデュエル中に1度しか使用できない。","limit":"無制限"},{"code":"GB-092","name":"胞子の調律花","category":"モンスター","subtype":"効果","level":1,"attribute":"風","race":"植物族","tags":["調律"],"atk":400,"def_":800,"text":"このカードが墓地に存在する場合、このカード以外の自分の墓地の植物族モンスター1体を除外して発動できる。このカードを墓地から特殊召喚し、除外したモンスターのレベル分だけこのカードのレベルを上げる。この効果はデュエル中に1度しか使用できない。","limit":"無制限"},{"code":"GB-093","name":"覇古竜ラグナレイジ","category":"モンスター","subtype":"重ね","level":4,"attribute":"炎","race":"ドラゴン族","tags":[],"atk":2400,"def_":2000,"text":"レベル4の恐竜族モンスター×2\nモンスターを召喚・反転召喚・特殊召喚する際、または魔法・罠カードが発動した時に、このカードの重ね素材を2つ取り除いて発動できる。その召喚・発動を無効にし、そのカードを破壊する。","limit":"無制限"},{"code":"GB-094","name":"試作機ウルフガイ","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"獣戦士族","tags":[],"atk":1200,"def_":0,"text":"レベル4以下のモンスターが特殊召喚に成功した時（ダメージステップ以外）、このカードを手札から特殊召喚できる。フィールドのこのカードが破壊され墓地へ送られたターンのエンドフェイズに、自分のデッキから「試作機ウルフガイ」以外の『試作機』モンスター1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-095","name":"試作機サイバーメイジ","category":"モンスター","subtype":"効果","level":1,"attribute":"光","race":"魔法使い族","tags":["調律"],"atk":0,"def_":0,"text":"このカードを『試作機』同調モンスターの同調召喚に使用する場合、手札の『試作機』モンスターを同調素材（非調律）にできる。フィールドのこのカードが破壊され墓地へ送られたターンのエンドフェイズに、自分のデッキから「試作機サイバーメイジ」以外の『試作機』モンスター1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-096","name":"試作機ストライカー","category":"モンスター","subtype":"効果","level":2,"attribute":"地","race":"戦士族","tags":["調律"],"atk":800,"def_":0,"text":"相手フィールドにのみモンスターが存在する場合、このカードは手札から特殊召喚できる。フィールドのこのカードが破壊され墓地へ送られたターンのエンドフェイズに、自分のデッキから「試作機ストライカー」以外の『試作機』モンスター1体を手札に加える事ができる。","limit":"無制限"},{"code":"GB-097","name":"試作機ブレードキャノン","category":"モンスター","subtype":"同調","level":10,"attribute":"地","race":"機械族","tags":[],"atk":3300,"def_":2200,"text":"調律の同調モンスター＋調律以外の同調モンスター1体以上\n相手がフィールドのこのカードを対象とする魔法・罠カードを発動した時、手札を1枚墓地へ送って発動できる。その効果を無効にする。1ターンに1度、相手ターンに自分の墓地の『試作機』モンスター1体を除外して発動できる。フィールドの表側表示のこのカードを除外する。この効果で除外した場合、次のスタンバイフェイズにこのカードを特殊召喚する。","limit":"無制限"},{"code":"GB-098","name":"試作機ライブラリアン","category":"モンスター","subtype":"同調","level":5,"attribute":"闇","race":"魔法使い族","tags":[],"atk":2400,"def_":1800,"text":"調律＋調律以外のモンスター1体以上\nこのカードがフィールドに表側表示で存在する限り、自分または相手が同調召喚に成功する度に、自分はデッキから1枚ドローする。","limit":"無制限"},{"code":"GB-099","name":"試作機ワンダーメイジ","category":"モンスター","subtype":"同調","level":5,"attribute":"光","race":"魔法使い族","tags":["調律"],"atk":1900,"def_":0,"text":"調律＋調律以外の『試作機』モンスター1体以上\nこのカードは調律として扱う。このカードが同調召喚に成功した時、フィールドの魔法・罠カード1枚を対象として破壊する。フィールドのこのカードが破壊された時、自分はデッキから1枚ドローする。相手のメインフェイズに、このカードを含む自分フィールドのモンスターを同調素材として同調召喚できる（1チェーンに1度）。","limit":"無制限"},{"code":"GB-100","name":"闇鎧の剣士","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"戦士族","tags":[],"atk":1700,"def_":1600,"text":"このカードは手札からレベル5以上の闇属性モンスター1体を捨てて、手札から特殊召喚できる。1ターンに1度、手札から闇属性モンスター1体を捨てて発動できる。自分のデッキから闇属性モンスター1体を墓地へ送る。","limit":"無制限"},{"code":"GB-101","name":"雷獣王ボルガ","category":"モンスター","subtype":"効果","level":4,"attribute":"光","race":"雷族","tags":[],"atk":1900,"def_":800,"text":"このカードがフィールドに表側表示で存在する限り、お互いにドロー以外の方法でデッキからカードを手札に加える事はできない。相手がモンスター1体を特殊召喚する際、フィールドの表側表示のこのカードを墓地へ送って発動できる。その特殊召喚を無効にし、そのモンスターを破壊する。","limit":"無制限"},{"code":"GB-102","name":"魔剣士ブレイズ","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"魔法使い族","tags":[],"atk":1600,"def_":1000,"text":"このカードが通常召喚に成功した時、このカードに魔力カウンターを1つ置く（最大1つ）。このカードの攻撃力は、このカードの魔力カウンターの数×300アップする。このカードの魔力カウンターを1つ取り除き、フィールドの魔法・罠カード1枚を対象として発動できる。そのカードを破壊する。","limit":"無制限"},{"code":"GB-103","name":"魔窟の妖術師スノウラ","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"悪魔族","tags":[],"atk":1700,"def_":0,"text":"このカードがカードの効果によって手札から墓地へ捨てられた場合、自分のデッキから『魔窟』カード1枚を手札に加える。相手のカードの効果によって捨てられた場合、さらに相手の墓地のモンスター1体を選んで自分フィールドに守備表示で特殊召喚できる。","limit":"無制限"},{"code":"GB-104","name":"魔窟の尖兵ベイジュ","category":"モンスター","subtype":"効果","level":4,"attribute":"闇","race":"悪魔族","tags":[],"atk":1600,"def_":1300,"text":"このカードがカードの効果によって手札から墓地へ捨てられた場合、このカードを墓地から特殊召喚する。","limit":"無制限"},{"code":"GB-105","name":"魔窟の武将ゴルドン","category":"モンスター","subtype":"効果","level":5,"attribute":"闇","race":"悪魔族","tags":[],"atk":2300,"def_":1400,"text":"このカードがカードの効果によって手札から墓地へ捨てられた場合、このカードを墓地から特殊召喚する。相手のカードの効果によって捨てられた場合、さらにフィールドのカードを2枚まで選んで破壊できる。","limit":"無制限"},{"code":"GB-106","name":"魔窟の狩人ブラウニ","category":"モンスター","subtype":"効果","level":3,"attribute":"闇","race":"悪魔族","tags":[],"atk":1400,"def_":800,"text":"このカードがカードの効果によって手札から墓地へ捨てられた場合、自分はデッキから1枚ドローする。相手のカードの効果によって捨てられた場合、さらにもう1枚ドローする。","limit":"無制限"},{"code":"GB-107","name":"魔窟の軍将シルヴァン","category":"モンスター","subtype":"効果","level":5,"attribute":"闇","race":"悪魔族","tags":[],"atk":2300,"def_":1400,"text":"このカードがカードの効果によって手札から墓地へ捨てられた場合、このカードを墓地から特殊召喚する。相手のカードの効果によって捨てられた場合、さらに相手は手札を2枚選んで好きな順番でデッキの一番下に戻す。","limit":"無制限"},{"code":"GB-108","name":"魔窟の龍帝ガルグラフ","category":"モンスター","subtype":"効果","level":8,"attribute":"闇","race":"悪魔族","tags":[],"atk":2700,"def_":1800,"text":"このカードは自分フィールドの表側表示の「魔窟の龍帝ガルグラフ」以外の『魔窟』モンスター1体を手札に戻し、墓地から特殊召喚できる。このカードがカードの効果によって手札から墓地へ捨てられた場合、相手フィールドのカード1枚を選んで破壊する。相手のカードの効果によって捨てられた場合、さらに相手の手札をランダムに1枚確認し、それがモンスターだった場合、そのモンスターを自分フィールドに特殊召喚できる。","limit":"無制限"},{"code":"GB-109","name":"黒薔薇の魔竜","category":"モンスター","subtype":"同調","level":7,"attribute":"炎","race":"ドラゴン族","tags":[],"atk":2400,"def_":1800,"text":"調律＋調律以外のモンスター1体以上\nこのカードが同調召喚に成功した時、フィールドのカードを全て破壊できる。1ターンに1度、自分の墓地の植物族モンスター1体を除外し、相手フィールドの守備表示モンスター1体を対象として発動できる。そのモンスターを表側攻撃表示にし、ターン終了時まで攻撃力を0にする。","limit":"無制限"},{"code":"GB-110","name":"ひとつと引き換えに","category":"魔法","subtype":"通常","text":"手札からモンスター1体を墓地へ送って発動できる。手札・デッキからレベル1モンスター1体を特殊召喚する。","limit":"制限"},{"code":"GB-111","name":"勇士再臨","category":"魔法","subtype":"通常","text":"自分フィールドに表側表示モンスターが存在しない場合、LPを半分払って発動できる。自分のデッキからレベル4以下の『元素の勇士』モンスター1体を特殊召喚する。","limit":"無制限"},{"code":"GB-112","name":"夜鴉の旋風","category":"魔法","subtype":"永続","text":"（永続魔法）自分フィールドに『夜鴉』モンスターが召喚された時、そのモンスターより攻撃力が低い『夜鴉』モンスター1体を自分のデッキから手札に加える事ができる。","limit":"制限"},{"code":"GB-113","name":"大地割り","category":"魔法","subtype":"通常","text":"相手フィールドの守備力が一番高い表側表示モンスター1体を破壊する（同じ数値の場合は自分が選ぶ）。","limit":"無制限"},{"code":"GB-114","name":"天上の聖庭","category":"魔法","subtype":"フィールド","text":"（フィールド魔法）天使族モンスターの戦闘によって発生する、そのモンスターのコントローラーへの戦闘ダメージは0になる。","limit":"無制限"},{"code":"GB-115","name":"天界の大広間","category":"魔法","subtype":"永続","text":"（永続魔法）自分フィールドにモンスターが存在しない場合、1ターンに1度、手札から天使族モンスター1体を特殊召喚できる。","limit":"無制限"},{"code":"GB-116","name":"奇跡の融合","category":"魔法","subtype":"通常","text":"自分のフィールド・墓地から、融合モンスターカードによって決められた融合素材モンスターを除外し、『元素の勇士』融合モンスター1体をエクストラデッキから融合召喚する。","limit":"無制限"},{"code":"GB-117","name":"強制交換","category":"魔法","subtype":"通常","text":"お互いのプレイヤーはそれぞれ自分フィールドのモンスター1体を選び、そのコントロールを入れ替える。そのモンスターはこのターン表示形式を変更できない。","limit":"無制限"},{"code":"GB-118","name":"愚者の埋葬","category":"魔法","subtype":"通常","text":"自分のデッキからモンスター1体を墓地へ送る。","limit":"制限"},{"code":"GB-119","name":"手札一掃","category":"魔法","subtype":"通常","text":"お互いのプレイヤーは手札を全て墓地へ捨てる。その後、それぞれ捨てた枚数分だけデッキからドローする。","limit":"制限"},{"code":"GB-120","name":"手札交換の儀","category":"魔法","subtype":"速攻","text":"お互いのプレイヤーは手札を2枚墓地へ送る。その後、それぞれデッキから2枚ドローする。","limit":"無制限"},{"code":"GB-121","name":"援軍の要請","category":"魔法","subtype":"通常","text":"自分のデッキからレベル4以下の戦士族モンスター1体を手札に加える。","limit":"制限"},{"code":"GB-122","name":"新月の秘本","category":"魔法","subtype":"速攻","text":"フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターを裏側守備表示にする。","limit":"制限"},{"code":"GB-123","name":"機巧の隠し蔵","category":"魔法","subtype":"通常","text":"自分フィールドの表側表示の『機巧』モンスター1体を選んで発動できる。自分のデッキからレベル4以下の『機巧』モンスター1体を手札に加え、選んだモンスターの表示形式を変更する。","limit":"無制限"},{"code":"GB-124","name":"武士団の結束","category":"魔法","subtype":"永続","text":"（永続魔法）『武士団』モンスターが召喚・特殊召喚される度に、このカードに武士道カウンターを1つ置く（最大2つ）。このカードを墓地へ送って発動できる。このカードの武士道カウンターの数だけ自分はデッキからドローする。","limit":"無制限"},{"code":"GB-125","name":"武士団の門","category":"魔法","subtype":"永続","text":"（永続魔法）『武士団』モンスターが召喚・特殊召喚される度に、このカードに武士道カウンターを2つ置く。自分フィールドの武士道カウンターを以下の数だけ取り除いて効果を発動できる。●2つ：フィールドの『武士団』または『蒼月』効果モンスター1体の攻撃力をターン終了時まで500アップする。●4つ：自分のデッキ・墓地から『武士団』モンスター1体を手札に加える。●6つ：自分の墓地の『蒼月』効果モンスター1体を特殊召喚する。","limit":"制限"},{"code":"GB-126","name":"死者の呼び声","category":"魔法","subtype":"通常","text":"自分または相手の墓地のモンスター1体を対象として発動できる。そのモンスターを自分フィールドに特殊召喚する。","limit":"制限"},{"code":"GB-127","name":"疾風の旋刃","category":"魔法","subtype":"速攻","text":"フィールドの魔法・罠カード1枚を対象として発動できる。そのカードを破壊する。","limit":"準制限"},{"code":"GB-128","name":"禁断の盃","category":"魔法","subtype":"速攻","text":"フィールドの表側表示モンスター1体を対象として発動できる。ターン終了時まで、そのモンスターの攻撃力は400アップし、効果は無効化される。","limit":"無制限"},{"code":"GB-129","name":"緊急招集","category":"魔法","subtype":"通常","text":"自分のデッキから『元素の勇士』モンスター1体を手札に加える。","limit":"無制限"},{"code":"GB-130","name":"蒼月の狼煙","category":"魔法","subtype":"通常","text":"自分のデッキからレベル3以下の『武士団』モンスター1体を手札に加える。","limit":"無制限"},{"code":"GB-131","name":"虚無の大穴","category":"魔法","subtype":"通常","text":"フィールドのモンスターを全て破壊する。","limit":"制限"},{"code":"GB-132","name":"調律の儀","category":"魔法","subtype":"通常","text":"自分のデッキから『ハーモン』調律モンスター1体を手札に加え、その後自分のデッキの一番上のカードを墓地へ送る。","limit":"無制限"},{"code":"GB-133","name":"謙虚な選択","category":"魔法","subtype":"通常","text":"このカード名のカードは1ターンに1枚しか発動できず、このカードを発動するターン、自分はモンスターを特殊召喚できない。自分のデッキの上からカードを3枚めくり、その中から1枚を選んで手札に加え、その後デッキをシャッフルする。","limit":"無制限"},{"code":"GB-134","name":"闇の囁き","category":"魔法","subtype":"通常","text":"自分のデッキから2枚ドローし、その後手札の闇属性モンスター1体を除外する。手札に闇属性モンスターが無い場合、手札を全て墓地へ送る。","limit":"制限"},{"code":"GB-135","name":"魔窟の取引","category":"魔法","subtype":"通常","text":"お互いのプレイヤーはデッキから1枚ドローし、その後手札を1枚選んで捨てる。","limit":"無制限"},{"code":"GB-136","name":"魔窟の門番","category":"魔法","subtype":"速攻","text":"（速攻魔法）自分の墓地の『魔窟』モンスター1体を対象として発動できる。そのモンスターを特殊召喚する。このカードを発動するターン、自分はこの効果以外ではモンスターを召喚・反転召喚・特殊召喚できない（セットは可能）。","limit":"無制限"},{"code":"GB-137","name":"三羽鴉の逆襲","category":"罠","subtype":"通常","text":"自分フィールドに『夜鴉』モンスターが存在する場合に発動できる。相手フィールドにセットされた魔法・罠カードを全て破壊する。自分フィールドに『夜鴉』モンスターがちょうど3体存在する場合、このカードは手札からも発動できる。","limit":"無制限"},{"code":"GB-138","name":"勇士の狼煙","category":"罠","subtype":"通常","text":"自分フィールドのモンスターが戦闘で破壊され墓地へ送られた時に発動できる。自分の手札・デッキからレベル4以下の『元素の勇士』モンスター1体を特殊召喚する。","limit":"無制限"},{"code":"GB-139","name":"勾玉の守護","category":"罠","subtype":"カウンター","text":"（カウンター罠）自分フィールドに『武士団』モンスターが存在する場合、相手がカードを破壊する効果を含む魔法・罠・効果モンスターの効果を発動した時に発動できる。その発動を無効にし破壊する。","limit":"無制限"},{"code":"GB-140","name":"反射の聖壁","category":"罠","subtype":"通常","text":"相手モンスターの攻撃宣言時に発動できる。相手フィールドの攻撃表示モンスターを全て破壊する。","limit":"制限"},{"code":"GB-141","name":"墜天の一撃","category":"罠","subtype":"通常","text":"自分フィールドの鳥獣族モンスター1体をリリースし、フィールドのカード2枚を対象として発動できる。そのカードを破壊する。","limit":"準制限"},{"code":"GB-142","name":"大激流","category":"罠","subtype":"通常","text":"モンスターが召喚・反転召喚・特殊召喚に成功した時に発動できる。フィールドのモンスターを全て破壊する。","limit":"制限"},{"code":"GB-143","name":"天啓の審判","category":"罠","subtype":"カウンター","text":"LPを半分払って以下の効果を発動できる。●モンスターの召喚・反転召喚・特殊召喚を無効にし、そのモンスターを破壊する。●魔法・罠カードの発動を無効にし、破壊する。","limit":"制限"},{"code":"GB-144","name":"天啓の警鐘","category":"罠","subtype":"カウンター","text":"2000LPを払って以下の効果を発動できる。●モンスターの召喚・反転召喚・特殊召喚を無効にし、そのモンスターを破壊する。●モンスターを特殊召喚する効果を含む効果モンスターの効果・魔法・罠カードの発動を無効にし、破壊する。","limit":"準制限"},{"code":"GB-145","name":"底なしの奈落","category":"罠","subtype":"通常","text":"相手が攻撃力1500以上のモンスターを召喚・反転召喚・特殊召喚した時に発動できる。その攻撃力1500以上のモンスターを破壊し、除外する。","limit":"準制限"},{"code":"GB-146","name":"強制退去装置","category":"罠","subtype":"通常","text":"フィールドのモンスター1体を対象として発動できる。そのモンスターを持ち主の手札に戻す。","limit":"無制限"},{"code":"GB-147","name":"機巧の秘密蔵","category":"罠","subtype":"カウンター","text":"（カウンター罠）自分フィールドに表側守備表示の『機巧』モンスターが存在する場合、相手が魔法・罠カードを発動した時に発動できる。その発動を無効にし破壊する。","limit":"無制限"},{"code":"GB-148","name":"次元の牢獄","category":"罠","subtype":"通常","text":"相手モンスターの攻撃宣言時、その攻撃モンスター1体を対象として発動できる。そのモンスターを除外する。","limit":"無制限"},{"code":"GB-149","name":"王政の圧制","category":"罠","subtype":"永続","text":"このカードがフィールドに存在する限り、お互いのプレイヤーは800LPを払って、モンスターの特殊召喚、またはモンスターを特殊召喚する効果を含む効果モンスターの効果・魔法・罠カードの発動を無効にし、それらを破壊できる。","limit":"制限"},{"code":"GB-150","name":"蘇生の呼び声","category":"罠","subtype":"永続","text":"自分の墓地のモンスター1体を対象としてこのカードを発動できる。そのモンスターを攻撃表示で特殊召喚する。このカードがフィールドから離れた時にそのモンスターを破壊する。そのモンスターが破壊された時にこのカードを破壊する。","limit":"制限"},{"code":"GB-151","name":"闇の取り引き","category":"罠","subtype":"カウンター","text":"相手が魔法・罠カードを発動した時に発動できる。相手はデッキから1枚ドローし、その発動を無効にし破壊する。","limit":"無制限"}],"decks":{"rabbit":{"name":"古竜ラグナレイジ","ref":"兎ラギア","main":[[3,"GB-057"],[3,"GB-032"],[2,"GB-078"],[2,"GB-017"],[2,"GB-101"],[2,"GB-036"],[1,"GB-102"],[1,"GB-030"],[1,"GB-035"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[1,"GB-113"],[1,"GB-117"],[2,"GB-128"],[1,"GB-133"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[2,"GB-151"],[1,"GB-149"]],"extra":[[3,"GB-093"],[2,"GB-007"],[1,"GB-006"]]},"agent":{"name":"星使","ref":"代行天使","main":[[3,"GB-033"],[3,"GB-028"],[3,"GB-086"],[3,"GB-058"],[2,"GB-050"],[1,"GB-029"],[1,"GB-030"],[2,"GB-017"],[2,"GB-036"],[2,"GB-114"],[2,"GB-115"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[1,"GB-133"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"]],"extra":[[2,"GB-007"],[2,"GB-001"],[1,"GB-005"],[1,"GB-006"],[1,"GB-003"]]},"hero":{"name":"勇士","ref":"HERO","main":[[1,"GB-020"],[2,"GB-052"],[2,"GB-026"],[2,"GB-022"],[2,"GB-024"],[1,"GB-029"],[1,"GB-030"],[2,"GB-017"],[2,"GB-036"],[1,"GB-035"],[3,"GB-129"],[2,"GB-111"],[2,"GB-116"],[1,"GB-121"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[1,"GB-138"]],"extra":[[2,"GB-025"],[2,"GB-021"],[1,"GB-027"],[1,"GB-023"],[2,"GB-007"],[1,"GB-006"],[1,"GB-004"]]},"tg_gadget":{"name":"試作機ギア人形","ref":"TGガジェット","main":[[3,"GB-009"],[3,"GB-010"],[2,"GB-008"],[3,"GB-096"],[2,"GB-094"],[1,"GB-095"],[2,"GB-017"],[2,"GB-036"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[2,"GB-133"],[1,"GB-113"],[2,"GB-128"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[1,"GB-151"],[1,"GB-150"]],"extra":[[2,"GB-098"],[1,"GB-099"],[1,"GB-070"],[1,"GB-077"],[1,"GB-109"],[1,"GB-079"],[1,"GB-076"],[1,"GB-097"],[1,"GB-087"],[1,"GB-054"],[2,"GB-007"],[1,"GB-006"],[1,"GB-001"]]},"debris_plant":{"name":"瓦礫竜ハーモン","ref":"デブリダンディ","main":[[2,"GB-080"],[1,"GB-090"],[2,"GB-051"],[1,"GB-091"],[1,"GB-092"],[1,"GB-053"],[3,"GB-015"],[2,"GB-031"],[2,"GB-089"],[1,"GB-055"],[1,"GB-018"],[2,"GB-017"],[2,"GB-036"],[1,"GB-110"],[1,"GB-118"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[1,"GB-133"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[1,"GB-150"]],"extra":[[1,"GB-079"],[1,"GB-109"],[1,"GB-012"],[1,"GB-013"],[1,"GB-070"],[1,"GB-076"],[1,"GB-077"],[1,"GB-016"],[1,"GB-059"],[1,"GB-034"],[1,"GB-054"],[1,"GB-075"],[1,"GB-088"],[1,"GB-007"],[1,"GB-001"]]},"quick_plant":{"name":"クイックハーモン","ref":"クイックダンディ","main":[[3,"GB-014"],[2,"GB-019"],[1,"GB-090"],[2,"GB-051"],[1,"GB-091"],[1,"GB-092"],[1,"GB-053"],[1,"GB-055"],[1,"GB-018"],[2,"GB-017"],[2,"GB-036"],[1,"GB-031"],[1,"GB-015"],[2,"GB-132"],[1,"GB-110"],[1,"GB-118"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[1,"GB-150"],[1,"GB-151"]],"extra":[[1,"GB-079"],[1,"GB-109"],[1,"GB-012"],[1,"GB-013"],[1,"GB-070"],[1,"GB-076"],[1,"GB-077"],[1,"GB-016"],[1,"GB-059"],[1,"GB-034"],[1,"GB-054"],[1,"GB-011"],[1,"GB-088"],[1,"GB-007"],[1,"GB-001"]]},"six_samurai":{"name":"武士団","ref":"六武衆","main":[[3,"GB-081"],[3,"GB-082"],[2,"GB-084"],[2,"GB-083"],[1,"GB-085"],[1,"GB-072"],[1,"GB-073"],[1,"GB-071"],[1,"GB-074"],[2,"GB-017"],[1,"GB-125"],[3,"GB-124"],[3,"GB-130"],[1,"GB-121"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[2,"GB-139"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-140"],[1,"GB-148"],[1,"GB-146"]],"extra":[[2,"GB-049"],[1,"GB-077"],[1,"GB-070"],[1,"GB-109"],[1,"GB-079"],[1,"GB-076"],[2,"GB-007"],[1,"GB-001"],[1,"GB-005"],[1,"GB-006"]]},"dark_world":{"name":"魔窟","ref":"暗黒界","main":[[3,"GB-108"],[2,"GB-107"],[1,"GB-105"],[3,"GB-104"],[1,"GB-103"],[2,"GB-106"],[2,"GB-100"],[1,"GB-056"],[2,"GB-036"],[1,"GB-017"],[3,"GB-135"],[2,"GB-136"],[1,"GB-119"],[1,"GB-134"],[1,"GB-118"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[2,"GB-120"],[1,"GB-133"],[1,"GB-121"],[1,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"]],"extra":[[2,"GB-007"],[1,"GB-001"],[1,"GB-006"],[1,"GB-002"]]},"karakuri":{"name":"機巧","ref":"カラクリ","main":[[3,"GB-061"],[2,"GB-062"],[2,"GB-067"],[1,"GB-068"],[2,"GB-064"],[1,"GB-066"],[1,"GB-065"],[1,"GB-060"],[2,"GB-036"],[2,"GB-017"],[1,"GB-055"],[1,"GB-122"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-133"],[1,"GB-113"],[1,"GB-128"],[2,"GB-123"],[1,"GB-147"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[2,"GB-148"],[1,"GB-146"],[1,"GB-150"]],"extra":[[2,"GB-063"],[2,"GB-069"],[1,"GB-079"],[1,"GB-109"],[1,"GB-077"],[1,"GB-076"],[1,"GB-070"],[1,"GB-054"],[1,"GB-034"],[1,"GB-016"],[1,"GB-007"],[1,"GB-001"],[1,"GB-005"]]},"blackwing":{"name":"夜鴉","ref":"BF","main":[[1,"GB-040"],[1,"GB-042"],[2,"GB-038"],[3,"GB-044"],[2,"GB-041"],[3,"GB-046"],[2,"GB-039"],[1,"GB-043"],[2,"GB-036"],[1,"GB-017"],[1,"GB-112"],[1,"GB-126"],[1,"GB-131"],[2,"GB-127"],[1,"GB-122"],[1,"GB-118"],[1,"GB-133"],[1,"GB-134"],[2,"GB-137"],[2,"GB-141"],[2,"GB-145"],[2,"GB-144"],[1,"GB-143"],[1,"GB-142"],[1,"GB-140"],[1,"GB-148"],[1,"GB-150"]],"extra":[[2,"GB-048"],[1,"GB-037"],[1,"GB-045"],[1,"GB-047"],[1,"GB-079"],[1,"GB-109"],[1,"GB-077"],[1,"GB-076"],[1,"GB-070"],[1,"GB-088"],[1,"GB-016"],[1,"GB-007"],[1,"GB-001"],[1,"GB-005"]]}}};
+const C = {}; DATA.cards.forEach(c => C[c.code] = c);
+const PH = ['ドロー','スタンバイ','メイン1','バトル','メイン2','エンド'];
+const EXTRA_TYPES = ['融合','同調','重ね'];
+const SAVE_KEY = 'gb1103-duel';
+let S = null;           // デュエル状態
+let setup = {deck:['rabbit','agent'], first:'rand', curtain:true, assist:true};
+let ui = {curtain:false};
+
+/* ---------- 基本ユーティリティ ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const num = v => (typeof v === 'number' ? v : 0);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function loadSave(){ try{ const s=localStorage.getItem(SAVE_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
+function cd(u){ const i=S.inst[u]; return i.tok || C[i.code]; }
+function pname(p){ return S.p[p].name; }
+function log(msg){ S.log.push(`[${S.turn}] ${msg}`); }
+function onField(i){ return i.zone==='mz'||i.zone==='sz'||i.zone==='fz'; }
+function lvl(u){ const c=cd(u), i=S.inst[u]; return c.subtype==='重ね' ? 0 : num(c.level)+(i.lm||0); }
+function atkOf(u){ const c=cd(u), i=S.inst[u]; return Math.max(0, num(c.atk)+i.am); }
+function defOf(u){ const c=cd(u), i=S.inst[u]; return Math.max(0, num(c.def_)+i.dm); }
+function isTuner(u){ return (cd(u).tags||[]).includes('調律'); }
+function isMain(){ return S.phase===2||S.phase===4; }
+function label(u){ const i=S.inst[u]; return i.face==='down' && i.ctrl!==S.view && onField(i) ? '裏側のカード' : `「${cd(u).name}」`; }
+
+/* ---------- デュエル開始 ---------- */
+function newDuel(){
+  S = {n:0, inst:{}, turn:1, tp:0, phase:0, ns:false, view:0, log:[], win:null,
+       assist:setup.assist, curtain:setup.curtain, p:[]};
+  setup.deck.forEach((key,p)=>{
+    const d = DATA.decks[key];
+    const P = {name:`P${p+1}`, deckKey:key, lp:8000, deck:[], hand:[], gy:[], ban:[], extra:[], mz:[null,null,null,null,null], sz:[null,null,null,null,null], fz:null};
+    S.p.push(P);
+    d.main.forEach(([n,code])=>{ for(let k=0;k<n;k++) P.deck.push(mk(code,p,'deck')); });
+    d.extra.forEach(([n,code])=>{ for(let k=0;k<n;k++) P.extra.push(mk(code,p,'extra')); });
+    shuffle(P.deck);
+  });
+  S.tp = setup.first==='rand' ? (Math.random()<.5?0:1) : (setup.first==='p1'?0:1);
+  S.view = S.tp;
+  log(`デュエル開始：${pname(0)}【${DATA.decks[setup.deck[0]].name}】 vs ${pname(1)}【${DATA.decks[setup.deck[1]].name}】`);
+  log(`先攻は${pname(S.tp)}`);
+  for(let k=0;k<5;k++){ draw(0,true); draw(1,true); }
+  draw(S.tp);  // 先攻1ターン目もドローする（1103ルール）
+  ui.curtain = S.curtain;
+  render();
+}
+function mk(code, owner, zone){
+  const u = 'u'+(S.n++);
+  S.inst[u] = {u, code, owner, ctrl:owner, zone, face:'down', pos:'atk', am:0, dm:0, lm:0, ctr:0, mats:[], parent:null,
+               setT:-1, sumT:-1, atkd:false, pc:false, neg:false, tok:null};
+  return u;
+}
+
+/* ---------- カード移動 ---------- */
+function freeSlot(p, zone){ return S.p[p][zone].indexOf(null); }
+function detach(u){
+  const i = S.inst[u];
+  if(i.zone==='mz'||i.zone==='sz'){ const a=S.p[i.ctrl][i.zone]; a[a.indexOf(u)]=null; }
+  else if(i.zone==='fz'){ S.p[i.ctrl].fz=null; }
+  else if(i.zone==='mat'){ const par=S.inst[i.parent]; par.mats.splice(par.mats.indexOf(u),1); i.parent=null; }
+  else { const a=S.p[i.owner][i.zone]; const k=a.indexOf(u); if(k>=0) a.splice(k,1); }
+}
+// zone: hand/deck/gy/ban/extra/mz/sz/fz。o: {p, pos, face, bottom, shuffle}
+function move(u, zone, o={}){
+  const i = S.inst[u];
+  const p = o.p ?? i.owner;
+  if((zone==='mz'||zone==='sz') && !(onField(i) && i.zone===zone && i.ctrl===p) && freeSlot(p,zone)<0){
+    toast(zone==='mz'?'モンスターゾーンに空きがありません':'魔法・罠ゾーンに空きがありません'); return false;
+  }
+  const wasField = onField(i);
+  detach(u);
+  if(wasField){
+    i.mats.slice().forEach(m=>move(m,'gy'));
+    i.am=0; i.dm=0; i.lm=0; i.ctr=0; i.atkd=false; i.pc=false; i.neg=false;
+  }
+  if(i.tok && zone!=='mz'){ delete S.inst[u]; return true; }
+  if(EXTRA_TYPES.includes(cd(u).subtype) && (zone==='hand'||zone==='deck')) zone='extra';
+  i.zone = zone;
+  if(zone==='mz'||zone==='sz'||zone==='fz'){
+    i.ctrl = p; const P = S.p[p];
+    if(zone==='fz'){ if(P.fz) move(P.fz,'gy'); P.fz=u; }
+    else P[zone][freeSlot(p,zone)] = u;
+    i.face = o.face||'up'; i.pos = o.pos||'atk';
+  } else {
+    i.ctrl = i.owner;
+    const a = S.p[i.owner][zone];
+    if(zone==='deck'){ if(o.bottom) a.push(u); else if(o.shuffle){ a.push(u); shuffle(a); } else a.unshift(u); }
+    else a.push(u);
+    i.face = (zone==='gy'||zone==='ban') ? 'up' : 'down';
+  }
+  return true;
+}
+function attachMat(u, parent){
+  detach(u); const i=S.inst[u];
+  if(i.tok){ delete S.inst[u]; return; }
+  i.mats.slice().forEach(m=>move(m,'gy'));
+  Object.assign(i,{zone:'mat', parent, ctrl:S.inst[parent].ctrl, am:0, dm:0, lm:0, ctr:0, mats:[], neg:false, face:'up'});
+  S.inst[parent].mats.push(u);
+}
+function draw(p, quiet){
+  const P = S.p[p];
+  if(!P.deck.length){ if(!quiet){ log(`${P.name}はデッキが0枚でドローできない`); finish(1-p,'デッキ切れ'); } return null; }
+  const u = P.deck.shift(); move(u,'hand');
+  if(!quiet) log(`${P.name}がドロー`);
+  return u;
+}
+function damage(p, v){
+  if(!v) return;
+  S.p[p].lp = Math.max(0, S.p[p].lp - v);
+  log(`${pname(p)}に${v}ダメージ（LP ${S.p[p].lp}）`);
+  if(S.p[p].lp<=0) finish(1-p,'LP0');
+}
+function finish(winner, why){ if(S.win==null){ S.win={p:winner, why}; log(`${pname(winner)}の勝利（${why}）`); } }
+
+/* ---------- ターン進行 ---------- */
+function nextPhase(){
+  if(S.win) return;
+  if(S.phase<5){ S.phase++; log(`${PH[S.phase]}フェイズ`); act(); return; }
+  const H = S.p[S.tp].hand;
+  if(H.length>6){
+    const need = H.length-6;
+    S.view = S.tp;
+    picker({title:`手札が${H.length}枚です。${need}枚捨ててください`, items:H.slice(), min:need, max:need,
+      actions:[{label:'捨ててターン終了', pri:true, fn:sel=>{ sel.forEach(u=>move(u,'gy')); log(`${pname(S.tp)}は手札上限で${need}枚捨てた`); endTurn(); }}]});
+    return;
+  }
+  endTurn();
+}
+function endTurn(){
+  Object.values(S.inst).forEach(i=>{ i.atkd=false; i.pc=false; });
+  S.turn++; S.tp = 1-S.tp; S.ns=false; S.phase=0;
+  log(`――― ターン${S.turn}：${pname(S.tp)} ―――`);
+  draw(S.tp);
+  if(S.curtain){ S.view=S.tp; ui.curtain=true; } else S.view=S.tp;
+  closeLayer(); act();
+}
+function act(){ save(); render(); }
+
+/* ---------- 描画 ---------- */
+function render(){
+  const app = $('#app');
+  if(!S){ app.innerHTML = setupHTML(); return; }
+  const me = S.view, op = 1-me;
+  app.innerHTML = `
+    ${S.win?`<div class="win">${esc(pname(S.win.p))}の勝利（${esc(S.win.why)}） <button class="chipbtn" data-a="menu">メニュー</button></div>`:''}
+    <div class="side opp">${pilesHTML(op)}${zonesHTML(op,'sz')}${zonesHTML(op,'mz')}</div>
+    <div class="mid">
+      <div class="lp ${S.tp===op?'cur':''}"><small>${esc(pname(op))}${S.tp===op?'（ターン中）':''}</small>${S.p[op].lp}</div>
+      <div class="phase"><span class="t">ターン${S.turn}</span><button class="p" data-a="next" aria-label="次のフェイズへ">${PH[S.phase]} ▶</button></div>
+      <div class="lp r ${S.tp===me?'cur':''}"><small>${esc(pname(me))}${S.tp===me?'（ターン中）':''}</small>${S.p[me].lp}</div>
+    </div>
+    <button class="logline" data-a="log">${esc(S.log[S.log.length-1]||'')}</button>
+    <div class="side mine">${zonesHTML(me,'mz')}${zonesHTML(me,'sz')}${pilesHTML(me)}</div>
+    <div class="hand">${S.p[me].hand.map(u=>tileHTML(u,me)).join('') || '<span class="note">手札なし</span>'}</div>
+    <div class="tools">
+      <button class="go" data-a="next">${S.phase===5?'ターン終了':'次のフェイズ'}</button>
+      <button data-a="draw">ドロー</button>
+      <button data-a="exsum">EX召喚</button>
+      <button data-a="more">その他</button>
+    </div>`;
+  if(ui.curtain) showCurtain();
+}
+function pilesHTML(p){
+  const P=S.p[p];
+  const fz = P.fz ? `<button class="pile fz" data-u="${P.fz}"><span>F</span><b>${esc(cd(P.fz).name)}</b></button>` : `<span class="pile fz"><span>フィールド</span><b>—</b></span>`;
+  return `<div class="piles">${fz}
+    <button class="pile" data-a="deck" data-p="${p}"><span>デッキ</span><b>${P.deck.length}</b></button>
+    <button class="pile" data-a="extra" data-p="${p}"><span>EX</span><b>${P.extra.length}</b></button>
+    <button class="pile" data-a="gy" data-p="${p}"><span>墓地</span><b>${P.gy.length}</b></button>
+    <button class="pile" data-a="ban" data-p="${p}"><span>除外</span><b>${P.ban.length}</b></button>
+    <span class="pile"><span>手札</span><b>${P.hand.length}</b></span></div>`;
+}
+function zonesHTML(p, zone){
+  return `<div class="zones">${S.p[p][zone].map(u=>`<div class="cell ${zone==='sz'?'st':''}">${u?tileHTML(u,S.view):''}</div>`).join('')}</div>`;
+}
+function tileHTML(u, viewer){
+  const i=S.inst[u], c=cd(u);
+  const hidden = (i.zone==='hand' && i.owner!==viewer) || (i.face==='down' && onField(i) && i.ctrl!==viewer);
+  const def = i.zone==='mz' && i.pos==='def';
+  if(hidden) return `<button class="tile back ${def?'def':''}" data-u="${u}" aria-label="裏側のカード"></button>`;
+  const t = c.category==='モンスター' ? (i.tok?'トークン':c.subtype) : c.category;
+  let st = '';
+  if(c.category==='モンスター'){
+    const lv = c.subtype==='重ね' ? `R${c.level}` : `★${lvl(u)}`;
+    st = `${lv}<br>${i.zone==='mz'?atkOf(u):num(c.atk)}/${i.zone==='mz'?defOf(u):num(c.def_)}`;
+  } else st = c.subtype;
+  const b = [];
+  if(i.mats.length) b.push(`<span class="bdg">素${i.mats.length}</span>`);
+  if(i.ctr) b.push(`<span class="bdg">C${i.ctr}</span>`);
+  if(i.neg) b.push(`<span class="bdg neg">無効</span>`);
+  if(i.am||i.dm||i.lm) b.push(`<span class="bdg mod">補</span>`);
+  return `<button class="tile t-${t} ${def?'def':''} ${i.face==='down'&&onField(i)?'down':''}" data-u="${u}" aria-label="${esc(c.name)}">
+    ${b.length?`<span class="badges">${b.join('')}</span>`:''}<span class="nm">${esc(c.name)}</span><span class="st">${st}</span></button>`;
+}
+
+/* ---------- セットアップ画面 ---------- */
+const TIER = {rabbit:'S',agent:'S',hero:'A',tg_gadget:'A',debris_plant:'A',quick_plant:'A',six_samurai:'A',dark_world:'B',karakuri:'B',blackwing:'B〜A'};
+function setupHTML(){
+  const saved = loadSave();
+  const seat = p => `<section class="seat"><h2>P${p+1}のデッキ</h2><div class="decks">
+    ${Object.entries(DATA.decks).map(([k,d])=>`<button class="deckbtn ${setup.deck[p]===k?'on':''}" data-a="pick" data-p="${p}" data-k="${k}">
+      <span class="tier">Tier ${TIER[k]}</span><b>${esc(d.name)}</b><span>参照：${esc(d.ref)}</span></button>`).join('')}
+    </div><button class="chipbtn" data-a="recipe" data-k="${setup.deck[p]}">このデッキのレシピを見る</button></section>`;
+  return `<div class="setup">
+    <h1 class="brand">ゲートボール1103<small>DUEL TABLE — 2011.03 REGULATION</small></h1>
+    ${saved && !saved.win ? `<button class="big" data-a="resume">続きから（ターン${saved.turn}）</button>`:''}
+    ${seat(0)}${seat(1)}
+    <section class="seat"><h2>設定</h2>
+      <div class="row"><span class="note">先攻</span>
+        ${[['rand','ランダム'],['p1','P1'],['p2','P2']].map(([k,l])=>`<button class="chipbtn ${setup.first===k?'on':''}" data-a="first" data-k="${k}">${l}</button>`).join('')}</div>
+      <div class="row"><button class="chipbtn ${setup.curtain?'on':''}" data-a="tgl" data-k="curtain">ターン交代で画面を隠す</button>
+        <button class="chipbtn ${setup.assist?'on':''}" data-a="tgl" data-k="assist">ルール補助</button></div>
+      <p class="note">1台の端末を2人で交互に使う対戦盤です。召喚・戦闘ダメージ・フェイズ・手札上限は自動、カード効果は効果文を見て手動で処理します（カードをタップ）。「ルール補助」をオフにすると、召喚権やセットしたターンの制限を無視して操作できます。</p>
+    </section>
+    <button class="big" data-a="start">デュエル開始</button></div>`;
+}
+
+/* ---------- レイヤー（シート・モーダル） ---------- */
+function closeLayer(){ $('#layer').innerHTML=''; }
+function sheet(html){ $('#layer').innerHTML = `<div class="scrim" data-a="close"><div class="sheet" role="dialog">${html}</div></div>`; }
+function showCurtain(){
+  $('#layer').innerHTML = `<div class="curtain"><div class="brand">${esc(pname(S.view))}</div>
+    <p class="note">${esc(pname(S.view))}の画面です。相手に見えないようにしてからタップしてください。</p>
+    <button class="big" style="max-width:320px" data-a="uncurtain">表示する</button></div>`;
+}
+let ACTS = [];
+function actsHTML(list){
+  ACTS = list;
+  return `<div class="acts">${list.map((a,k)=>`<button class="${a.pri?'pri':''} ${a.dan?'dan':''}" data-act="${k}" ${a.dis?'disabled':''} title="${esc(a.dis||'')}">${esc(a.label)}</button>`).join('')}</div>`
+    + (list.some(a=>a.dis)?`<p class="why">押せない操作：${[...new Set(list.filter(a=>a.dis).map(a=>a.dis))].map(esc).join('／')}（ルール補助オフで解除）</p>`:'');
+}
+function rule(ok, reason){ return (!S.assist || ok) ? null : reason; }
+function metaLine(u){
+  const c=cd(u);
+  if(c.category!=='モンスター') return `${c.subtype}${c.category}`;
+  const t=[c.subtype, ...(c.tags||[])].join('・');
+  const lv = c.subtype==='重ね' ? `ランク${c.level}` : `レベル${c.level}`;
+  return `${c.attribute}属性／${c.race}／${t}／${lv}／攻${c.atk} 守${c.def_}`;
+}
+
+/* ---------- カード操作 ---------- */
+function openCard(u){
+  const i=S.inst[u]; if(!i) return;
+  const c=cd(u);
+  const hidden = (i.zone==='hand' && i.owner!==S.view) || (i.face==='down' && onField(i) && i.ctrl!==S.view);
+  const L = [];
+  const mine = (onField(i)? i.ctrl : i.owner) === S.view;
+  const myTurn = S.tp === (onField(i)? i.ctrl : i.owner);
+  const isMon = c.category==='モンスター';
+  const isEx = EXTRA_TYPES.includes(c.subtype);
+  const who = onField(i)? i.ctrl : i.owner;
+
+  if(i.zone==='hand'){
+    if(!mine){ sheet(`<h3>相手の手札</h3><p class="note">中身は見えません。</p>${actsHTML([
+      {label:'ランダムに1枚捨てさせる', fn:()=>{ const H=S.p[who].hand; const r=H[Math.floor(Math.random()*H.length)]; move(r,'gy'); log(`${pname(who)}の手札から${label(r)}が捨てられた`); }},
+      {label:'閉じる', fn:()=>{}}])}`); return; }
+    if(isMon){
+      const need = num(c.level)>=7?2:num(c.level)>=5?1:0;
+      const nsBlock = rule(myTurn&&isMain()&&!S.ns, '召喚はメインフェイズに1回');
+      L.push({label: need?`アドバンス召喚（リリース${need}）`:'通常召喚', pri:true, dis:nsBlock, fn:()=>normalSummon(u,need,'up')});
+      L.push({label: need?`アドバンスセット（リリース${need}）`:'セット', dis:nsBlock, fn:()=>normalSummon(u,need,'down')});
+      if(need) L.push({label:'リリースなしで召喚（効果）', dis:nsBlock, fn:()=>normalSummon(u,0,'up')});
+      L.push({label:'特殊召喚（攻撃表示）', fn:()=>ss(u,'atk')});
+      L.push({label:'特殊召喚（守備表示）', fn:()=>ss(u,'def')});
+    } else if(c.category==='魔法'){
+      const ok = myTurn && (c.subtype==='速攻' || isMain());
+      const why = rule(ok, c.subtype==='速攻'?'手札の速攻魔法は自分のターンのみ':'魔法は自分のメインフェイズに');
+      if(c.subtype==='通常'||c.subtype==='速攻') L.push({label:'発動（解決後に墓地へ）', pri:true, dis:why, fn:()=>{ log(`${pname(who)}が${label(u)}を発動`); move(u,'gy'); }});
+      L.push({label: c.subtype==='フィールド'?'発動（フィールドゾーンへ）':'発動（場に出す）', pri:!(c.subtype==='通常'||c.subtype==='速攻'), dis:why, fn:()=>activateFromHand(u)});
+      L.push({label:'セット', dis:rule(myTurn&&isMain(),'セットは自分のメインフェイズに'), fn:()=>setST(u)});
+    } else {
+      L.push({label:'セット', pri:true, dis:rule(myTurn&&isMain(),'セットは自分のメインフェイズに'), fn:()=>setST(u)});
+      L.push({label:'手札から発動（効果で許可）', fn:()=>activateFromHand(u)});
+    }
+    L.push({label:'効果を発動（手札で）', fn:()=>log(`${pname(who)}が手札の${label(u)}の効果を発動`)});
+    L.push({label:'捨てる（墓地へ）', fn:()=>{ move(u,'gy'); log(`${pname(who)}が${label(u)}を捨てた`); }});
+    L.push({label:'除外', fn:()=>{ move(u,'ban'); log(`${label(u)}を除外`); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ move(u,'deck'); log(`${pname(who)}が手札1枚をデッキの上に戻した`); }});
+    L.push({label:'デッキに戻してシャッフル', fn:()=>{ move(u,'deck',{shuffle:true}); log(`${pname(who)}が手札1枚をデッキに戻した`); }});
+    L.push({label:'相手に見せる（ログ）', fn:()=>log(`${pname(who)}が手札の「${c.name}」を公開`)});
+  }
+  else if(i.zone==='mz'){
+    if(!hidden && mine){
+      const base = myTurn && isMain() && i.sumT!==S.turn && !i.pc && !i.atkd;
+      if(i.face==='down') L.push({label:'反転召喚', pri:true, dis:rule(base,'召喚・セットしたターンや変更済みは不可'), fn:()=>{ i.face='up'; i.pos='atk'; i.pc=true; log(`${pname(who)}が「${c.name}」を反転召喚`); }});
+      else L.push({label:i.pos==='atk'?'守備表示にする':'攻撃表示にする', dis:rule(base,'召喚したターン・攻撃後・変更済みは不可'), fn:()=>{ i.pos=i.pos==='atk'?'def':'atk'; i.pc=true; log(`「${c.name}」を${i.pos==='atk'?'攻撃':'守備'}表示に変更`); }});
+      L.push({label:'攻撃する', pri:true, dis:rule(myTurn&&S.phase===3&&i.face==='up'&&i.pos==='atk'&&!i.atkd&&S.turn>1, S.turn===1?'先攻1ターン目は攻撃できない':'バトルフェイズに攻撃表示で1回'), fn:()=>attack(u)});
+    }
+    if(!hidden) L.push({label:'効果を発動（ログ）', fn:()=>log(`「${c.name}」の効果を発動`)});
+    if(i.mats.length) L.push({label:`重ね素材を取り除く（${i.mats.length}）`, fn:()=>detachMats(u)});
+    L.push({label:'破壊（墓地へ）', dan:true, fn:()=>{ log(`${label(u)}を破壊`); move(u,'gy'); }});
+    L.push({label:'リリース（墓地へ）', fn:()=>{ log(`${label(u)}をリリース`); move(u,'gy'); }});
+    L.push({label:'除外', fn:()=>{ log(`${label(u)}を除外`); move(u,'ban'); }});
+    L.push({label:'持ち主の手札へ', fn:()=>{ log(`${label(u)}を手札に戻した`); move(u,'hand'); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ log(`${label(u)}をデッキの上に戻した`); move(u,'deck'); }});
+    L.push({label:'デッキに戻してシャッフル', fn:()=>{ log(`${label(u)}をデッキに戻した`); move(u,'deck',{shuffle:true}); }});
+    L.push({label:'表示形式を変える（効果）', fn:()=>{ if(i.face==='down'){ i.face='up'; i.pos='def'; } else i.pos=i.pos==='atk'?'def':'atk'; log(`${label(u)}の表示形式を変更（効果）`); }});
+    L.push({label:'裏側守備表示にする', fn:()=>{ i.face='down'; i.pos='def'; i.am=0; i.dm=0; i.neg=false; log(`「${c.name}」を裏側守備表示にした`); }});
+    if(i.face==='down') L.push({label:'表にする（リバース）', fn:()=>{ i.face='up'; log(`「${c.name}」がリバース`); }});
+    L.push({label:'コントロールを相手に移す', fn:()=>{ const to=1-i.ctrl; if(move(u,'mz',{p:to,pos:i.pos,face:i.face})) log(`「${c.name}」のコントロールが${pname(to)}に移った`); }});
+    L.push({label:i.neg?'効果無効を解除':'効果無効の印をつける', fn:()=>{ i.neg=!i.neg; log(`「${c.name}」の効果${i.neg?'を無効':'無効を解除'}`); }});
+  }
+  else if(i.zone==='sz'||i.zone==='fz'){
+    if(mine && i.face==='down'){
+      const ok = c.category==='罠' ? i.setT<S.turn : (c.subtype==='速攻' ? i.setT<S.turn : (myTurn&&isMain()));
+      const why = rule(ok, c.category==='罠'||c.subtype==='速攻' ? 'セットしたターンは発動できない' : 'セットした魔法は自分のメインフェイズに');
+      const once = c.subtype==='通常'||c.subtype==='速攻'||c.subtype==='カウンター';
+      if(once) L.push({label:'発動（解決後に墓地へ）', pri:true, dis:why, fn:()=>{ log(`${pname(who)}が「${c.name}」を発動`); move(u,'gy'); }});
+      L.push({label:'発動（場に残す）', pri:!once, dis:why, fn:()=>{ i.face='up'; log(`${pname(who)}が「${c.name}」を発動`); }});
+    }
+    if(i.face==='up'){
+      L.push({label:'効果を発動（ログ）', fn:()=>log(`「${c.name}」の効果を発動`)});
+      L.push({label:'解決して墓地へ', fn:()=>{ move(u,'gy'); log(`「${c.name}」を墓地へ`); }});
+    }
+    L.push({label:'破壊（墓地へ）', dan:true, fn:()=>{ log(`${label(u)}を破壊`); move(u,'gy'); }});
+    L.push({label:'持ち主の手札へ', fn:()=>{ log(`${label(u)}を手札に戻した`); move(u,'hand'); }});
+    L.push({label:'除外', fn:()=>{ log(`${label(u)}を除外`); move(u,'ban'); }});
+    L.push({label:'デッキの一番上へ', fn:()=>{ log(`${label(u)}をデッキの上に戻した`); move(u,'deck'); }});
+    if(i.face==='down' && mine) L.push({label:'表にする（確認）', fn:()=>{ i.face='up'; log(`「${c.name}」を表にした`); }});
+  }
+  else { // deck / gy / ban / extra のリストから
+    if(isMon){
+      L.push({label:'特殊召喚（攻撃表示）', pri:true, dis: rule(!isEx || i.zone!=='extra','EXからは同調・重ね・融合の手順で'), fn:()=>ss(u,'atk')});
+      L.push({label:'特殊召喚（守備表示）', dis: rule(!isEx || i.zone!=='extra','EXからは同調・重ね・融合の手順で'), fn:()=>ss(u,'def')});
+      if(i.zone==='deck') L.push({label:'裏側守備で特殊召喚', fn:()=>ss(u,'def','down')});
+    } else if(i.zone!=='hand'){
+      L.push({label:'場に出す（表側）', fn:()=>{ if(move(u, c.subtype==='フィールド'?'fz':'sz')) log(`「${c.name}」を場に出した`); }});
+      L.push({label:'セットする', fn:()=>setST(u,true)});
+    }
+    if(i.zone!=='hand' && !isEx) L.push({label:'手札に加える', pri:!isMon, fn:()=>{ const from=i.zone; move(u,'hand'); log(`${pname(i.owner)}が${from==='deck'?'デッキ':from==='gy'?'墓地':'除外'}から「${c.name}」を手札に加えた`); }});
+    if(i.zone!=='gy') L.push({label:'墓地へ送る', fn:()=>{ move(u,'gy'); log(`「${c.name}」を墓地へ送った`); }});
+    if(i.zone!=='ban') L.push({label:'除外', fn:()=>{ move(u,'ban'); log(`「${c.name}」を除外`); }});
+    if(i.zone!=='deck' && !isEx){ L.push({label:'デッキの一番上へ', fn:()=>{ move(u,'deck'); log(`「${c.name}」をデッキの上に置いた`); }});
+      L.push({label:'デッキに戻してシャッフル', fn:()=>{ move(u,'deck',{shuffle:true}); log(`「${c.name}」をデッキに戻した`); }}); }
+    if(i.zone==='deck') L.push({label:'デッキの一番下へ', fn:()=>{ move(u,'deck',{bottom:true}); log(`デッキのカード1枚をデッキの一番下へ`); }});
+    if(isEx && i.zone!=='extra') L.push({label:'エクストラデッキへ戻す', fn:()=>{ move(u,'extra'); log(`「${c.name}」をEXに戻した`); }});
+  }
+
+  let tune = '';
+  if(i.zone==='mz' && !hidden){
+    tune = `<div class="steps"><span>攻</span>${[-1000,-100,100,1000].map(v=>`<button data-mod="am" data-v="${v}">${v>0?'+':''}${v}</button>`).join('')}<b>${atkOf(u)}</b></div>
+      <div class="steps"><span>守</span>${[-1000,-100,100,1000].map(v=>`<button data-mod="dm" data-v="${v}">${v>0?'+':''}${v}</button>`).join('')}<b>${defOf(u)}</b></div>
+      <div class="steps"><span>攻守</span><button data-mod="half">半分</button><button data-mod="zero">0にする</button><button data-mod="reset">補正リセット</button>
+        ${c.subtype!=='重ね'?`<span>レベル</span><button data-mod="lm" data-v="-1">−1</button><b>${lvl(u)}</b><button data-mod="lm" data-v="1">＋1</button>`:''}</div>`;
+  }
+  if(onField(i)) tune += `<div class="steps"><span>カウンター</span><button data-mod="ctr" data-v="-1">−</button><b>${i.ctr}</b><button data-mod="ctr" data-v="1">＋</button></div>`;
+  ui.cur = u;
+  const matsList = i.mats.length ? `<p class="meta">重ね素材：${i.mats.map(m=>esc(cd(m).name)).join('、')}</p>` : '';
+  const zoneName = {hand:'手札',mz:'モンスターゾーン',sz:'魔法・罠ゾーン',fz:'フィールドゾーン',deck:'デッキ',gy:'墓地',ban:'除外',extra:'エクストラデッキ'}[i.zone];
+  sheet(hidden ? `<h3>裏側のカード</h3><p class="meta">${esc(pname(who))}の${zoneName}</p>${tune}${actsHTML(L)}`
+    : `<h3>${esc(c.name)}${c.limit&&c.limit!=='無制限'?` <span class="tier">【${esc(c.limit)}】</span>`:''}</h3>
+      <p class="meta">${esc(metaLine(u))} ・ ${esc(pname(i.owner))}の${zoneName}${i.ctrl!==i.owner&&onField(i)?`（${esc(pname(i.ctrl))}がコントロール）`:''}</p>
+      <p class="ctext">${esc(c.text)}</p>${matsList}${tune}${actsHTML(L)}`);
+}
+function modCard(kind, v){
+  const u=ui.cur, i=S.inst[u]; if(!i) return;
+  const c=cd(u);
+  if(kind==='am'||kind==='dm'||kind==='lm'||kind==='ctr') i[kind]=Math.max(kind==='ctr'?0:-99999, i[kind]+v);
+  if(kind==='half'){ i.am -= Math.ceil(atkOf(u)/2); i.dm -= Math.ceil(defOf(u)/2); }
+  if(kind==='zero'){ i.am = -num(c.atk); i.dm = -num(c.def_); }
+  if(kind==='reset'){ i.am=0; i.dm=0; i.lm=0; }
+  if(kind!=='ctr') log(`「${c.name}」の数値を変更（攻${atkOf(u)} 守${defOf(u)}${c.subtype!=='重ね'?` ★${lvl(u)}`:''}）`);
+  save(); render(); openCard(u);
+}
+
+function normalSummon(u, need, face){
+  const c=cd(u), me=S.inst[u].owner;
+  const go = () => {
+    if(!move(u,'mz',{p:me, face, pos:face==='down'?'def':'atk'})) return;
+    S.ns=true; S.inst[u].sumT=S.turn;
+    log(face==='down' ? `${pname(me)}がモンスターをセット` : `${pname(me)}が「${c.name}」を召喚`);
+    act();
+  };
+  if(!need){ go(); return; }
+  const mons = S.p[me].mz.filter(Boolean);
+  if(mons.length<need){ toast(`リリースするモンスターが${need}体必要です`); return; }
+  picker({title:`リリースするモンスターを${need}体選択`, items:mons, min:need, max:need,
+    actions:[{label:'リリースして召喚', pri:true, fn:sel=>{ sel.forEach(t=>{ log(`${label(t)}をリリース`); move(t,'gy'); }); go(); }}]});
+}
+function ss(u, pos, face='up'){
+  const i=S.inst[u], c=cd(u), from=i.zone;
+  const p = S.view;  // 操作している側の場に出す
+  if(move(u,'mz',{p, pos, face})){ i.sumT=S.turn; log(`${pname(p)}が${face==='down'?'モンスター':`「${c.name}」`}を${{hand:'手札',gy:'墓地',ban:'除外',deck:'デッキ',extra:'EX'}[from]||''}から特殊召喚（${pos==='atk'?'攻撃':'守備'}）`); }
+  act();
+}
+function setST(u, fromList){
+  const c=cd(u), me=S.inst[u].owner;
+  const zone = c.subtype==='フィールド' ? 'fz' : 'sz';
+  if(move(u, zone, {p:me, face:'down'})){ S.inst[u].setT=S.turn; log(`${pname(me)}が魔法・罠をセット`); }
+  act();
+}
+function activateFromHand(u){
+  const c=cd(u), me=S.inst[u].owner;
+  if(move(u, c.subtype==='フィールド'?'fz':'sz', {p:me})){ log(`${pname(me)}が「${c.name}」を発動`); }
+  act();
+}
+function detachMats(u){
+  const i=S.inst[u];
+  picker({title:'取り除く重ね素材を選択', items:i.mats.slice(), min:1, max:i.mats.length,
+    actions:[{label:'取り除く（墓地へ）', pri:true, fn:sel=>{ sel.forEach(m=>move(m,'gy')); log(`「${cd(u).name}」の重ね素材を${sel.length}つ取り除いた`); }}]});
+}
+
+/* ---------- 戦闘 ---------- */
+function attack(a){
+  const me=S.inst[a].ctrl, op=1-me;
+  const targets = S.p[op].mz.filter(Boolean);
+  if(!targets.length){ battle(a,null); return; }
+  picker({title:'攻撃対象を選択', items:targets, min:1, max:1,
+    actions:[{label:'このモンスターに攻撃', pri:true, fn:sel=>battle(a,sel[0])},
+             {label:'直接攻撃（効果で可能な場合）', fn:()=>battle(a,null)}]});
+}
+function battle(a, t){
+  const A=S.inst[a], me=A.ctrl, op=1-me;
+  A.atkd=true;
+  const res = {kill:[], dmg:[0,0]};
+  let desc;
+  if(!t){ res.dmg[op]=atkOf(a); desc=`「${cd(a).name}」（攻${atkOf(a)}）の直接攻撃`; }
+  else {
+    const T=S.inst[t];
+    if(T.face==='down'){ T.face='up'; log(`「${cd(t).name}」がリバース`); }
+    const x=atkOf(a);
+    if(T.pos==='atk'){
+      const y=atkOf(t);
+      if(x>y){ res.kill.push(t); res.dmg[op]=x-y; }
+      else if(x<y){ res.kill.push(a); res.dmg[me]=y-x; }
+      else if(x>0){ res.kill.push(a,t); }
+      desc=`「${cd(a).name}」（攻${x}）→「${cd(t).name}」（攻${y}）`;
+    } else {
+      const y=defOf(t);
+      if(x>y) res.kill.push(t); else if(x<y) res.dmg[me]=y-x;
+      desc=`「${cd(a).name}」（攻${x}）→「${cd(t).name}」（守${y}）`;
+    }
+  }
+  log(`${pname(me)}の攻撃：${desc}`);
+  const box = u => `<label class="li ${res.kill.includes(u)?'on':''}"><input type="checkbox" id="k-${u}" data-kill="${u}" ${res.kill.includes(u)?'checked':''}> <span class="tx"><b>${esc(cd(u).name)}を破壊</b><span>${esc(pname(S.inst[u].ctrl))}のモンスター</span></span></label>`;
+  sheet(`<h3>ダメージ計算</h3><p class="meta">${esc(desc)}</p>
+    <p class="note">効果による破壊耐性・貫通・ダメージ0などは、ここで手直ししてから「適用」を押してください。</p>
+    ${t?`<div class="list">${[a,t].map(box).join('')}</div>`:''}
+    <div class="form"><label for="d0">${esc(pname(0))}へのダメージ</label><input id="d0" type="number" inputmode="numeric" value="${res.dmg[0]}">
+      <label for="d1">${esc(pname(1))}へのダメージ</label><input id="d1" type="number" inputmode="numeric" value="${res.dmg[1]}"></div>
+    ${actsHTML([{label:'適用', pri:true, keep:true, fn:()=>{
+        document.querySelectorAll('[data-kill]').forEach(cb=>{ if(cb.checked && S.inst[cb.dataset.kill]){ log(`「${cd(cb.dataset.kill).name}」が戦闘で破壊された`); move(cb.dataset.kill,'gy'); } });
+        damage(0, Math.max(0,parseInt($('#d0').value)||0)); damage(1, Math.max(0,parseInt($('#d1').value)||0));
+        closeLayer(); act(); }},
+      {label:'攻撃を無効にする', keep:true, fn:()=>{ log('攻撃は無効になった'); closeLayer(); act(); }}])}`);
+}
+
+/* ---------- エクストラデッキからの召喚 ---------- */
+function exSummonMenu(){
+  const me=S.view;
+  sheet(`<h3>エクストラデッキから召喚</h3><p class="meta">${esc(pname(me))}の場のモンスターを素材にします。</p>${actsHTML([
+    {label:'同調召喚（シンクロ）', pri:true, fn:()=>setTimeout(()=>synchro(me))},
+    {label:'重ね召喚（エクシーズ）', pri:true, fn:()=>setTimeout(()=>xyz(me))},
+    {label:'融合召喚', fn:()=>setTimeout(()=>fusion(me))},
+    {label:'エクストラデッキを見る', fn:()=>setTimeout(()=>viewPile(me,'extra'))}])}`);
+}
+function placeEx(u, me, pos, mats, how){
+  const ok = move(u,'mz',{p:me,pos});
+  if(!ok) return false;
+  S.inst[u].sumT=S.turn; log(`${pname(me)}が「${cd(u).name}」を${how}（${pos==='atk'?'攻撃':'守備'}表示）`);
+  return true;
+}
+function synchro(me){
+  const mons = S.p[me].mz.filter(u=>u && S.inst[u].face==='up' && cd(u).subtype!=='重ね');
+  picker({title:'同調素材を選択（調律1体＋それ以外）', items:mons, min:2, max:5,
+    actions:[{label:'次へ', pri:true, fn:sel=>{
+      const tuners=sel.filter(isTuner).length, sum=sel.reduce((s,u)=>s+lvl(u),0);
+      const cands=S.p[me].extra.filter(u=>cd(u).subtype==='同調' && (!S.assist || num(cd(u).level)===sum));
+      const warn = tuners!==1 ? `調律が${tuners}体です（通常は1体）。` : '';
+      if(!cands.length){ toast(`レベル合計${sum}の同調モンスターがEXにありません`); return; }
+      setTimeout(()=>picker({title:`レベル合計${sum}：召喚する同調モンスター`, note:warn+'素材の種類指定（「〇〇」＋…等）はカード文を確認してください。', items:cands, min:1, max:1,
+        actions:['atk','def'].map(pos=>({label:pos==='atk'?'攻撃表示で同調召喚':'守備表示で同調召喚', pri:pos==='atk', fn:s2=>{
+          const mats=sel.slice(); mats.forEach(m=>move(m,'gy'));
+          placeEx(s2[0],me,pos,mats,'同調召喚'); log(`同調素材：${mats.map(m=>S.inst[m]?`「${cd(m).name}」`:'トークン').join('、')}`); }}))}));
+    }}]});
+}
+function xyz(me){
+  const mons = S.p[me].mz.filter(u=>u && S.inst[u].face==='up' && cd(u).subtype!=='重ね' && !S.inst[u].tok);
+  picker({title:'重ね素材を選択（同じレベル）', note:'トークンは重ね素材にできません。', items:mons, min:2, max:5,
+    actions:[{label:'次へ', pri:true, fn:sel=>{
+      const levels=[...new Set(sel.map(lvl))];
+      if(S.assist && levels.length!==1){ toast('同じレベルのモンスターを選んでください'); return; }
+      const L=levels[0];
+      const cands=S.p[me].extra.filter(u=>{ const c=cd(u); if(c.subtype!=='重ね') return false; if(!S.assist) return true;
+        const m=c.text.match(/×(\d)/); return num(c.level)===L && (!m || +m[1]===sel.length); });
+      if(!cands.length){ toast(`ランク${L}・素材${sel.length}体の重ねモンスターがEXにありません`); return; }
+      setTimeout(()=>picker({title:`ランク${L}：召喚する重ねモンスター`, note:'種族などの素材指定はカード文を確認してください。', items:cands, min:1, max:1,
+        actions:['atk','def'].map(pos=>({label:pos==='atk'?'攻撃表示で重ね召喚':'守備表示で重ね召喚', pri:pos==='atk', fn:s2=>{
+          const x=s2[0]; const names=sel.map(m=>cd(m).name);
+          sel.forEach(m=>detach(m));
+          // 素材をいったん外してから本体を置き、素材として重ねる
+          sel.forEach(m=>{ const i=S.inst[m]; i.zone='limbo'; });
+          if(!move(x,'mz',{p:me,pos})){ sel.forEach(m=>{ S.inst[m].zone='gy'; S.p[S.inst[m].owner].gy.push(m); }); return; }
+          sel.forEach(m=>{ const i=S.inst[m]; Object.assign(i,{zone:'mat',parent:x,am:0,dm:0,lm:0,ctr:0,neg:false,face:'up'}); S.inst[x].mats.push(m); });
+          S.inst[x].sumT=S.turn; log(`${pname(me)}が「${cd(x).name}」を重ね召喚（素材：${names.join('、')}）`); }}))}));
+    }}]});
+}
+function fusion(me){
+  const fus=S.p[me].extra.filter(u=>cd(u).subtype==='融合');
+  if(!fus.length){ toast('EXに融合モンスターがありません'); return; }
+  picker({title:'融合召喚するモンスター', items:fus, min:1, max:1, actions:[{label:'次へ', pri:true, fn:s1=>{
+    const P=S.p[me];
+    const pool=[...P.hand, ...P.mz.filter(Boolean), ...P.gy];
+    setTimeout(()=>picker({title:'融合素材を選択（手札・場・墓地）', note:'「融合」なら手札・場から墓地へ、「奇跡の融合」なら場・墓地から除外します。', items:pool, min:1, max:4,
+      actions:[{label:'素材を墓地へ送って融合召喚', pri:true, fn:sel=>doFusion(s1[0],sel,'gy')},
+               {label:'素材を除外して融合召喚', fn:sel=>doFusion(s1[0],sel,'ban')}]}));
+  }}]});
+  function doFusion(f, sel, to){
+    const names=sel.map(m=>cd(m).name);
+    sel.forEach(m=>move(m,to));
+    if(placeEx(f,me,'atk',sel,'融合召喚')) log(`融合素材（${to==='gy'?'墓地へ':'除外'}）：${names.join('、')}`);
+  }
+}
+
+/* ---------- ピッカー ---------- */
+let PK = null;
+function picker(o){
+  PK = {...o, sel:[]};
+  drawPicker();
+}
+function drawPicker(){
+  const o=PK;
+  sheet(`<h3>${esc(o.title)}</h3>${o.note?`<p class="note">${esc(o.note)}</p>`:''}
+    <div class="list">${o.items.map(u=>{ const c=cd(u), i=S.inst[u]; const hid=(i.zone==='hand'&&i.owner!==S.view)||(i.face==='down'&&onField(i)&&i.ctrl!==S.view);
+      const sw=c.category==='モンスター'?(i.tok?'var(--c-token)':`var(--c-${{通常:'normal',効果:'effect',融合:'fusion',同調:'synchro',重ね:'xyz'}[c.subtype]||'effect'})`):(c.category==='魔法'?'var(--c-spell)':'var(--c-trap)');
+      const where={hand:'手札',mz:'場',sz:'場',gy:'墓地',ban:'除外',deck:'デッキ',extra:'EX',mat:'素材'}[i.zone]||'';
+      return `<button class="li ${o.sel.includes(u)?'on':''}" data-pk="${u}"><span class="sw" style="background:${hid?'var(--c-back)':sw}"></span><span class="tx"><b>${hid?'裏側のカード':esc(c.name)}</b><span>${hid?'':esc(metaLine(u))}${where?` ・ ${where}`:''}${i.zone==='mz'&&!hid?` ・ 攻${atkOf(u)} 守${defOf(u)}`:''}</span></span></button>`; }).join('') || '<p class="note">対象がありません</p>'}</div>
+    <p class="meta">選択 ${o.sel.length}／${o.min===o.max?o.min:`${o.min}〜${o.max}`}</p>
+    ${actsHTML([...o.actions.map(a=>({...a, dis:(o.sel.length<o.min||o.sel.length>o.max)?'選択数が足りません':null, fn:()=>a.fn(o.sel.slice())})), {label:'やめる', fn:()=>{}}])}`);
+}
+
+/* ---------- 一覧表示 ---------- */
+function viewPile(p, zone){
+  const P=S.p[p];
+  const own = p===S.view;
+  if((zone==='deck'||zone==='extra') && !own){ toast('相手のデッキは見られません'); return; }
+  let items = P[zone].slice();
+  if(zone==='deck') items.sort((a,b)=>cd(a).name.localeCompare(cd(b).name,'ja'));
+  const title = {deck:'デッキ（名前順・順番は非公開）', extra:'エクストラデッキ', gy:'墓地', ban:'除外'}[zone];
+  const tools = zone==='deck' ? [
+    {label:'シャッフル', fn:()=>{ shuffle(P.deck); log(`${P.name}がデッキをシャッフル`); }},
+    {label:'上から1枚墓地へ', fn:()=>{ const u=P.deck[0]; if(u){ move(u,'gy'); log(`デッキの上の「${cd(u).name}」を墓地へ`); } }},
+    {label:'上から3枚めくる', fn:()=>setTimeout(()=>{ const top=P.deck.slice(0,3); log(`${P.name}がデッキの上から${top.length}枚をめくった：${top.map(u=>cd(u).name).join('、')}`); listSheet(`デッキの上から${top.length}枚`, top, '上から順。選んだカードを操作できます。'); })},
+    {label:'上から5枚めくる', fn:()=>setTimeout(()=>{ const top=P.deck.slice(0,5); log(`${P.name}がデッキの上から${top.length}枚をめくった：${top.map(u=>cd(u).name).join('、')}`); listSheet(`デッキの上から${top.length}枚`, top, '上から順。'); })}] : [];
+  listSheet(`${P.name}の${title}（${items.length}）`, items, zone==='deck'?'カードを選ぶとサーチ・特殊召喚・墓地送りなどができます。操作後は必要に応じてシャッフルしてください。':'', tools);
+}
+function listSheet(title, items, note, tools=[]){
+  PK = {title, items, note, min:0, max:0, sel:[], list:true};
+  sheet(`<h3>${esc(title)}</h3>${note?`<p class="note">${esc(note)}</p>`:''}${tools.length?actsHTML(tools):''}
+    <div class="list">${items.map(u=>{ const c=cd(u);
+      return `<button class="li" data-open="${u}"><span class="sw" style="background:${c.category==='魔法'?'var(--c-spell)':c.category==='罠'?'var(--c-trap)':`var(--c-${{通常:'normal',効果:'effect',融合:'fusion',同調:'synchro',重ね:'xyz'}[c.subtype]||'effect'})`}"></span><span class="tx"><b>${esc(c.name)}</b><span>${esc(metaLine(u))}</span></span></button>`; }).join('') || '<p class="note">カードがありません</p>'}</div>`);
+}
+function recipeSheet(k){
+  const d=DATA.decks[k];
+  const part = (arr) => arr.map(([n,code])=>`<button class="li" data-show="${code}"><span class="tx"><b>${esc(C[code].name)} ×${n}</b><span>${esc(C[code].subtype)}${esc(C[code].category)}${C[code].limit!=='無制限'?` ・ ${esc(C[code].limit)}`:''}</span></span></button>`).join('');
+  sheet(`<h3>【${esc(d.name)}】レシピ</h3><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s,x)=>s+x[0],0)} ／ EX${d.extra.reduce((s,x)=>s+x[0],0)}</p>
+    <div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
+}
+function showCode(code){
+  const c=C[code];
+  const meta = c.category==='モンスター' ? `${c.attribute}属性／${c.race}／${[c.subtype,...(c.tags||[])].join('・')}／${c.subtype==='重ね'?'ランク':'レベル'}${c.level}／攻${c.atk} 守${c.def_}` : `${c.subtype}${c.category}`;
+  sheet(`<h3>${esc(c.name)}</h3><p class="meta">${esc(meta)}</p><p class="ctext">${esc(c.text)}</p>`);
+}
+
+/* ---------- その他メニュー ---------- */
+function moreMenu(){
+  sheet(`<h3>その他の操作</h3>${actsHTML([
+    {label:'視点を相手に切り替え', pri:true, fn:()=>{ S.view=1-S.view; if(S.curtain) ui.curtain=true; }},
+    {label:'LPを変更', fn:()=>setTimeout(lpSheet)},
+    {label:'トークンを生成', fn:()=>setTimeout(tokenSheet)},
+    {label:'コイントス', fn:()=>log(`コイントス：${Math.random()<.5?'表':'裏'}`)},
+    {label:'サイコロ', fn:()=>log(`サイコロ：${1+Math.floor(Math.random()*6)}`)},
+    {label:'ログを見る', fn:()=>setTimeout(logSheet)},
+    {label:'自分のデッキ', fn:()=>setTimeout(()=>viewPile(S.view,'deck'))},
+    {label:`ルール補助：${S.assist?'オン':'オフ'}`, fn:()=>{ S.assist=!S.assist; toast(`ルール補助を${S.assist?'オン':'オフ'}にしました`); }},
+    {label:`交代時に隠す：${S.curtain?'オン':'オフ'}`, fn:()=>{ S.curtain=!S.curtain; }},
+    {label:'メニューに戻る', dan:true, fn:()=>setTimeout(menuSheet)}])}`);
+}
+function menuSheet(){
+  sheet(`<h3>デュエルを終了しますか？</h3><p class="note">「デッキ選択に戻る」を押すと、このデュエルの続きは消えます。</p>${actsHTML([
+    {label:'デッキ選択に戻る', dan:true, fn:()=>{ clearSave(); S=null; }},
+    {label:'同じデッキで再戦', pri:true, fn:()=>{ setup.deck=[S.p[0].deckKey,S.p[1].deckKey]; newDuel(); }},
+    {label:'続ける', fn:()=>{}}])}`);
+}
+function lpSheet(){
+  sheet(`<h3>LPを変更</h3><div class="form">
+    <label for="lpP">プレイヤー</label><select id="lpP">${[0,1].map(p=>`<option value="${p}" ${p===S.view?'selected':''}>${esc(pname(p))}（${S.p[p].lp}）</option>`).join('')}</select>
+    <label for="lpV">数値</label><input id="lpV" type="number" inputmode="numeric" value="1000"></div>
+    ${actsHTML([
+      {label:'ダメージ', pri:true, fn:()=>damage(+$('#lpP').value, Math.max(0,parseInt($('#lpV').value)||0))},
+      {label:'回復', fn:()=>{ const p=+$('#lpP').value, v=Math.max(0,parseInt($('#lpV').value)||0); S.p[p].lp+=v; log(`${pname(p)}が${v}回復（LP ${S.p[p].lp}）`); }},
+      {label:'LPを払う（コスト）', fn:()=>{ const p=+$('#lpP').value, v=Math.max(0,parseInt($('#lpV').value)||0); S.p[p].lp=Math.max(0,S.p[p].lp-v); log(`${pname(p)}が${v}LPを払った（LP ${S.p[p].lp}）`); if(S.p[p].lp<=0) finish(1-p,'LP0'); }},
+      {label:'半分を払う', fn:()=>{ const p=+$('#lpP').value, v=Math.floor(S.p[p].lp/2); S.p[p].lp-=v; log(`${pname(p)}がLPの半分（${v}）を払った（LP ${S.p[p].lp}）`); }}])}`);
+}
+const TOKENS = [
+  {name:'綿毛トークン', race:'植物族', attribute:'風', level:1, atk:0, def_:0, pos:'def'},
+  {name:'分身トークン', race:'戦士族', attribute:'闇', level:1, atk:400, def_:400, pos:'atk'},
+  {name:'冥門の残光トークン', race:'天使族', attribute:'光', level:7, atk:0, def_:0, pos:'atk'},
+];
+function tokenSheet(){
+  sheet(`<h3>トークンを生成</h3><div class="form">
+    <label for="tkK">種類</label><select id="tkK">${TOKENS.map((t,k)=>`<option value="${k}">${esc(t.name)}</option>`).join('')}<option value="x">その他</option></select>
+    <label for="tkN">名前</label><input id="tkN" type="text" value="${esc(TOKENS[0].name)}">
+    <label for="tkL">レベル</label><input id="tkL" type="number" value="1">
+    <label for="tkA">攻撃力</label><input id="tkA" type="number" value="0">
+    <label for="tkD">守備力</label><input id="tkD" type="number" value="0">
+    <label for="tkC">数</label><input id="tkC" type="number" value="1" min="1" max="5">
+    <label for="tkP">表示形式</label><select id="tkP"><option value="def">守備表示</option><option value="atk">攻撃表示</option></select></div>
+    ${actsHTML([{label:`${pname(S.view)}の場に生成`, pri:true, fn:()=>{
+      const k=$('#tkK').value, base=k==='x'?{race:'—',attribute:'—'}:TOKENS[+k];
+      const n=Math.min(5,Math.max(1,parseInt($('#tkC').value)||1));
+      for(let j=0;j<n;j++){
+        const u=mk('token',S.view,'limbo');
+        S.inst[u].tok={name:$('#tkN').value||'トークン', category:'モンスター', subtype:'トークン', tags:[], race:base.race, attribute:base.attribute,
+          level:parseInt($('#tkL').value)||1, atk:parseInt($('#tkA').value)||0, def_:parseInt($('#tkD').value)||0, text:'トークン（フィールドを離れると消える）', limit:'無制限'};
+        if(freeSlot(S.view,'mz')<0){ delete S.inst[u]; toast('モンスターゾーンに空きがありません'); break; }
+        const P=S.p[S.view]; Object.assign(S.inst[u],{zone:'mz',ctrl:S.view,face:'up',pos:$('#tkP').value,sumT:S.turn}); P.mz[freeSlot(S.view,'mz')]=u;
+      }
+      log(`${pname(S.view)}が「${$('#tkN').value}」を${n}体特殊召喚`); }}])}`);
+  $('#tkK').addEventListener('change', e=>{ const t=TOKENS[+e.target.value]; if(!t) return; $('#tkN').value=t.name; $('#tkL').value=t.level; $('#tkA').value=t.atk; $('#tkD').value=t.def_; $('#tkP').value=t.pos; });
+  // 初期値を最初のプリセットに合わせる
+  $('#tkP').value=TOKENS[0].pos;
+}
+function logSheet(){
+  sheet(`<h3>ログ</h3><div class="logbox">${S.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`);
+}
+
+/* ---------- 入力 ---------- */
+document.addEventListener('click', e=>{
+  const t=e.target;
+  if(t.classList && t.classList.contains('scrim')){ closeLayer(); return; }
+  const actBtn=t.closest('[data-act]');
+  if(actBtn){
+    const a=ACTS[+actBtn.dataset.act]; if(!a||a.dis) return;
+    const before=$('#layer').innerHTML;
+    a.fn();                                   // 入力欄を読む操作があるので、閉じる前に実行する
+    if(!a.keep && $('#layer').innerHTML===before) closeLayer();
+    if(S) save();
+    render(); return;
+  }
+  const pk=t.closest('[data-pk]');
+  if(pk){ const u=pk.dataset.pk, s=PK.sel; const k=s.indexOf(u); if(k>=0) s.splice(k,1); else { if(PK.max===1) s.length=0; if(s.length<PK.max) s.push(u); } drawPicker(); return; }
+  const op=t.closest('[data-open]'); if(op){ openCard(op.dataset.open); return; }
+  const sh=t.closest('[data-show]'); if(sh){ showCode(sh.dataset.show); return; }
+  const md=t.closest('[data-mod]'); if(md){ modCard(md.dataset.mod, +(md.dataset.v||0)); return; }
+  const cu=t.closest('[data-u]'); if(cu && S){ openCard(cu.dataset.u); return; }
+  const b=t.closest('[data-a]'); if(!b) return;
+  const a=b.dataset.a;
+  if(a==='close') return;
+  if(!S){
+    if(a==='pick'){ setup.deck[+b.dataset.p]=b.dataset.k; }
+    if(a==='first') setup.first=b.dataset.k;
+    if(a==='tgl') setup[b.dataset.k]=!setup[b.dataset.k];
+    if(a==='recipe'){ recipeSheet(b.dataset.k); return; }
+    if(a==='start'){ newDuel(); return; }
+    if(a==='resume'){ S=loadSave(); ui.curtain=S.curtain; render(); return; }
+    render(); return;
+  }
+  if(a==='uncurtain'){ ui.curtain=false; closeLayer(); render(); return; }
+  if(a==='next') nextPhase();
+  else if(a==='draw'){ draw(S.view); act(); }
+  else if(a==='exsum') exSummonMenu();
+  else if(a==='more') moreMenu();
+  else if(a==='log') logSheet();
+  else if(a==='menu') menuSheet();
+  else if(['deck','extra','gy','ban'].includes(a)) viewPile(+b.dataset.p, a);
+});
+
+/* ---------- 起動 ---------- */
+function start(data){
+  if(data && data.S){ S=data.S; setup=data.setup||setup; }
+  render();
+}
+window.claude?.hot?.snapshot?.(()=>({S, setup}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
