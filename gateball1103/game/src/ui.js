@@ -63,14 +63,18 @@ function newDuel(opts, seats, history) {
 }
 
 /* ---------------- 進行ループ ---------------- */
-function loop() {
+async function loop() {
+  const replaying = duel.replay.length > 0;
+  busy = true;
   const st = duel.advance();
   F = duel.field();
+  const evs = duel.takeUiEvents();
+  if (!replaying) await playEvents(evs);
   if (st === 'end') { busy = false; pend = null; clearSaved(); render(); return; }
   if (st === 'ai') {
-    busy = true; render();
+    render();
     const visible = [M.SELECT_IDLECMD, M.SELECT_BATTLECMD, M.SELECT_CHAIN].includes(duel.req.type);
-    const delay = setup.speed === 'fast' ? (visible ? 120 : 0) : (visible ? 550 : 60);
+    const delay = replaying ? 0 : setup.speed === 'fast' ? (visible ? 150 : 0) : (visible ? 700 : 60);
     setTimeout(() => { duel.aiAct(); loop(); }, delay);
     return;
   }
@@ -80,6 +84,37 @@ function loop() {
   pend = req; sel = [];
   persist();
   render();
+}
+
+/* ---------------- 演出：ターン交代の帯、フェイズ、相手の行動の字幕 ---------------- */
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function playEvents(evs) {
+  const fast = setup.speed === 'fast';
+  for (const e of evs) {
+    if (e.k === 'turn') {
+      render();
+      await banner(e.p, e.t, fast ? 700 : 1500);
+    } else if (e.k === 'phase') {
+      if (e.p !== view || setup.mode === 'pvp') { render(); await wait(fast ? 120 : 380); }
+    } else if (e.k === 'log' && e.p != null && setup.mode === 'cpu' && e.p !== view && /召喚|セット|チェーン|攻撃/.test(e.s)) {
+      render();
+      await caption(e.s, fast ? 450 : 1100);
+    }
+  }
+}
+function banner(p, t, ms) {
+  const mine = p === view;
+  const el = $('#banner');
+  el.className = `banner ${mine ? 'mine' : 'theirs'}`;
+  el.innerHTML = `<div class="band"><small>ターン${t}</small>${esc(duel.names[p])}のターン</div>`;
+  el.hidden = false;
+  return wait(ms).then(() => { el.hidden = true; });
+}
+function caption(text, ms) {
+  const el = $('#caption');
+  el.textContent = text; el.hidden = false;
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  return wait(ms).then(() => { el.hidden = true; });
 }
 function answer(res) {
   pend = null; sel = [];
@@ -96,19 +131,25 @@ function render() {
   const lastLog = duel.log[duel.log.length - 1]?.s || '';
   app.innerHTML = `
     ${duel.win ? winHTML() : ''}
-    <div class="side">${pilesHTML(op)}${zonesHTML(op, 'sz')}${zonesHTML(op, 'mz')}</div>
+    <div class="side ${duel.turnPlayer === op ? 'turnside theirs' : ''}">${pilesHTML(op)}${zonesHTML(op, 'sz')}${zonesHTML(op, 'mz')}</div>
     <div class="mid">
       <div class="lp ${duel.turnPlayer === op ? 'cur' : ''}"><small>${esc(duel.names[op])}${duel.turnPlayer === op ? '（ターン中）' : ''}</small>${duel.lp[op]}</div>
-      <div class="phase"><span class="t">ターン${duel.turn}</span><span class="p">${PHASE_NAME[duel.phase] || ''}</span></div>
+      <div class="phase"><span class="t">ターン${duel.turn}</span><span class="who ${duel.turnPlayer === me ? 'mine' : 'theirs'}">${esc(duel.names[duel.turnPlayer])}のターン</span><span class="t ns">通常召喚：${duel.nsUsed ? '済' : '未'}</span></div>
       <div class="lp r ${duel.turnPlayer === me ? 'cur' : ''}"><small>${esc(duel.names[me])}${duel.turnPlayer === me ? '（ターン中）' : ''}</small>${duel.lp[me]}</div>
     </div>
+    ${phaseStrip()}
     ${duel.chain.length ? `<div class="chain">${duel.chain.map((c, i) => `<span>C${i + 1} ${esc(data.name(c.code))}</span>`).join('')}</div>` : ''}
     <button class="logline" data-a="log">${esc(lastLog)}</button>
-    <div class="side">${zonesHTML(me, 'mz')}${zonesHTML(me, 'sz')}${pilesHTML(me)}</div>
+    <div class="side ${duel.turnPlayer === me ? 'turnside mine' : ''}">${zonesHTML(me, 'mz')}${zonesHTML(me, 'sz')}${pilesHTML(me)}</div>
     <div class="hand">${F[me].hand.map((q, i) => tileHTML(q, me, L.HAND, i)).join('') || '<span class="note">手札なし</span>'}</div>
     <div class="tools">${toolsHTML()}</div>`;
   if (curtain) showCurtain();
   else if (pend && !isCommand(pend) && !$('#layer').innerHTML) openPrompt();
+}
+const PHASES = [[1, 'ドロー'], [2, 'スタンバイ'], [4, 'メイン1'], [248, 'バトル'], [256, 'メイン2'], [512, 'エンド']];
+function phaseStrip() {
+  const cls = duel.turnPlayer === view ? 'mine' : 'theirs';
+  return `<div class="phases ${cls}">${PHASES.map(([m, l]) => `<span class="${duel.phase & m ? 'on' : ''}">${l}</span>`).join('')}</div>`;
 }
 const isCommand = r => r.type === M.SELECT_IDLECMD || r.type === M.SELECT_BATTLECMD;
 function toolsHTML() {
@@ -235,8 +276,26 @@ function openFieldCard(p, loc, i) {
   let extra = '';
   if (loc === L.MZONE && !hiddenFor(q, p, loc)) extra += `<p class="meta">現在：攻${q.attack} 守${q.defense}${q.level ? ` ★${q.level}` : ''}${q.position & POS.DEFENSE ? '（守備表示）' : '（攻撃表示）'}</p>`;
   if (q.overlayCards?.length) extra += `<p class="meta">重ね素材：${q.overlayCards.map(x => esc(data.name(x))).join('、')}</p>`;
+  if (!acts.length && !hiddenFor(q, p, loc)) extra += whyNot(q, p, loc);
   cardSheet(q.code, extra, acts, hiddenFor(q, p, loc));
 }
+// 操作できない理由を説明する
+function whyNot(q, p, loc) {
+  let why = '';
+  const c = data.card(q.code);
+  if (busy) why = '相手が処理中です。';
+  else if (!pend) why = '';
+  else if (!isCommand(pend)) why = '選択の途中です。下の「選択に戻る」から答えてください。';
+  else if (p !== view) why = '';
+  else if (loc === L.HAND && c?.category === 'モンスター' && pend.type === M.SELECT_IDLECMD) {
+    if (duel.nsUsed) why = 'このターンはすでに通常召喚（またはモンスターのセット）をしています。通常召喚は1ターンに1回です。';
+    else if (c.level >= 5) why = `レベル${c.level}なのでリリースが${c.level >= 7 ? 2 : 1}体必要ですが、足りません。`;
+    else if (EXTRA_ONLY.has(c.subtype)) why = 'エクストラデッキのモンスターは手札から召喚できません。';
+    else why = '今は召喚できません（カードの効果による制限など）。';
+  } else if (pend.type === M.SELECT_BATTLECMD && loc === L.HAND) why = 'バトルフェイズ中は召喚できません。メイン2へ進んでください。';
+  return why ? `<p class="why">${esc(why)}</p>` : '';
+}
+const EXTRA_ONLY = new Set(['融合', '同調', '重ね']);
 function openPile(p, kind) {
   const loc = { gy: L.GRAVE, ban: L.REMOVED, extra: L.EXTRA }[kind];
   if (kind === 'extra' && p !== view) { toast('相手のエクストラデッキは見られません'); return; }
@@ -359,7 +418,7 @@ function moreSheet() {
   sheet(`<h3>その他</h3>${btns([
     { label: 'ログを見る', pri: true, fn: () => setTimeout(logSheet) },
     { label: `チェーン確認：${setup.chainMode === 'events' ? '要所のみ' : '毎回'}`, fn: () => { setup.chainMode = setup.chainMode === 'events' ? 'always' : 'events'; duel.chainMode = setup.chainMode; toast(`チェーン確認を「${setup.chainMode === 'events' ? '要所のみ' : '毎回'}」にしました`); } },
-    { label: `CPUの速さ：${setup.speed === 'fast' ? '速い' : 'ふつう'}`, fn: () => { setup.speed = setup.speed === 'fast' ? 'normal' : 'fast'; } },
+    { label: `CPUの速さ：${setup.speed === 'fast' ? '速い' : 'ゆっくり'}`, fn: () => { setup.speed = setup.speed === 'fast' ? 'normal' : 'fast'; } },
     { label: '降参する', fn: () => setTimeout(() => sheet(`<h3>降参しますか？</h3><p class="note">このデュエルは負けになり、デッキ選択に戻ります。</p>${btns([{ label: '降参する', fn: quit }, { label: '続ける', pri: true, fn: () => {} }])}`)) },
   ])}`);
 }

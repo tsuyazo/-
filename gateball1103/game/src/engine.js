@@ -68,7 +68,11 @@ export class GameData {
     d = BigInt(d);
     if (d < 10000n) return (SYS[Number(d)] || '効果').replace('%ls', '');
     const code = Number(d >> 20n), idx = Number(d & 0xfffffn);   // aux.Stringid(id,n) = id<<20 | n
-    return this.raw.effectStrings[`${code}:${idx}`] || `「${this.name(code)}」の効果${idx + 1}`;
+    const known = this.raw.effectStrings[`${code}:${idx}`];
+    if (known) return known;
+    const c = this.byId[code];
+    if (c && c.category !== 'モンスター') return '発動';
+    return `「${this.name(code)}」の効果${idx + 1}`;
   }
   hint(h) {
     if (h == null) return '';
@@ -86,6 +90,8 @@ export class Duel {
     this.lib = lib; this.data = data; this.opts = opts;
     this.ai = opts.ai; this.names = opts.names;
     this.lp = [8000, 8000]; this.turn = 0; this.turnPlayer = 0; this.phase = 1;
+    this.nsUsed = false;                     // このターンの通常召喚（セット含む）を使ったか
+    this.uiEvents = [];                      // 画面の演出用（ターン交代・フェイズ・行動）
     this.log = []; this.chain = []; this.win = null; this.req = null; this.lastReq = null;
     this.hintMsg = [null, null]; this.events = new Set(); this.retry = 0;
     this.history = []; this.errors = []; this.reveal = null;
@@ -179,7 +185,9 @@ export class Duel {
       default: return null;
     }
   }
-  say(s) { this.log.push({ t: this.turn, s }); }
+  // p: その出来事の主体のプレイヤー（分かる場合）。画面側の演出用に uiEvents にも積む
+  say(s, p = null) { this.log.push({ t: this.turn, s, p }); this.uiEvents.push({ k: 'log', s, p }); }
+  takeUiEvents() { const e = this.uiEvents; this.uiEvents = []; return e; }
   cardLabel(loc, code) {
     const hidden = !code;
     return hidden ? '裏側のカード' : `「${this.data.name(code)}」`;
@@ -189,31 +197,31 @@ export class Duel {
     const D = this.data;
     if (EVENT_TYPES.has(m.type)) this.events.add(m.type);
     switch (m.type) {
-      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.say(`――― ターン${this.turn}：${n(m.player)} ―――`); break;
-      case M.NEW_PHASE: this.phase = m.phase; if (m.phase === 512 || m.phase === 8) this.events.add('phase'); break;
+      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.nsUsed = false; this.uiEvents.push({ k: 'turn', p: m.player, t: this.turn }); this.events.clear(); this.say(`――― ターン${this.turn}：${n(m.player)} ―――`, m.player); break;
+      case M.NEW_PHASE: this.phase = m.phase; this.uiEvents.push({ k: 'phase', ph: m.phase, p: this.turnPlayer }); if (m.phase === 512 || m.phase === 8) this.events.add('phase'); break;
       case M.HINT:
         if (m.hint_type === HT.SELECTMSG) this.hintMsg[m.player] = m.hint;
         else if (m.hint_type === HT.OPSELECTED || m.hint_type === HT.EFFECT) { /* 相手の選択の表示は省略 */ }
         break;
-      case M.DRAW: this.say(`${n(m.player)}が${m.drawn.length}枚ドロー`); break;
-      case M.SUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`); break;
-      case M.SPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`); break;
-      case M.FLIPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`); break;
-      case M.SET: this.say(`${n(m.controller)}がカードをセット`); break;
+      case M.DRAW: this.say(`${n(m.player)}が${m.drawn.length}枚ドロー`, m.player); break;
+      case M.SUMMONING: if (m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`, m.controller); break;
+      case M.SPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`, m.controller); break;
+      case M.FLIPSUMMONING: this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`, m.controller); break;
+      case M.SET: if (m.location === L.MZONE && m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}がカードをセット`, m.controller); break;
       case M.CHAINING:
         this.chain.push({ code: m.code, player: m.controller, desc: m.description });
-        this.say(`チェーン${m.chain_size}：${n(m.controller)}の「${D.name(m.code)}」（${D.desc(m.description)}）`); break;
+        this.say(`チェーン${m.chain_size}：${n(m.controller)}の「${D.name(m.code)}」（${D.desc(m.description)}）`, m.controller); break;
       case M.CHAIN_NEGATED: this.say(`チェーン${m.chain_size}の発動が無効になった`); break;
       case M.CHAIN_DISABLED: this.say(`チェーン${m.chain_size}の効果が無効になった`); break;
       case M.CHAIN_SOLVED: this.chain.pop(); break;
       case M.CHAIN_END: this.chain = []; break;
-      case M.DAMAGE: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}に${m.amount}ダメージ（LP ${this.lp[m.player]}）`); break;
-      case M.RECOVER: this.lp[m.player] += m.amount; this.say(`${n(m.player)}が${m.amount}回復（LP ${this.lp[m.player]}）`); break;
-      case M.PAY_LPCOST: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}が${m.amount}LPを払った（LP ${this.lp[m.player]}）`); break;
+      case M.DAMAGE: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}に${m.amount}ダメージ（LP ${this.lp[m.player]}）`, m.player); break;
+      case M.RECOVER: this.lp[m.player] += m.amount; this.say(`${n(m.player)}が${m.amount}回復（LP ${this.lp[m.player]}）`, m.player); break;
+      case M.PAY_LPCOST: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}が${m.amount}LPを払った（LP ${this.lp[m.player]}）`, m.player); break;
       case M.LPUPDATE: this.lp[m.player] = m.lp; break;
       case M.ATTACK: {
         const a = this.query(m.card), t = m.target ? this.query(m.target) : null;
-        this.say(`${n(m.card.controller)}の「${D.name(a?.code)}」が${t ? `「${D.name(t.code)}」に` : '直接'}攻撃`); break;
+        this.say(`${n(m.card.controller)}の「${D.name(a?.code)}」が${t ? `「${D.name(t.code)}」に` : '直接'}攻撃`, m.card.controller); break;
       }
       case M.MOVE: {
         const f = m.from, t = m.to;

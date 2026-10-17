@@ -124,8 +124,38 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .tools button:disabled{opacity:.4}
 .ask{font-size:15px;font-weight:700;margin:0}
 .phase .p{cursor:default}
+.phase .ns{font-size:10px}
+.why{font-size:12px;color:var(--brass);margin:0;line-height:1.6}
+
+/* turn & phase visibility */
+[hidden]{display:none!important}
+.phases{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;font-size:10px;text-align:center}
+.phases span{border:1px solid var(--line);border-radius:3px;padding:3px 0;color:var(--muted);white-space:nowrap;overflow:hidden}
+.phases.mine span.on{background:var(--brass);color:var(--brassInk);border-color:var(--brass);font-weight:700}
+.phases.theirs span.on{background:var(--hurt);color:#fff;border-color:var(--hurt);font-weight:700}
+.who{font-family:var(--display);font-size:13px;border-radius:4px;padding:3px 8px}
+.who.mine{background:var(--brass);color:var(--brassInk)}
+.who.theirs{background:var(--hurt);color:#fff}
+.side.turnside{border-radius:6px;box-shadow:0 0 0 2px var(--turnc),0 0 14px var(--turnc);padding:3px}
+.side.turnside.mine{--turnc:rgba(214,169,79,.55)}
+.side.turnside.theirs{--turnc:rgba(224,96,79,.55)}
+.side{transition:box-shadow .3s}
+.banner{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(10,6,4,.45)}
+.banner .band{width:100%;text-align:center;font-family:var(--display);font-size:clamp(28px,9vw,44px);padding:18px max(16px,env(safe-area-inset-right,0px)) 18px max(16px,env(safe-area-inset-left,0px));color:#fff}
+.banner .band small{display:block;font-family:var(--body);font-size:13px;letter-spacing:.2em;opacity:.85}
+.banner.mine .band{background:var(--brass);color:var(--brassInk)}
+.banner.theirs .band{background:var(--hurt)}
+.caption{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);z-index:25;max-width:min(92vw,480px);background:#160f0b;border:2px solid var(--hurt);color:var(--ink);padding:10px 16px;border-radius:8px;font-size:15px;font-weight:700;text-align:center;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:no-preference){
+  .banner:not([hidden]) .band{animation:sweep .35s ease-out}
+  @keyframes sweep{from{transform:translateX(-30%);opacity:0}}
+  .caption.pop{animation:pop .2s ease-out}
+  @keyframes pop{from{transform:translate(-50%,-40%);opacity:0}}
+}
 </style>
 <div id="app"><div class="setup"><h1 class="brand">ゲートボール1103<small>デュエルエンジンを読み込み中…</small></h1></div></div>
 <div id="layer"></div>
+<div id="banner" class="banner" hidden></div>
+<div id="caption" class="caption" hidden></div>
 <script>window.GB_DATA = __DATA__;</script>
 <script>__APP__</script>
