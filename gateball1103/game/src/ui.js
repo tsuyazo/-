@@ -4,7 +4,7 @@ import { Duel, GameData, PHASE_NAME, L, POS, M, R, locName, sumSolve } from './e
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-const SAVE_KEY = 'gb1103-engine-duel';
+const SAVE_KEY = 'gb1103-engine-duel-v2';   // v1 はデッキ未シャッフル時代の記録なので再生しない
 const TIER = { rabbit: 'S', agent: 'S', hero: 'A', tg_gadget: 'A', debris_plant: 'A', quick_plant: 'A', six_samurai: 'A', dark_world: 'B', karakuri: 'B', blackwing: 'B〜A' };
 const TYPE_COLOR = { 通常: 'normal', 効果: 'effect', 融合: 'fusion', 同調: 'synchro', 重ね: 'xyz' };
 

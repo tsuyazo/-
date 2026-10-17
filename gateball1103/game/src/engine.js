@@ -108,11 +108,16 @@ export class Duel {
     });
     lib.loadScript(this.h, 'constant.lua', data.raw.scripts['constant.lua']);
     lib.loadScript(this.h, 'utility.lua', data.raw.scripts['utility.lua']);
+    // エンジンは開始時にデッキを混ぜないので、シードから決まる乱数でここでシャッフルする（再開時も同じ順になる）
+    const rand = seededRandom(seed);
     this.opts.decks.forEach((key, team) => {
       const d = data.raw.decks[key];
-      const add = (list, location) => list.forEach(([n, id]) => { for (let k = 0; k < n; k++)
-        lib.duelNewCard(this.h, { team, duelist: 0, code: id, controller: team, location, sequence: 0, position: POS.FACEDOWN_DEFENSE }); });
-      add(d.main, L.DECK); add(d.extra, L.EXTRA);
+      const expand = list => list.flatMap(([n, id]) => Array(n).fill(id));
+      const main = expand(d.main);
+      for (let i = main.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [main[i], main[j]] = [main[j], main[i]]; }
+      const add = (ids, location) => ids.forEach(id =>
+        lib.duelNewCard(this.h, { team, duelist: 0, code: id, controller: team, location, sequence: 0, position: POS.FACEDOWN_DEFENSE }));
+      add(main, L.DECK); add(expand(d.extra), L.EXTRA);
     });
     lib.startDuel(this.h);
     this.say(`デュエル開始：${this.names[0]}（先攻）vs ${this.names[1]}`);
@@ -243,6 +248,17 @@ export class Duel {
     }
     return out;
   }
+}
+
+// シード4つから作る再現可能な乱数（mulberry32）
+function seededRandom(seed) {
+  let a = Number(seed.reduce((h, s) => (h * 31n + BigInt(s)) & 0xffffffffn, 7n));
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 function placeResponse(m) {
