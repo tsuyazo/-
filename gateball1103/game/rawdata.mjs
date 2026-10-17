@@ -6,6 +6,21 @@ import { fileURLToPath } from 'url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.dirname(HERE);
 
+// 効果の選択肢の文言も、カード名・テーマ名を実名にそろえる（tools/build.py が data/name_map.json を書く）
+function renameAll(obj) {
+  const p = path.join(ROOT, 'data/name_map.json');
+  if (!fs.existsSync(p)) return obj;
+  const m = JSON.parse(fs.readFileSync(p));
+  const keys = Object.keys(m.names).sort((a, b) => b.length - a.length);
+  const conv = s => {
+    for (const k of keys) s = s.split(`「${k}」`).join(`「${m.names[k]}」`);
+    for (const [a, b] of Object.entries(m.archetypes)) s = s.split(a).join(b);
+    for (const [a, b] of m.terms) s = s.split(a).join(b);
+    return s;
+  };
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, conv(v)]));
+}
+
 export function loadRaw() {
   const cards = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cards.json')));
   const decks = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/decks.json')));
@@ -21,7 +36,7 @@ export function loadRaw() {
       main: d.main.map(e => [e.n, idOf[e.code]]), extra: d.extra.map(e => [e.n, idOf[e.code]]) }])),
     cardData: JSON.parse(fs.readFileSync(path.join(HERE, 'card_data.json'))),
     recipes: JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/recipes_meta.json'))),
-    effectStrings: JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json'))),
+    effectStrings: renameAll(JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json')))),
     scripts,
   };
 }

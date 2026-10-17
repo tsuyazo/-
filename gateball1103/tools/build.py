@@ -56,8 +56,21 @@ def tags(t):
     return out
 
 
-def main(cdb):
+def main(cdb, ja=None):
     cards = runpy.run_path(os.path.join(HERE, "cards_src.py"))["CARDS"]
+    renamer = None
+    if ja:   # 実際のカード名を使う
+        from real_names import Renamer
+        renamer = Renamer(ja)
+        dbx = sqlite3.connect(cdb)
+        for ref, v in cards.items():
+            r = dbx.execute("select d.id from texts t join datas d on d.id=t.id where t.name=? and d.alias=0", (ref,)).fetchone()
+            if r:
+                renamer.add(v["name"], r[0])
+        renamer.finish()
+        from real_names import ARCHETYPES, TERMS
+        json.dump({"names": renamer.map, "archetypes": ARCHETYPES, "terms": TERMS},
+                  open(os.path.join(ROOT, "data", "name_map.json"), "w"), ensure_ascii=False, indent=0)
     decks = runpy.run_path(os.path.join(HERE, "decks_src.py"))["DECKS"]
     lflist = {e["id"]: e["limit"] for e in json.load(open(os.path.join(HERE, "lflist_2011_03_ocg.json")))}
     db = sqlite3.connect(cdb)
@@ -87,12 +100,13 @@ def main(cdb):
     for i, ref in enumerate(used, 1):
         cid, t, lv, atk, df, attr, race = rows[ref]
         cat, sub = kind(t)
-        c = {"code": f"GB-{i:03d}", "id": cid, "name": cards[ref]["name"], "category": cat, "subtype": sub}
+        name = renamer.map.get(cards[ref]["name"], cards[ref]["name"]) if renamer else cards[ref]["name"]
+        c = {"code": f"GB-{i:03d}", "id": cid, "name": name, "category": cat, "subtype": sub}
         if cat == "モンスター":
             c.update(level=lv & 0xFF, rank_or_level="ランク" if sub == "重ね" else "レベル",
                      attribute=ATTR[attr], race=RACE[race], tags=tags(t),
                      atk="?" if atk < 0 else atk, def_="?" if df < 0 else df)
-        c["text"] = cards[ref]["text"]
+        c["text"] = renamer.text(cards[ref]["text"]) if renamer else cards[ref]["text"]
         c["limit"] = LIMIT.get(lflist.get(cid), "無制限")
         c["ref"] = ref
         out.append(c)
@@ -101,7 +115,7 @@ def main(cdb):
     deck_out = {}
     for key, d in decks.items():
         deck_out[key] = {
-            "name": GAME_DECK_NAME[key], "ref_archetype": DECK_INFO[key],
+            "name": DECK_INFO[key] if renamer else GAME_DECK_NAME[key], "ref_archetype": DECK_INFO[key],
             "main": [{"n": n, "code": by_ref[r]["code"], "name": by_ref[r]["name"]} for n, r in d["main"]],
             "extra": [{"n": n, "code": by_ref[r]["code"], "name": by_ref[r]["name"]} for n, r in d["extra"]],
         }
@@ -220,4 +234,5 @@ def write_decklists_md(decks, by_ref):
     open(os.path.join(ROOT, "decklists.md"), "w").write("\n".join(lines))
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "cards.cdb"))
+    # 引数: 英語カードDB（数値用） [日本語カードDB（実名用）]
+    main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "cards.cdb"), sys.argv[2] if len(sys.argv) > 2 else None)

@@ -6,6 +6,8 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 const SAVE_KEY = 'gb1103-engine-duel-v2';   // v1 はデッキ未シャッフル時代の記録なので再生しない
 const TIER = { rabbit: 'S', agent: 'S', hero: 'A', tg_gadget: 'A', debris_plant: 'A', quick_plant: 'A', six_samurai: 'A', dark_world: 'B', karakuri: 'B', blackwing: 'B〜A' };
+// データ上の種類名 → 画面での表記（遊戯王の用語）
+const SUBTYPE_LABEL = { 同調: 'シンクロ', 重ね: 'エクシーズ', 調律: 'チューナー' };
 const TYPE_COLOR = { 通常: 'normal', 効果: 'effect', 融合: 'fusion', 同調: 'synchro', 重ね: 'xyz' };
 
 let lib, data, duel = null;
@@ -240,7 +242,7 @@ function actionsFor(p, loc, seq) {
   }
   return out;
 }
-function exKind(code) { const s = data.card(code)?.subtype; return s === '同調' ? '同調召喚' : s === '重ね' ? '重ね召喚' : s === '融合' ? '融合召喚' : '特殊召喚'; }
+function exKind(code) { const s = data.card(code)?.subtype; return s === '同調' ? 'シンクロ召喚' : s === '重ね' ? 'エクシーズ召喚' : s === '融合' ? '融合召喚' : '特殊召喚'; }
 function allActions() {
   const r = pend; const out = [];
   if (r.type === M.SELECT_IDLECMD) for (const [k, action, label] of IDLE_KINDS) r[k].forEach((c, index) => out.push({ c, label: k === 'activates' ? `発動：${data.desc(c.description)}` : k === 'special_summons' && c.location === L.EXTRA ? exKind(c.code) : label, res: { type: R.SELECT_IDLECMD, action, index } }));
@@ -260,7 +262,7 @@ function btns(list) {
 function metaLine(c) {
   if (!c) return 'トークン';
   if (c.category !== 'モンスター') return `${c.subtype}${c.category}`;
-  const t = [c.subtype, ...(c.tags || [])].join('・');
+  const t = [SUBTYPE_LABEL[c.subtype] || c.subtype, ...(c.tags || []).map(x => SUBTYPE_LABEL[x] || x)].join('・');
   return `${c.attribute}属性／${c.race}／${t}／${c.subtype === '重ね' ? 'ランク' : 'レベル'}${c.level}／攻${c.atk} 守${c.def_}`;
 }
 function cardSheet(code, extraHTML, list, hidden) {
@@ -275,7 +277,7 @@ function openFieldCard(p, loc, i) {
   const acts = actionsFor(p, loc, i).map(a => ({ label: a.label, pri: a.pri, fn: () => answer(a.res) }));
   let extra = '';
   if (loc === L.MZONE && !hiddenFor(q, p, loc)) extra += `<p class="meta">現在：攻${q.attack} 守${q.defense}${q.level ? ` ★${q.level}` : ''}${q.position & POS.DEFENSE ? '（守備表示）' : '（攻撃表示）'}</p>`;
-  if (q.overlayCards?.length) extra += `<p class="meta">重ね素材：${q.overlayCards.map(x => esc(data.name(x))).join('、')}</p>`;
+  if (q.overlayCards?.length) extra += `<p class="meta">エクシーズ素材：${q.overlayCards.map(x => esc(data.name(x))).join('、')}</p>`;
   if (!acts.length && !hiddenFor(q, p, loc)) extra += whyNot(q, p, loc);
   cardSheet(q.code, extra, acts, hiddenFor(q, p, loc));
 }
