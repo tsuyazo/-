@@ -211,6 +211,8 @@ export class Duel {
         if (!m.selects.length && !m.forced) return { type: R.SELECT_CHAIN, index: null };
         if (!this.ai[m.player] && !m.forced) {
           const pass = { type: R.SELECT_CHAIN, index: null };
+          // 誘発効果（ドッペル・ウォリアーなど、自分の行動をきっかけに発動できる効果）は、どの設定でも必ず聞く
+          if (m.spe_count > 0) return null;
           if (this.stopRequest) { this.stopRequest = false; return null; }
           const mode = CHAIN_MODE_ALIAS[this.chainMode] || this.chainMode;
           // オートでも、相手ターンのエンドフェイズには1回だけ止まる（エンドサイク・強制脱出などの定番の使い所）

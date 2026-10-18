@@ -308,6 +308,8 @@ function chain(ctx, m) {
       if (NEGATE_SPSUMMON.has(code) || code === 74294676) return oppSummoning && summonValue >= 1800 ? 80 : (oppTop && top && impact(duel, top.code, ctx.rules) >= 2 ? 70 : 0);
       return 60;
     }
+    // 手札から出られる誘発効果（ドッペル・ウォリアーなど、自分の行動をきっかけにしたもの）は使う
+    if (c.location === L.HAND && (t & T_MONSTER) && m.spe_count > 0 && !HAND_TRAP.has(code)) return 60;
     if (HAND_TRAP.has(code)) {
       if (code === VEILER) return oppTop && !myTurn && top && (info(duel, top.code).type & T_MONSTER) && KEY_THREATS.has(top.code) ? 85 : (oppTop && !myTurn && top && (info(duel, top.code).type & T_MONSTER) ? 40 : 0);
       return 60;   // ゴーズなど（条件はエンジンが判定）
