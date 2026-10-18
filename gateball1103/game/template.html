@@ -108,6 +108,14 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .list{display:flex;flex-direction:column;gap:4px}
 .li{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--slot);border-radius:4px;padding:6px;text-align:left;width:100%}
 .li.on{border-color:var(--brass);background:#4a3720}
+.lirow{display:flex;gap:4px;align-items:stretch}
+.lirow .li{flex:1;min-width:0}
+.infobtn{flex:0 0 auto;border:1px solid var(--line);background:var(--felt);border-radius:4px;padding:0 10px;font-size:11px;color:var(--muted)}
+.infobtn.on{border-color:var(--brass);color:var(--brass)}
+.liinfo{display:flex;gap:8px;align-items:flex-start;background:var(--felt);border:1px solid var(--line);border-radius:4px;padding:8px;margin:-2px 0 2px}
+.liinfo img{width:72px;flex:0 0 72px;border-radius:3px}
+.liinfo .meta{margin:0 0 4px}
+.liinfo .ctext{font-size:12.5px;padding:6px 8px}
 .li .sw{width:10px;align-self:stretch;border-radius:2px;flex:0 0 10px}
 .li .tx{min-width:0;display:flex;flex-direction:column;gap:2px}
 .li .tx b{font-size:13px}
@@ -200,7 +208,7 @@ html{overflow-x:clip}
 }
 .logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
 .logbox div{border-bottom:1px solid var(--line);padding-block:2px}
-@media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
+@media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} .scrim.still .sheet{animation:none} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
 
 /* engine-driven additions */
 .tile.can{box-shadow:0 0 0 2px var(--brass),0 0 10px rgba(214,169,79,.65)}

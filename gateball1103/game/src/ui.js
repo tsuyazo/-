@@ -301,7 +301,13 @@ function allActions() {
 
 /* ---------------- シート ---------------- */
 let ACTS = [];
-function sheet(html) { $('#layer').innerHTML = `<div class="scrim" data-a="close"><div class="sheet" role="dialog">${html}</div></div>`; }
+let SHEET_STILL = false;   // 同じシートの描き直し（出てくる動きとスクロールの巻き戻しをしない）
+function sheet(html) {
+  const y = SHEET_STILL ? $('#layer .sheet')?.scrollTop : 0;
+  $('#layer').innerHTML = `<div class="scrim ${SHEET_STILL ? 'still' : ''}" data-a="close"><div class="sheet" role="dialog">${html}</div></div>`;
+  if (SHEET_STILL && y) $('#layer .sheet').scrollTop = y;
+  SHEET_STILL = false;
+}
 function closeSheet() { $('#layer').innerHTML = ''; }
 function btns(list) {
   ACTS = list;
@@ -396,12 +402,13 @@ function hintNote(res) {
 }
 const hintBtn = () => `<button class="chipbtn hintbtn" data-a="hint">ヒント：CPUならどうする？</button>`;
 function openActs(showHint = false) {
+  REDRAW = () => openActs(showHint);
   const list = allActions();
   const rec = showHint ? aiHint() : null;
   const note = showHint ? hintNote(rec) : '';
   sheet(`<h3>${pend.type === M.SELECT_IDLECMD ? '行動一覧' : '攻撃・発動'}</h3><p class="note">盤面のカードをタップしても選べます（光っているカード）。</p>
     ${showHint ? `<p class="hintline">${note ? `おすすめ：${esc(note)}` : list.some(a => sameRes(a.res, rec)) ? 'おすすめの行動に印を付けました' : 'おすすめは特にありません'}</p>` : hintBtn()}
-    <div class="list">${list.map((a, k) => `<button class="li ${sameRes(a.res, rec) ? 'rec' : ''}" data-actpick="${k}">${swatch(a.c.code)}<span class="tx"><b>${sameRes(a.res, rec) ? '<i class="recmark">おすすめ</i>' : ''}${esc(a.label)}</b><span>「${esc(data.name(a.c.code))}」・${esc(locName(a.c.location))}</span></span></button>`).join('') || '<p class="note">できる行動はありません</p>'}</div>`);
+    <div class="list">${list.map((a, k) => infoRow(`<button class="li ${sameRes(a.res, rec) ? 'rec' : ''}" data-actpick="${k}">${swatch(a.c.code)}<span class="tx"><b>${sameRes(a.res, rec) ? '<i class="recmark">おすすめ</i>' : ''}${esc(a.label)}</b><span>「${esc(data.name(a.c.code))}」・${esc(locName(a.c.location))}</span></span></button>`, a.c.code, false, `a${k}`)).join('') || '<p class="note">できる行動はありません</p>'}</div>`);
   ACTS = list.map(a => ({ fn: () => answer(a.res) }));
 }
 
@@ -413,13 +420,14 @@ function openPrompt(showHint = false) {
   switch (r.type) {
     case M.SELECT_IDLECMD: case M.SELECT_BATTLECMD: openActs(showHint); return;
     case M.SELECT_CHAIN: {
+      REDRAW = () => openPrompt(showHint);
       const last = duel.chain[duel.chain.length - 1];
       const ctx = last ? `相手の行動：チェーン${duel.chain.length}「${data.name(last.code)}」` : (duel.log[duel.log.length - 1]?.s || '');
       const rec = showHint ? aiHint() : null;
       const isRec = k => rec && rec.type === R.SELECT_CHAIN && rec.index === k;
       sheet(`<h3>${r.forced ? '発動する効果を選んでください' : 'チェーンして発動しますか？'}</h3><p class="meta">${esc(ctx)}</p>
         ${r.forced ? '' : showHint ? `<p class="hintline">${rec && rec.index == null ? 'おすすめ：発動しない' : 'おすすめの発動に印を付けました'}</p>` : hintBtn()}
-        <div class="list">${r.selects.map((c, k) => `<button class="li ${isRec(k) ? 'rec' : ''}" data-actpick="${k}">${swatch(c.code)}<span class="tx"><b>${isRec(k) ? '<i class="recmark">おすすめ</i>' : ''}「${esc(data.name(c.code))}」</b><span>${esc(data.desc(c.description))}・${esc(locName(c.location))}</span></span></button>`).join('')}</div>
+        <div class="list">${r.selects.map((c, k) => infoRow(`<button class="li ${isRec(k) ? 'rec' : ''}" data-actpick="${k}">${swatch(c.code)}<span class="tx"><b>${isRec(k) ? '<i class="recmark">おすすめ</i>' : ''}「${esc(data.name(c.code))}」</b><span>${esc(data.desc(c.description))}・${esc(locName(c.location))}</span></span></button>`, c.code, false, `c${k}`)).join('')}</div>
         ${r.forced ? '' : btns([{ label: '発動しない', fn: () => answer({ type: R.SELECT_CHAIN, index: null }) },
           { label: `チェーン確認：${chainLabel()}`, keep: true, fn: () => { nextChainMode(); openPrompt(); } }])}`);
       const pick = r.selects.map((c, k) => ({ fn: () => answer({ type: R.SELECT_CHAIN, index: k }) }));
@@ -461,7 +469,23 @@ function openPrompt(showHint = false) {
   }
 }
 let ACTS_PICK = [];
+// 選択肢の行に「効果」ボタンを付け、押すとその行の下にカードの画像と効果文を開く（選択中の状態はそのまま）
+let INFO_OPEN = new Set(), INFO_REQ = null, REDRAW = null;
+function infoRow(rowHTML, code, hidden, key) {
+  if (INFO_REQ !== pend) { INFO_OPEN = new Set(); INFO_REQ = pend; }
+  if (hidden || !code || !data.card(code)) return rowHTML;
+  const open = INFO_OPEN.has(key);
+  const c = data.card(code), img = imageOf(code);
+  return `<div class="lirow">${rowHTML}<button class="infobtn ${open ? 'on' : ''}" data-info="${key}" aria-expanded="${open}">効果</button></div>
+    ${open ? `<div class="liinfo">${img ? `<img src="${img}" alt="">` : ''}<div><p class="meta">${esc(metaLine(c))}</p><p class="ctext">${esc(c.text)}</p></div></div>` : ''}`;
+}
+function toggleInfo(key) {
+  if (INFO_OPEN.has(key)) INFO_OPEN.delete(key); else INFO_OPEN.add(key);
+  SHEET_STILL = true;
+  REDRAW?.();
+}
 function drawPicker() {
+  REDRAW = drawPicker;
   const r = pend;
   const items = r.type === M.SELECT_SUM ? [...r.selects_must.map(c => ({ ...c, must: true })), ...r.selects] : r.selects;
   const hint = data.hint(duel.hintMsg[r.player]) || (r.type === M.SELECT_TRIBUTE ? 'リリースするモンスターを選択' : 'カードを選択');
@@ -472,7 +496,7 @@ function drawPicker() {
   sheet(`<h3>${esc(hint)}</h3><p class="meta">${esc(rule)} ・ 選択中 ${sel.length}</p>
     <div class="list">${items.map((c, k) => { const L2 = selLabel(c); const on = c.must || sel.includes(k - offset);
       const amt = r.type === M.SELECT_SUM ? ` ・ 値${c.amount & 0xffff}` : '';
-      return `<button class="li ${on ? 'on' : ''}" data-pick="${c.must ? -1 : k - offset}">${L2.hidden ? '<span class="sw" style="background:var(--c-back)"></span>' : swatch(c.code)}<span class="tx"><b>${esc(L2.name)}</b><span>${esc(L2.where)}${amt}</span></span></button>`; }).join('')}</div>
+      return infoRow(`<button class="li ${on ? 'on' : ''}" data-pick="${c.must ? -1 : k - offset}">${L2.hidden ? '<span class="sw" style="background:var(--c-back)"></span>' : swatch(c.code)}<span class="tx"><b>${esc(L2.name)}</b><span>${esc(L2.where)}${amt}</span></span></button>`, c.code, L2.hidden, `p${k}`); }).join('')}</div>
     ${btns([{ label: '決定', pri: true, dis: !ok, fn: () => submitPicker() },
       ...(r.can_cancel ? [{ label: 'キャンセル', fn: () => answer(r.type === M.SELECT_CARD ? { type: R.SELECT_CARD, indicies: null } : { type: R.SELECT_TRIBUTE, indicies: null }) }] : []),
       ...(r.type === M.SELECT_SUM ? [{ label: 'おまかせ', fn: () => answer({ type: R.SELECT_SUM, indicies: sumSolve(r) || [0] }) }] : [])])}`);
@@ -484,9 +508,10 @@ function submitPicker() {
   else answer({ type: R.SELECT_SUM, indicies: sel.slice() });
 }
 function drawUnselect() {
+  REDRAW = drawUnselect;
   const r = pend;
   const hint = data.hint(duel.hintMsg[r.player]) || 'カードを選択';
-  const row = (c, k, on) => { const L2 = selLabel(c); return `<button class="li ${on ? 'on' : ''}" data-us="${k}">${L2.hidden ? '<span class="sw" style="background:var(--c-back)"></span>' : swatch(c.code)}<span class="tx"><b>${esc(L2.name)}</b><span>${esc(L2.where)}${on ? ' ・ 選択済み（タップで外す）' : ''}</span></span></button>`; };
+  const row = (c, k, on) => { const L2 = selLabel(c); return infoRow(`<button class="li ${on ? 'on' : ''}" data-us="${k}">${L2.hidden ? '<span class="sw" style="background:var(--c-back)"></span>' : swatch(c.code)}<span class="tx"><b>${esc(L2.name)}</b><span>${esc(L2.where)}${on ? ' ・ 選択済み（タップで外す）' : ''}</span></span></button>`, c.code, L2.hidden, `u${k}`); };
   sheet(`<h3>${esc(hint)}</h3><p class="meta">${r.min === r.max ? r.min : `${r.min}〜${r.max}`}枚 ・ 選択済み ${r.unselect_cards.length}</p>
     <div class="list">${r.unselect_cards.map((c, k) => row(c, r.select_cards.length + k, true)).join('')}${r.select_cards.map((c, k) => row(c, k, false)).join('')}</div>
     ${btns([...(r.can_finish ? [{ label: '決定', pri: true, fn: () => answer({ type: R.SELECT_UNSELECT_CARD, index: null }) }] : []),
@@ -594,10 +619,12 @@ function onClick(e) {
   if (t.classList?.contains('scrim')) { closeSheet(); return; }
   const ab = t.closest('[data-act]');
   if (ab) { const a = ACTS[+ab.dataset.act]; if (!a || a.dis) return; const before = $('#layer').innerHTML; a.fn(); if ($('#layer').innerHTML === before && !a.keep) closeSheet(); if (!duel || !pend) render(); return; }
+  const inf = t.closest('[data-info]');
+  if (inf) { toggleInfo(inf.dataset.info); return; }
   const ap = t.closest('[data-actpick]');
   if (ap) { const list = (pend && (pend.type === M.SELECT_CHAIN || pend.type === M.ANNOUNCE_CARD)) ? ACTS_PICK : ACTS; list[+ap.dataset.actpick]?.fn(); return; }
   const pk = t.closest('[data-pick]');
-  if (pk) { const k = +pk.dataset.pick; if (k < 0) return; const i = sel.indexOf(k); if (i >= 0) sel.splice(i, 1); else if (pend.type === M.SELECT_SUM || sel.length < pend.max) sel.push(k); else if (pend.max === 1) sel = [k]; drawPicker(); return; }
+  if (pk) { const k = +pk.dataset.pick; if (k < 0) return; const i = sel.indexOf(k); if (i >= 0) sel.splice(i, 1); else if (pend.type === M.SELECT_SUM || sel.length < pend.max) sel.push(k); else if (pend.max === 1) sel = [k]; SHEET_STILL = true; drawPicker(); return; }
   const us = t.closest('[data-us]');
   if (us) { answer({ type: R.SELECT_UNSELECT_CARD, index: +us.dataset.us }); return; }
   const sh = t.closest('[data-show]'); if (sh) { cardSheet(+sh.dataset.show); return; }
