@@ -9,7 +9,7 @@ const stubJspi = {
     b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export default null;' })); },
 };
 const out = await esbuild.build({ entryPoints: ['src/main.js'], bundle: true, format: 'iife', platform: 'browser',
-  target: 'es2020', minify: true, write: false, plugins: [stubJspi], logLevel: 'warning' });
+  target: 'es2020', minifyWhitespace: true, minifySyntax: true, minifyIdentifiers: false, write: false, plugins: [stubJspi], logLevel: 'warning' });
 const js = out.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const raw = loadRaw();
 const json = JSON.stringify(raw).replace(/</g, '\\u003c');

@@ -99,7 +99,7 @@ const capWorthy = e => e && e.k === 'log' && e.p != null && setup.mode === 'cpu'
 function fxInfo(code) {
   const c = data.card(code);
   const kind = c?.category === '魔法' ? 'spell' : c?.category === '罠' ? 'trap' : 'monster';
-  return { kind, name: esc(data.name(code)), img: imageOf(code) };
+  return { kind, name: data.name(code), img: imageOf(code) };
 }
 async function playEvents(evs) {
   const fast = setup.speed === 'fast';
@@ -161,9 +161,9 @@ function render() {
     ${duel.win ? winHTML() : ''}
     <div class="side ${duel.turnPlayer === op ? 'turnside theirs' : ''}">${pilesHTML(op)}${zonesHTML(op, 'sz')}${zonesHTML(op, 'mz')}</div>
     <div class="mid">
-      <div class="lp ${duel.turnPlayer === op ? 'cur' : ''}" data-lp="${op}"><small>${esc(duel.names[op])}${duel.turnPlayer === op ? '（ターン中）' : ''}</small>${duel.lp[op]}</div>
+      <div class="lp ${duel.turnPlayer === op ? 'cur' : ''}" id="lp-${op}"><small>${esc(duel.names[op])}${duel.turnPlayer === op ? '（ターン中）' : ''}</small>${duel.lp[op]}</div>
       <div class="phase"><span class="t">ターン${duel.turn}</span><span class="who ${duel.turnPlayer === me ? 'mine' : 'theirs'}">${esc(duel.names[duel.turnPlayer])}のターン</span><span class="t ns">通常召喚：${duel.nsUsed ? '済' : '未'}</span></div>
-      <div class="lp r ${duel.turnPlayer === me ? 'cur' : ''}" data-lp="${me}"><small>${esc(duel.names[me])}${duel.turnPlayer === me ? '（ターン中）' : ''}</small>${duel.lp[me]}</div>
+      <div class="lp r ${duel.turnPlayer === me ? 'cur' : ''}" id="lp-${me}"><small>${esc(duel.names[me])}${duel.turnPlayer === me ? '（ターン中）' : ''}</small>${duel.lp[me]}</div>
     </div>
     ${phaseStrip()}
     ${duel.chain.length ? `<div class="chain">${duel.chain.map((c, i) => `<span>C${i + 1} ${esc(data.name(c.code))}</span>`).join('')}</div>` : ''}
@@ -233,7 +233,7 @@ function pilesHTML(p) {
 function zonesHTML(p, zone) {
   const arr = F[p][zone];
   const loc = zone === 'mz' ? L.MZONE : L.SZONE;
-  return `<div class="zones">${arr.map((q, i) => `<div class="cell ${zone === 'sz' ? 'st' : ''}" data-zone="${p}:${loc}:${i}">${q ? tileHTML(q, p, loc, i) : ''}</div>`).join('')}</div>`;
+  return `<div class="zones">${arr.map((q, i) => `<div class="cell ${zone === 'sz' ? 'st' : ''}" id="zone-${p}-${loc}-${i}">${q ? tileHTML(q, p, loc, i) : ''}</div>`).join('')}</div>`;
 }
 function hiddenFor(q, p, loc) {
   if (loc === L.HAND) return p !== view && !q.isPublic;

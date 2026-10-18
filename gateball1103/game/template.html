@@ -137,19 +137,31 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .hintline{margin:4px 0 8px;font-size:12.5px;color:var(--brass);font-weight:700}
 .li.rec{border-color:var(--brass)!important;box-shadow:0 0 0 1px var(--brass) inset}
 .recmark{font-style:normal;font-weight:700;display:inline-block;background:var(--brass);color:var(--brassInk);font-size:10px;border-radius:3px;padding:0 5px;margin-right:6px;vertical-align:1px}
-/* ---- 演出（召喚・攻撃・ダメージ・発動） ---- */
+/* ---- 演出（召喚・攻撃・ダメージ・発動）。src/fx.js が要素とクラスを付け外しする ---- */
+html{overflow-x:clip}
 #caption.low{top:auto;bottom:16%;transform:translate(-50%,0)}
-#fx{position:fixed;inset:0;pointer-events:none;z-index:24;overflow:hidden}
-.fx{position:absolute;pointer-events:none;will-change:transform,opacity}
-.fx.ring{width:90px;height:90px;border-radius:50%;border:3px solid var(--brass);box-shadow:0 0 18px var(--brass),inset 0 0 14px var(--brass)}
+#duel-fx{position:absolute;left:0;top:0;width:0;height:0;overflow:visible;pointer-events:none;z-index:24}
+.fx{position:absolute;pointer-events:none;animation:var(--anim) var(--t) ease-out forwards}
+.fx.ring{--anim:fx-ring;width:90px;height:90px;border-radius:50%;border:3px solid var(--brass);box-shadow:0 0 18px var(--brass),inset 0 0 14px var(--brass)}
 .fx.ring.special{border-color:#bfe9ff;box-shadow:0 0 22px #8fd3ff,inset 0 0 16px #8fd3ff}
 .fx.ring.flip{border-color:#e8c58a}
-.fx.pillar{width:70px;height:60vh;transform-origin:50% 100%;background:linear-gradient(to top,rgba(190,235,255,.85),rgba(190,235,255,.25) 60%,transparent);filter:blur(2px);mix-blend-mode:screen}
-.fx.tag{font-family:var(--display);font-size:13px;letter-spacing:.06em;white-space:nowrap;color:#fff;text-shadow:0 0 6px var(--brass),0 1px 2px #000}
+@keyframes fx-ring{from{transform:translate(-50%,-50%) scale(.2);opacity:1}to{transform:translate(-50%,-50%) scale(1.9);opacity:0}}
+.fx.pillar{--anim:fx-pillar;width:70px;height:60vh;transform-origin:50% 100%;background:linear-gradient(to top,rgba(190,235,255,.85),rgba(190,235,255,.25) 60%,transparent);filter:blur(2px);mix-blend-mode:screen}
+@keyframes fx-pillar{0%{transform:translate(-50%,-100%) scaleY(0);opacity:0}35%{transform:translate(-50%,-100%) scaleY(1);opacity:.9}100%{transform:translate(-50%,-100%) scaleY(1);opacity:0}}
+.fx.tag{--anim:fx-tag;font-family:var(--display);font-size:13px;letter-spacing:.06em;white-space:nowrap;color:#fff;text-shadow:0 0 6px var(--brass),0 1px 2px #000}
 .fx.tag.special{text-shadow:0 0 8px #6cc6ff,0 1px 2px #000}
-.fx.srcglow{transform:translate(-50%,-50%);border-radius:4px;box-shadow:0 0 0 2px #fff,0 0 22px 6px var(--glow)}
+@keyframes fx-tag{0%{transform:translate(-50%,-30%);opacity:0}25%{transform:translate(-50%,-100%);opacity:1}100%{transform:translate(-50%,-140%);opacity:0}}
+.tile.fx-drop{animation:fx-drop var(--t) ease-out}
+@keyframes fx-drop{from{transform:scale(1.35);opacity:0;filter:brightness(2.2)}to{transform:scale(1);opacity:1;filter:brightness(1)}}
+.fx.srcglow{--anim:fx-glow;transform:translate(-50%,-50%);border-radius:4px;box-shadow:0 0 0 2px #fff,0 0 22px 6px var(--glow)}
 .fx.srcglow.spell{--glow:#3fd1a8}.fx.srcglow.trap{--glow:#ff5fb0}.fx.srcglow.monster{--glow:#ffb35c}
-.fx.cutin{display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%)}
+@keyframes fx-glow{0%{opacity:0}20%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.fx.cutin{--anim:fx-cutin;display:flex;flex-direction:column;align-items:center;gap:6px}
+@keyframes fx-cutin{
+  0%{transform:translate(calc(-50% + var(--from) * 60vw),-50%) skewX(calc(var(--from) * -12deg));opacity:0}
+  22%{transform:translate(-50%,-50%) skewX(0deg);opacity:1}
+  78%{transform:translate(-50%,-50%) scale(1.02);opacity:1}
+  100%{transform:translate(calc(-50% - var(--from) * 40vw),-50%);opacity:0}}
 .fx.cutin .cut-band{font-family:var(--display);font-size:22px;letter-spacing:.08em;color:#fff;padding:4px 22px;border-radius:3px;background:var(--band);box-shadow:0 0 24px var(--band);white-space:nowrap}
 .fx.cutin .cut-band small{font-family:var(--body);font-size:11px;margin-left:8px;opacity:.85}
 .fx.cutin .cut-card{width:118px;aspect-ratio:59/86;border-radius:5px;overflow:hidden;background:var(--band);box-shadow:0 0 0 2px #fff,0 0 28px var(--band),0 10px 30px rgba(0,0,0,.6)}
@@ -157,18 +169,35 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .fx.cutin .cut-blank{width:100%;height:100%;background:repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 6px,transparent 6px 12px)}
 .fx.cutin .cut-name{font-weight:700;font-size:15px;color:#fff;background:rgba(10,6,4,.85);padding:3px 12px;border-radius:3px;max-width:80vw;text-align:center}
 .fx.cutin.spell{--band:#1f9c78}.fx.cutin.trap{--band:#b8306f}.fx.cutin.monster{--band:#c4672a}
-.fx.impact{width:80px;height:80px;transform:translate(-50%,-50%)}
+.tile.fx-lunge{position:relative;z-index:5;animation:fx-lunge var(--t) ease-in-out}
+@keyframes fx-lunge{0%{transform:translate(0,0) scale(1)}25%{transform:translate(0,0) scale(1.12)}55%{transform:translate(var(--dx),var(--dy)) scale(1.12)}100%{transform:translate(0,0) scale(1)}}
+.fx.impact{--anim:fx-impact;width:80px;height:80px}
+@keyframes fx-impact{from{transform:translate(-50%,-50%) scale(.3) rotate(-20deg);opacity:1}to{transform:translate(-50%,-50%) scale(1.4) rotate(0deg);opacity:0}}
 .fx.impact i{position:absolute;left:50%;top:50%;width:96px;height:6px;margin:-3px 0 0 -48px;border-radius:3px;background:linear-gradient(90deg,transparent,#fff,#ffd27a,#fff,transparent);box-shadow:0 0 12px #ffcf6a}
 .fx.impact i:nth-child(1){transform:rotate(30deg)}.fx.impact i:nth-child(2){transform:rotate(-30deg)}.fx.impact i:nth-child(3){transform:rotate(90deg);width:60px;margin-left:-30px}
 .fx.impact.direct i{background:linear-gradient(90deg,transparent,#fff,#ff6a55,#fff,transparent);box-shadow:0 0 14px #ff5a45}
-.fx.lpnum{font-family:var(--display);font-size:26px;color:var(--hurt);text-shadow:0 0 10px rgba(224,96,79,.8),0 2px 0 #000;white-space:nowrap}
+.fx.lpnum{--anim:fx-num;font-family:var(--display);font-size:26px;color:var(--hurt);text-shadow:0 0 10px rgba(224,96,79,.8),0 2px 0 #000;white-space:nowrap}
 .fx.lpnum.heavy{font-size:36px}
 .fx.lpnum.recover{color:var(--heal);text-shadow:0 0 10px rgba(127,191,134,.8),0 2px 0 #000}
 .fx.lpnum.cost{font-size:20px;color:#e8a35c;text-shadow:0 2px 0 #000}
-.fx.vignette{inset:0;left:0!important;top:0!important;box-shadow:inset 0 0 90px 10px rgba(224,60,40,.55)}
-.fx.vignette.mine{box-shadow:inset 0 0 120px 24px rgba(224,40,30,.75)}
-.fx.shard{width:7px;height:7px;background:#e9dcc6;box-shadow:0 0 6px rgba(255,220,170,.8);border-radius:1px}
+@keyframes fx-num{0%{transform:translate(-50%,-50%) scale(.6);opacity:0}20%{transform:translate(-50%,-90%) scale(1.15);opacity:1}70%{transform:translate(-50%,-110%) scale(1);opacity:1}100%{transform:translate(-50%,-160%) scale(1);opacity:0}}
+.fx-shake{animation:fx-shake var(--t) linear}
+@keyframes fx-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.fx-quake{animation:fx-quake var(--t) linear}
+@keyframes fx-quake{0%,100%{transform:translate(0,0)}25%{transform:translate(-5px,3px)}50%{transform:translate(5px,-3px)}75%{transform:translate(-3px,2px)}}
+.fx-vignette{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 90px 10px rgba(224,60,40,.55);animation:fx-vig var(--t) ease-out forwards;--peak:.6}
+.fx-vignette.mine{box-shadow:inset 0 0 120px 24px rgba(224,40,30,.75)}
+.fx-vignette.heavy{--peak:1}
+@keyframes fx-vig{0%{opacity:0}15%{opacity:var(--peak)}100%{opacity:0}}
+.fx.shard{--anim:fx-shard;width:7px;height:7px;background:#e9dcc6;box-shadow:0 0 6px rgba(255,220,170,.8);border-radius:1px}
 .fx.shard.ban{background:#b9a3ff;box-shadow:0 0 6px #9a7dff}
+@keyframes fx-shard{from{transform:translate(-50%,-50%) rotate(0deg);opacity:1}to{transform:translate(calc(-50% + var(--sx)),calc(-50% + var(--sy))) rotate(var(--rot));opacity:0}}
+/* 動きを減らす設定の人には、移動や揺れをやめて光と数字だけにする */
+@media (prefers-reduced-motion: reduce){
+  .tile.fx-lunge,.fx-shake,.fx-quake,.tile.fx-drop{animation:none}
+  .fx.cutin{animation-name:fx-glow;transform:translate(-50%,-50%)}
+  .fx.shard,.fx.pillar{display:none}
+}
 .logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
 .logbox div{border-bottom:1px solid var(--line);padding-block:2px}
 @media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
