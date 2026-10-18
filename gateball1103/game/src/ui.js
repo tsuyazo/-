@@ -13,7 +13,7 @@ const SUBTYPE_LABEL = { 同調: 'シンクロ', 重ね: 'エクシーズ', 調�
 const TYPE_COLOR = { 通常: 'normal', 効果: 'effect', 融合: 'fusion', 同調: 'synchro', 重ね: 'xyz' };
 
 let lib, data, duel = null;
-let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'events', speed: 'normal', level: 'strong', fx: 'on' };
+let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'auto', speed: 'normal', level: 'strong', fx: 'on' };
 let view = 0;              // 画面の持ち主（下側に表示するプレイヤー）
 let curtain = false;
 let busy = false;          // CPUが考え中
@@ -37,6 +37,7 @@ function loadSaved() { try { const s = localStorage.getItem(SAVE_KEY); return s 
 function clearSaved() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* noop */ } }
 function restore(save) {
   setup = { ...setup, ...save.setup };
+  setup.chainMode = { events: 'auto', always: 'on' }[setup.chainMode] || setup.chainMode;   // 以前の設定名
   newDuel(save.opts, save.seats, save.history);
 }
 
@@ -191,7 +192,11 @@ function phaseStrip() {
 const isCommand = r => r.type === M.SELECT_IDLECMD || r.type === M.SELECT_BATTLECMD;
 function toolsHTML() {
   if (duel.win) return `<button class="go" data-a="rematch">もう一度</button><button data-a="quit">デッキ選択へ</button><button data-a="log">ログ</button><button data-a="more">その他</button>`;
-  if (busy) return `<div class="think">${esc(duel.names[duel.req?.player ?? 1])}が考え中…</div><button data-a="more">その他</button>`;
+  if (busy) {
+    // 相手の番に人間がいる時だけ「ここで止める」を出す（マスターデュエルの長押しにあたる）
+    const human = duel.ai.some(a => !a);
+    return `<div class="think ${human ? 'narrow' : ''}">${esc(duel.names[duel.req?.player ?? 1])}が考え中…</div>${human ? `<button data-a="stop" class="${duel.stopRequest ? 'on' : ''}">${duel.stopRequest ? '止める予約中' : 'ここで止める'}</button>` : ''}<button data-a="more">その他</button>`;
+  }
   const r = pend;
   if (!r) return `<button data-a="more">その他</button>`;
   if (r.type === M.SELECT_IDLECMD) return `
@@ -416,7 +421,7 @@ function openPrompt(showHint = false) {
         ${r.forced ? '' : showHint ? `<p class="hintline">${rec && rec.index == null ? 'おすすめ：発動しない' : 'おすすめの発動に印を付けました'}</p>` : hintBtn()}
         <div class="list">${r.selects.map((c, k) => `<button class="li ${isRec(k) ? 'rec' : ''}" data-actpick="${k}">${swatch(c.code)}<span class="tx"><b>${isRec(k) ? '<i class="recmark">おすすめ</i>' : ''}「${esc(data.name(c.code))}」</b><span>${esc(data.desc(c.description))}・${esc(locName(c.location))}</span></span></button>`).join('')}</div>
         ${r.forced ? '' : btns([{ label: '発動しない', fn: () => answer({ type: R.SELECT_CHAIN, index: null }) },
-          { label: setup.chainMode === 'events' ? 'チェーン確認：要所のみ' : 'チェーン確認：毎回', fn: () => { setup.chainMode = setup.chainMode === 'events' ? 'always' : 'events'; duel.chainMode = setup.chainMode; openPrompt(); } }])}`);
+          { label: `チェーン確認：${chainLabel()}`, keep: true, fn: () => { nextChainMode(); openPrompt(); } }])}`);
       const pick = r.selects.map((c, k) => ({ fn: () => answer({ type: R.SELECT_CHAIN, index: k }) }));
       ACTS_PICK = pick; return;
     }
@@ -488,12 +493,34 @@ function drawUnselect() {
       ...(r.can_cancel && !r.can_finish ? [{ label: 'キャンセル', fn: () => answer({ type: R.SELECT_UNSELECT_CARD, index: null }) }] : [])])}`);
 }
 
+/* ---------------- チェーン確認（マスターデュエルと同じ オート／ON／OFF） ---------------- */
+const CHAIN_MODES = [
+  ['auto', 'オート', '相手が発動・召喚・攻撃した時だけ止まります。'],
+  ['on', 'ON', '発動できるカードがある場面では毎回止まります（エンドフェイズなども）。'],
+  ['off', 'OFF', '強制効果以外では止まりません。使いたい時は相手のターン中に「ここで止める」を押してください。'],
+];
+const chainLabel = () => CHAIN_MODES.find(x => x[0] === setup.chainMode)?.[1] || 'オート';
+function nextChainMode() {
+  const i = CHAIN_MODES.findIndex(x => x[0] === setup.chainMode);
+  setup.chainMode = CHAIN_MODES[(i + 1) % CHAIN_MODES.length][0];
+  if (duel) duel.chainMode = setup.chainMode;
+  const m = CHAIN_MODES.find(x => x[0] === setup.chainMode);
+  toast(`チェーン確認：${m[1]}　${m[2]}`);
+}
+// 「ここで止める」：次に自分が発動できる場面で、モードに関係なく1回止まる
+function requestStop() {
+  if (!duel) return;
+  duel.stopRequest = !duel.stopRequest;
+  toast(duel.stopRequest ? '次に発動できる場面で止めます' : '止める予約を取り消しました');
+  render();
+}
+
 /* ---------------- その他 ---------------- */
 function logSheet() { sheet(`<h3>ログ</h3><div class="logbox">${duel.log.map(l => `<div>${esc(l.s)}</div>`).join('')}</div>`); }
 function moreSheet() {
   sheet(`<h3>その他</h3>${btns([
     { label: 'ログを見る', pri: true, fn: () => setTimeout(logSheet) },
-    { label: `チェーン確認：${setup.chainMode === 'events' ? '要所のみ' : '毎回'}`, fn: () => { setup.chainMode = setup.chainMode === 'events' ? 'always' : 'events'; duel.chainMode = setup.chainMode; toast(`チェーン確認を「${setup.chainMode === 'events' ? '要所のみ' : '毎回'}」にしました`); } },
+    { label: `チェーン確認：${chainLabel()}（タップで切り替え）`, fn: nextChainMode },
     { label: `CPUの速さ：${setup.speed === 'fast' ? '速い' : 'ゆっくり'}`, fn: () => { setup.speed = setup.speed === 'fast' ? 'normal' : 'fast'; } },
     { label: `演出：${setup.fx === 'off' ? 'なし' : 'あり'}`, fn: () => { setup.fx = setup.fx === 'off' ? 'on' : 'off'; toast(`演出を「${setup.fx === 'off' ? 'なし' : 'あり'}」にしました`); } },
     { label: '降参する', fn: () => setTimeout(() => sheet(`<h3>降参しますか？</h3><p class="note">このデュエルは負けになり、デッキ選択に戻ります。</p>${btns([{ label: '降参する', fn: quit }, { label: '続ける', pri: true, fn: () => {} }])}`)) },
@@ -594,6 +621,7 @@ function onClick(e) {
   if (a === 'uncurtain') { curtain = false; closeSheet(); render(); return; }
   if (a === 'log') logSheet();
   else if (a === 'more') moreSheet();
+  else if (a === 'stop') requestStop();
   else if (a === 'acts' || a === 'prompt') openPrompt();
   else if (a === 'hint' && pend) openPrompt(true);
   else if (a === 'tobp') answer({ type: R.SELECT_IDLECMD, action: 6, index: null });

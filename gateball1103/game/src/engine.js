@@ -46,6 +46,8 @@ const QFLAGS = Q.CODE | Q.POSITION | Q.LEVEL | Q.RANK | Q.ATTACK | Q.DEFENSE | Q
   | Q.OVERLAY_CARD | Q.COUNTERS | Q.OWNER | Q.IS_PUBLIC | Q.ATTRIBUTE | Q.RACE;
 // これらが起きた後は、チェーン確認「要所のみ」でも人間に発動の機会を聞く
 // （召喚は「召喚する時」と「召喚に成功した時」の2回、戦闘は攻撃宣言とダメージステップ）
+// 以前の設定名（保存データ）との対応
+const CHAIN_MODE_ALIAS = { events: 'auto', always: 'on' };
 const EVENT_TYPES = new Set([M.CHAINING, M.CHAIN_END, M.SUMMONING, M.SPSUMMONING, M.FLIPSUMMONING,
   M.SUMMONED, M.SPSUMMONED, M.FLIPSUMMONED, M.ATTACK, M.BATTLE, M.DAMAGE_STEP_START]);
 
@@ -117,7 +119,12 @@ export class Duel {
     // プレイヤーごとに「自分が最後に応答してから起きた出来事」。相手の応答では消さない
     this.events = [new Set(), new Set()];
     this.history = []; this.errors = []; this.reveal = null;
-    this.chainMode = 'events';               // 'events' = 何か起きた時だけチェーン確認 / 'always'
+    // 人間のチェーン確認のタイミング（マスターデュエルと同じ3段階）
+    //  'auto'：相手が発動・召喚・攻撃した時だけ止まる / 'on'：発動できる場面では毎回止まる / 'off'：強制効果以外は止まらない
+    this.chainMode = 'auto';
+    this.stopRequest = false;                // 「ここで止める」：次に発動できる場面で1回だけ止まる（モードに関係なく）
+    // プレイヤーごとに「自分が最後に応答してから、相手がした行動」（オートの判断に使う）
+    this.oppActs = [new Set(), new Set()];
     this.aiMemo = { turn: -1, used: {} };
   }
   start() {
@@ -188,7 +195,7 @@ export class Duel {
   }
   respond(res) {
     this.history.push(res);
-    if (this.req) this.events[this.req.player] = new Set();
+    if (this.req) { this.events[this.req.player] = new Set(); this.oppActs[this.req.player] = new Set(); }
     this.req = null;
     this.lib.duelSetResponse(this.h, res);
   }
@@ -202,7 +209,15 @@ export class Duel {
     switch (m.type) {
       case M.SELECT_CHAIN:
         if (!m.selects.length && !m.forced) return { type: R.SELECT_CHAIN, index: null };
-        if (!this.ai[m.player] && !m.forced && this.chainMode === 'events' && !this.events[m.player].size) return { type: R.SELECT_CHAIN, index: null };
+        if (!this.ai[m.player] && !m.forced) {
+          const pass = { type: R.SELECT_CHAIN, index: null };
+          if (this.stopRequest) { this.stopRequest = false; return null; }
+          const mode = CHAIN_MODE_ALIAS[this.chainMode] || this.chainMode;
+          // オートでも、相手ターンのエンドフェイズには1回だけ止まる（エンドサイク・強制脱出などの定番の使い所）
+          const endStop = mode === 'auto' && this.phase === 512 && this.turnPlayer !== m.player && this.endStopped !== this.turn;
+          if (endStop) { this.endStopped = this.turn; return null; }
+          if (mode === 'off' || (mode === 'auto' && !this.oppActs[m.player].size)) return pass;
+        }
         return null;
       case M.SELECT_PLACE: case M.SELECT_DISFIELD: return placeResponse(m);
       case M.SORT_CARD: case M.SORT_CHAIN: return { type: R.SORT_CARD, order: null };
@@ -225,8 +240,11 @@ export class Duel {
     const n = p => this.names[p];
     const D = this.data;
     if (EVENT_TYPES.has(m.type)) this.events.forEach(e => e.add(m.type));
+    // 相手の行動（発動・召喚・攻撃）を、行動したプレイヤー以外に記録する
+    const actor = this.actorOf(m);
+    if (actor != null) this.oppActs.forEach((s, p) => { if (p !== actor) s.add(m.type); });
     switch (m.type) {
-      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.nsUsed = false; this.uiEvents.push({ k: 'turn', p: m.player, t: this.turn }); this.events.forEach(e => e.clear()); this.say(`――― ターン${this.turn}：${n(m.player)} ―――`, m.player); break;
+      case M.NEW_TURN: this.turn++; this.turnPlayer = m.player; this.nsUsed = false; this.uiEvents.push({ k: 'turn', p: m.player, t: this.turn }); this.events.forEach(e => e.clear()); this.oppActs.forEach(e => e.clear()); this.say(`――― ターン${this.turn}：${n(m.player)} ―――`, m.player); break;
       case M.NEW_PHASE: this.phase = m.phase; this.uiEvents.push({ k: 'phase', ph: m.phase, p: this.turnPlayer }); if (m.phase === 512 || m.phase === 8) this.events.forEach(e => e.add('phase')); break;
       case M.HINT:
         if (m.hint_type === HT.SELECTMSG) this.hintMsg[m.player] = m.hint;
@@ -270,6 +288,16 @@ export class Duel {
       case M.TOSS_DICE: this.say(`サイコロ：${m.results.join('・')}`); break;
       case M.WIN: this.win = { player: m.player, reason: m.reason }; this.say(`${m.player === 2 ? '引き分け' : `${n(m.player)}の勝利`}`); break;
       default: break;
+    }
+  }
+  // オートのチェーン確認で「相手が何かした」とみなす出来事と、その行動をしたプレイヤー
+  actorOf(m) {
+    switch (m.type) {
+      case M.CHAINING: case M.SUMMONING: case M.SPSUMMONING: case M.FLIPSUMMONING: return m.controller;
+      case M.SUMMONED: case M.SPSUMMONED: case M.FLIPSUMMONED: return this.lastSummon?.player ?? null;
+      case M.ATTACK: return m.card?.controller ?? null;
+      case M.BATTLE: case M.DAMAGE_STEP_START: return this.lastAttack?.player ?? null;
+      default: return null;
     }
   }
   query(loc) {
