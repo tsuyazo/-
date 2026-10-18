@@ -4,7 +4,12 @@
 
 const $ = s => document.querySelector(s);
 const reduce = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-const layer = () => $('#fx');
+// 演出用のレイヤー（最初に使う時に作る）
+const layer = () => {
+  let el = $('#fx');
+  if (!el) { el = document.createElement('div'); el.id = 'fx'; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); }
+  return el;
+};
 
 function rectOf(p, loc, seq) {
   const el = document.querySelector(`[data-zone="${p}:${loc}:${seq}"]`);
@@ -64,9 +69,11 @@ function activate(e, k, info) {
   const at = screenCenter();
   const from = e.mine ? 1 : -1;                          // 自分の発動は右から、相手の発動は左から
   const card = spawn(`cutin ${kind}`, at.x, at.y, `
-    <div class="ci-band">${label}${e.n > 1 ? `<small>チェーン${e.n}</small>` : ''}</div>
-    <div class="ci-card">${c.img ? `<img src="${c.img}" alt="" onerror="this.remove()">` : `<div class="ci-blank"></div>`}</div>
-    <div class="ci-name">${c.name}</div>`);
+    <div class="cut-band">${label}${e.n > 1 ? `<small>チェーン${e.n}</small>` : ''}</div>
+    <div class="cut-card">${c.img ? `<img src="${c.img}" alt="">` : `<div class="cut-blank"></div>`}</div>
+    <div class="cut-name">${c.name}</div>`);
+  const img = card.querySelector('img');
+  if (img) img.addEventListener('error', () => img.remove());   // 画像が読めない時は色だけのカードにする
   jobs.push(done(card, card.animate([
     { transform: `translate(calc(-50% + ${from * 60}vw),-50%) skewX(${-from * 12}deg)`, opacity: 0 },
     { transform: 'translate(-50%,-50%) skewX(0)', opacity: 1, offset: .22 },
@@ -139,7 +146,6 @@ function leave(e, k) {
 
 // e：エンジンの演出イベント / opts：{ speed（0.5〜1）, view（手前に表示しているプレイヤー）, info(code) }
 export function playFx(e, opts) {
-  if (!layer()) return Promise.resolve();
   const k = (reduce() ? 0.45 : 1) * opts.speed;
   switch (e.t) {
     case 'summon': return summon(e, k);
