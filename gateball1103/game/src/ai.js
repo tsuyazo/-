@@ -10,7 +10,7 @@ import {
   NEGATE_SUMMON, NEGATE_SPSUMMON, ON_SUMMON, WIPE_ON_SUMMON, ATTACK_RESPONSE, NEGATE_ACTIVATION, ST_REMOVAL,
   HAND_TRAP, DAMAGE_STEP, BOARD_WIPE, OWN_TURN_TRAPS, HOLD_TRAPS, SUMMON_PRIORITY, KEY_THREATS, EXTRA_VALUE,
 } from './ai_cards.js';
-import { planIdle } from './ai_plan.js';
+import { planIdle, sigOf } from './ai_plan.js';
 
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
 const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000;
@@ -19,6 +19,23 @@ const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893, HURRICAN
 const SELF_TURN_ONLY = new Set([21007444, 32603633]);
 const LOCKS = new Set([29981921, 71564252]);   // シエン・ライオウ
 
+// 判断に使う数値。デッキごとの値（ai_params.json、CPU同士の対戦で調整したもの）があればそれを使う
+export const DEFAULTS = {
+  handV: 700, setV: 850, upV: 450, fdV: 1500, myLP: 0.5, opLP: 1, risk: 0.93, lockV: 1500, keyV: 1200, extraV: 600,
+  fdAtk: 1900, wipeDiff: 1000, wipeDiffChain: 1500, onSummonAtk: 1500, negSumVal: 2300, negSpVal: 2000,
+  prisonAtk: 1700, mirrorAtk: 2400, bookAtk: 1700, warnLP: 2500, declLP: 2000, declSpellLP: 3000, endTrap: 55, chainMin: 40,
+  perTurn: 12, rollouts: 1, eps: 0.3, line: 0, vulnV: 0, threatW: 0, routeOn: 1,
+};
+let PAR = DEFAULTS;
+// duel.aiParams[seat]（調整中の試し値）＞ デッキごとの値 ＞ 既定値
+export function paramsFor(duel, seat) {
+  const o = duel.aiParams?.[seat];
+  if (o) return o;
+  const deck = duel.opts.decks[seat];
+  const t = duel.data.raw.aiParams?.[deck];
+  if (!t) return DEFAULTS;
+  return t._full || (t._full = { ...DEFAULTS, ...t });
+}
 const info = (duel, code) => duel.data.eng(code) || { type: 0, attack: 0, defense: 0, level: 0 };
 const isExtra = t => (t & (T_FUSION | T_SYNCHRO | T_XYZ)) !== 0;
 
@@ -27,21 +44,28 @@ function cardValue(duel, code, q) {
   const e = info(duel, code);
   if (!(e.type & T_MONSTER)) return 1300;
   let v = q && typeof q.attack === 'number' ? Math.max(q.attack, q.defense ?? 0) : Math.max(e.attack, e.defense);
-  if (KEY_THREATS.has(code)) v += 1200;
-  if (isExtra(e.type)) v += 600;
+  if (KEY_THREATS.has(code)) v += PAR.keyV;
+  if (isExtra(e.type)) v += PAR.extraV;
   if (EXTRA_VALUE[code]) v += EXTRA_VALUE[code] * 5;
   return v;
 }
 function fieldValue(duel, f, p) {
-  return f[p].mz.filter(Boolean).reduce((s, q) => s + (q.position & POS.FACEDOWN ? 1500 : cardValue(duel, q.code, q)), 0);
+  return f[p].mz.filter(Boolean).reduce((s, q) => s + (q.position & POS.FACEDOWN ? PAR.fdV : cardValue(duel, q.code, q)), 0);
 }
 function strongestAtk(f, p) { return f[p].mz.filter(q => q && (q.position & POS.FACEUP)).reduce((m, q) => Math.max(m, q.attack || 0), 0); }
 
 export function aiRespond(duel, m) {
   const me = m.player, op = 1 - me;
+  PAR = paramsFor(duel, me);
   const f = duel.field();
   const memo = duel.aiMemo;
-  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; memo.plans = 0; memo.attackerAtk = null; }
+  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; memo.plans = 0; memo.attackerAtk = null; memo.line = null; }
+  // 先読みで見つけた手順：局面が予定どおりなら、その手をそのまま打つ（相手が何かして局面が変わったら捨てる）
+  if (!duel.isSim && memo.line && memo.line.length && duel.turnPlayer === me && memo.lineOwner === me) {
+    const head = memo.line[0];
+    if (head.sig === sigOf(m)) { memo.line.shift(); return head.res; }
+    memo.line = null;
+  }
   const ctx = { duel, f, me, op, memo, myTurn: duel.turnPlayer === me, rules: rulesFor(duel, me) };
   switch (m.type) {
     case M.SELECT_IDLECMD: return idle(ctx, m);
@@ -80,8 +104,13 @@ function idle(ctx, m) {
   // 先読み：候補を影のデュエルで試して、ターン終了時の盤面が一番良いものを選ぶ
   const after = memo.used;
   memo.used = before;
-  const planned = planIdle(ctx, m, greedy, aiRespond, boardValue);
+  const P = PAR;
+  const planned = planIdle(ctx, m, greedy, aiRespond, boardValue, P);
+  PAR = P;
   if (globalThis.PLAN_DEBUG && planned && planned !== greedy) console.log("   [plan]", JSON.stringify(planned), "greedy", JSON.stringify(greedy));
+  // ターンを終える（バトルへ進む）前に、伏せるべきカードは必ず伏せる（先読みの候補に「伏せる」は無いため）
+  const ending = r => r && r.type === R.SELECT_IDLECMD && (r.action === 6 || r.action === 7);
+  if (ending(planned || greedy)) { const sc = setChoice(ctx, m); if (sc) { memo.used = after; return sc; } }
   if (!planned || planned === greedy) { memo.used = after; return greedy; }
   // 普段の判断と違う行動を選んだ時は、その行動に「使った」印を付ける（同じ発動を繰り返さない）
   const f = ['summons', 'special_summons', 'pos_changes', 'monster_sets', 'spell_sets', 'activates'][planned.action];
@@ -92,15 +121,22 @@ function idle(ctx, m) {
 // 先読みで比べる「盤面の良さ」：自分の場と手札とLP、相手の場とLP
 export function boardValue(duel, me) {
   const op = 1 - me;
+  PAR = paramsFor(duel, me);
   if (duel.win) return duel.win.player === me ? 1e6 : duel.win.player === 2 ? 0 : -1e6;
   const f = duel.field();
-  const st = p => f[p].sz.filter(Boolean).reduce((s, q) => s + (q.position & POS.FACEDOWN ? 850 : 450), 0) + (f[p].fz ? 500 : 0);
+  const st = p => f[p].sz.filter(Boolean).reduce((s, q) => s + (q.position & POS.FACEDOWN ? PAR.setV : PAR.upV), 0) + (f[p].fz ? 500 : 0);
   // 相手の伏せが多いほど、場に出したモンスターは罠で失いやすい（手札は安全）
-  const risk = Math.pow(0.93, Math.min(4, f[op].sz.filter(q => q && (q.position & POS.FACEDOWN)).length));
+  const risk = Math.pow(PAR.risk, Math.min(4, f[op].sz.filter(q => q && (q.position & POS.FACEDOWN)).length));
   // 相手の行動を止め続けるモンスター（シエン・ライオウなど）は、先読みの中では働きが見えないので上乗せ
-  const lock = f[me].mz.filter(q => q && (q.position & POS.FACEUP) && LOCKS.has(q.code)).length * 1500;
-  return fieldValue(duel, f, me) * risk + lock + st(me) + 700 * f[me].hand.length + 0.5 * duel.lp[me]
-    - fieldValue(duel, f, op) - st(op) - duel.lp[op];
+  const lock = f[me].mz.filter(q => q && (q.position & POS.FACEUP) && LOCKS.has(q.code)).length * PAR.lockV;
+  // 次の相手ターンへの備え：攻撃表示で相手の一番強いモンスターに負けるモンスターと、壁で止められない攻撃の合計
+  const oppAtk = f[op].mz.filter(q => q && (q.position & POS.FACEUP) && (q.position & POS.ATTACK)).map(q => q.attack || 0).sort((a, b) => b - a);
+  const mine = f[me].mz.filter(Boolean);
+  const weak = mine.filter(q => (q.position & POS.FACEUP) && (q.position & POS.ATTACK) && (q.attack || 0) < (oppAtk[0] || 0)).length;
+  const through = oppAtk.slice(mine.length).reduce((a, b) => a + b, 0);
+  const exposure = PAR.vulnV * weak + PAR.threatW * through;
+  return fieldValue(duel, f, me) * risk + lock - exposure + st(me) + PAR.handV * f[me].hand.length + PAR.myLP * duel.lp[me]
+    - fieldValue(duel, f, op) - st(op) - PAR.opLP * duel.lp[op];
 }
 function idleGreedy(ctx, m) {
   const { duel, f, me, op, memo } = ctx;
@@ -121,6 +157,19 @@ function idleGreedy(ctx, m) {
     const i = m.activates.findIndex(c => ((ST_REMOVAL.has(c.code) && !hold.has(c.code) && (c.code !== HURRICANE || oppSetST >= 2)) || (c.code === TRAP_STUN && stun)) && !used(c) && c.location !== L.MZONE);
     if (i >= 0) { mark(m.activates[i]); return { type: R.SELECT_IDLECMD, action: 5, index: i }; }
   }
+  // 1.5 記事の展開ルート：初動カードがそろっていれば、手順の中で今できる最初の一手を打つ
+  if (PAR.routeOn && ctx.rules?.routes?.length) {
+    const have = new Set([...f[me].hand, ...f[me].mz.filter(Boolean), ...f[me].sz.filter(Boolean)].map(q => q.code));
+    const FIELD = { summon: ['summons', 0], special: ['special_summons', 1], activate: ['activates', 5] };
+    for (const r of ctx.rules.routes) {
+      if (!r.starters.some(id => have.has(id))) continue;
+      for (const st of r.steps) {
+        const fd = FIELD[st.act]; if (!fd) continue;
+        const i = m[fd[0]].findIndex(c => c.code === st.id && !used(c) && !(fd[1] === 0 && hold.has(c.code)));
+        if (i >= 0) { mark(m[fd[0]][i]); memo.route = r; return { type: R.SELECT_IDLECMD, action: fd[1], index: i }; }
+      }
+    }
+  }
   // 2. サーチ・ドロー・展開の魔法と、場のモンスターの起動効果
   const acts = m.activates.map((c, i) => ({ c, i, e: info(duel, c.code) })).filter(({ c, e }) => {
     if (used(c) >= (c.location === L.MZONE ? 1 : 1)) return false;
@@ -128,7 +177,7 @@ function idleGreedy(ctx, m) {
     if (SELF_TURN_ONLY.has(c.code)) return false;                        // 普段は使わず、先読みで得になる時だけ
     if (c.code === BOOK_OF_MOON) return false;                           // 月の書は相手の攻撃・召喚に合わせて使う
     if (e.type & T_TRAP) return OWN_TURN_TRAPS.has(c.code) && !HOLD_TRAPS.has(c.code);
-    if (BOARD_WIPE.has(c.code)) return opVal > myVal + 1000;
+    if (BOARD_WIPE.has(c.code)) return opVal > myVal + PAR.wipeDiff;
     // 温存するよう勧められた除去（王宮の弾圧などへの回答）は、表側の永続カードにだけ使う
     if (ST_REMOVAL.has(c.code) && hold.has(c.code)) return f[op].sz.some(q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_CONT));
     if (c.code === HURRICANE) return oppSetST >= 2;
@@ -159,17 +208,24 @@ function idleGreedy(ctx, m) {
     return { type: R.SELECT_IDLECMD, action: 3, index: i };
   }
   // 6. 罠・速攻魔法を伏せる（バトルの後、メイン2で伏せる方が情報を与えない）
-  if (duel.phase !== PH_MAIN1 || duel.turn === 1 || !canAttackUsefully(ctx)) {
-    const si = m.spell_sets.findIndex(c => { const t = info(duel, c.code).type; return (t & T_TRAP) || (t & T_QUICK); });
-    if (si >= 0 && f[me].sz.filter(Boolean).length < 5) return { type: R.SELECT_IDLECMD, action: 4, index: si };
-  }
+  const setNow = setChoice(ctx, m);
+  if (setNow) return setNow;
   // 7. 攻撃表示で弱いモンスターは守備に
   const pi = m.pos_changes.findIndex(c => {
     const q = f[me].mz[c.sequence];
-    return q && (q.position & POS.ATTACK) && (q.position & POS.FACEUP) && q.attack < strongestAtk(f, op) && (q.defense ?? 0) > q.attack;
+    // 相手の一番強いモンスターに負けるなら、守備力が低くても守備にする（守備表示ならLPは減らない）
+    return q && (q.position & POS.ATTACK) && (q.position & POS.FACEUP) && q.attack < strongestAtk(f, op);
   });
   if (pi >= 0 && duel.phase !== PH_MAIN1) return { type: R.SELECT_IDLECMD, action: 2, index: pi };
   return end();
+}
+// 今伏せるべき罠・速攻魔法（無ければ null）
+function setChoice(ctx, m) {
+  const { duel, f, me } = ctx;
+  if (!(duel.phase !== PH_MAIN1 || duel.turn === 1 || !canAttackUsefully(ctx))) return null;
+  if (f[me].sz.filter(Boolean).length >= 5) return null;
+  const si = m.spell_sets.findIndex(c => { const t = info(duel, c.code).type; return (t & T_TRAP) || (t & T_QUICK); });
+  return si >= 0 ? { type: R.SELECT_IDLECMD, action: 4, index: si } : null;
 }
 function actPriority(ctx, { c, e }) {
   const { duel, f, me } = ctx;
@@ -185,7 +241,9 @@ function actPriority(ctx, { c, e }) {
 }
 function spValue(ctx, c) {
   const { duel } = ctx;
-  if (c.location === L.EXTRA) return 1000 + (EXTRA_VALUE[c.code] || 50) * 10 + (info(duel, c.code).attack / 10);
+  const ord = ctx.rules?.extraOrder || [];
+  const rank = ord.indexOf(c.code);
+  if (c.location === L.EXTRA) return 1000 + (EXTRA_VALUE[c.code] || 50) * 10 + (info(duel, c.code).attack / 10) + (rank >= 0 && PAR.routeOn ? (ord.length - rank) * 40 : 0);
   return 500 + cardValue(duel, c.code) / 10;
 }
 // 攻撃して得をするモンスターがいるか
@@ -198,7 +256,7 @@ function canAttackUsefully(ctx) {
   return mine.some(a => opp.some(t => beats(a, t)));
 }
 function beats(a, t) {
-  if (t.position & POS.FACEDOWN) return (a.attack || 0) >= 1900;
+  if (t.position & POS.FACEDOWN) return (a.attack || 0) >= PAR.fdAtk;
   if (t.position & POS.ATTACK) return (a.attack || 0) > (t.attack || 0);
   return (a.attack || 0) > (t.defense || 0);
 }
@@ -257,23 +315,23 @@ function chain(ctx, m) {
     if (DAMAGE_STEP.has(code)) return 70;                                   // ダメージステップで出てくる時は使う
     if (code === BOOK_OF_MOON) {
       // 月の書：強い攻撃を止める／重要なモンスターの召喚成功時に裏にして効果を使わせない
-      if (oppAttacking) return la.atk >= 1700 || lethal ? 80 : 0;
+      if (oppAttacking) return la.atk >= PAR.bookAtk || lethal ? 80 : 0;
       if (oppSummoned && (KEY_THREATS.has(ls.code) || ctx.rules?.threats.has(ls.code) || summonValue >= 2400)) return 75;
       return 0;
     }
     if (NEGATE_SUMMON.has(code)) {
-      if (!oppSummoning) return oppTop && top && impact(duel, top.code, ctx.rules) >= 3 && code === 41420027 && lp > 3000 ? 75 : 0;
-      if (code === 41420027 && lp <= 2000) return 0;                        // 神の宣告はLPが少ないと撃たない
-      if (code === 84749824 && lp <= 2500) return 0;                        // 神の警告（2000払う）
-      return summonValue >= 2300 || KEY_THREATS.has(ls.code) || ctx.rules?.threats.has(ls.code) ? 90 : 0;
+      if (!oppSummoning) return oppTop && top && impact(duel, top.code, ctx.rules) >= 3 && code === 41420027 && lp > PAR.declSpellLP ? 75 : 0;
+      if (code === 41420027 && lp <= PAR.declLP) return 0;                        // 神の宣告はLPが少ないと撃たない
+      if (code === 84749824 && lp <= PAR.warnLP) return 0;                        // 神の警告（2000払う）
+      return summonValue >= PAR.negSumVal || KEY_THREATS.has(ls.code) || ctx.rules?.threats.has(ls.code) ? 90 : 0;
     }
-    if (NEGATE_SPSUMMON.has(code)) return oppSummoning && ls.kind === 'special' && summonValue >= 2000 && lp > 1000 ? 85 : 0;
-    if (ON_SUMMON.has(code)) return oppSummoned && summonValue >= 1500 ? 85 : 0;     // 奈落：攻撃力1500以上（記事より）
+    if (NEGATE_SPSUMMON.has(code)) return oppSummoning && ls.kind === 'special' && summonValue >= PAR.negSpVal && lp > 1000 ? 85 : 0;
+    if (ON_SUMMON.has(code)) return oppSummoned && summonValue >= PAR.onSummonAtk ? 85 : 0;     // 奈落：攻撃力1500以上（記事より）
     if (WIPE_ON_SUMMON.has(code)) return oppSummoned && f[op].mz.filter(Boolean).length >= f[me].mz.filter(Boolean).length + 1 ? 80 : 0;
     if (ATTACK_RESPONSE.has(code)) {
       if (!oppAttacking) return 0;
-      if (code === 44095762) return f[op].mz.filter(q => q && (q.position & POS.ATTACK)).length >= 2 || la.atk >= 2400 || lethal ? 90 : 0;
-      if (code === 70342110) return la.atk >= 1700 || lethal || KEY_THREATS.has(la.code) ? 85 : 0;
+      if (code === 44095762) return f[op].mz.filter(q => q && (q.position & POS.ATTACK)).length >= 2 || la.atk >= PAR.mirrorAtk || lethal ? 90 : 0;
+      if (code === 70342110) return la.atk >= PAR.prisonAtk || lethal || KEY_THREATS.has(la.code) ? 85 : 0;
       return 70;   // くず鉄のかかし・ホープは何度でも使える
     }
     if (NEGATE_ACTIVATION.has(code)) return oppTop && top && impact(duel, top.code, ctx.rules) >= 2 ? 88 : 0;
@@ -285,11 +343,11 @@ function chain(ctx, m) {
       return 0;
     }
     if (HOLD_TRAPS.has(code)) return 0;
-    if (BOARD_WIPE.has(code)) return fieldValue(duel, f, op) > fieldValue(duel, f, me) + 1500 ? 70 : 0;
+    if (BOARD_WIPE.has(code)) return fieldValue(duel, f, op) > fieldValue(duel, f, me) + PAR.wipeDiffChain ? 70 : 0;
     if (t & T_TRAP) {
       // 用途を分類していない罠：相手ターンのエンドフェイズか、相手が何かした時に使う
       if (SELF_TURN_ONLY.has(code)) return 0;                              // 諸刃の活人剣術・背水の陣は自分のメインフェイズに（先読みで判断）
-      if (!myTurn && duel.phase === PH_END) return 55;
+      if (!myTurn && duel.phase === PH_END) return PAR.endTrap;
       if (oppTop) return 35;
       return OWN_TURN_TRAPS.has(code) && myTurn ? 50 : 0;
     }
@@ -300,7 +358,7 @@ function chain(ctx, m) {
   const ck = c => `c${c.code}:${c.description ?? ''}`;
   let best = -1, bestScore = 0;
   m.selects.forEach((c, i) => { if ((ctx.memo.used[ck(c)] || 0) >= 2) return; const s = score(c); if (s > bestScore) { bestScore = s; best = i; } });
-  if (bestScore < 40) return { type: R.SELECT_CHAIN, index: null };
+  if (bestScore < PAR.chainMin) return { type: R.SELECT_CHAIN, index: null };
   const k = ck(m.selects[best]); ctx.memo.used[k] = (ctx.memo.used[k] || 0) + 1;
   return { type: R.SELECT_CHAIN, index: best };
 }
@@ -336,7 +394,7 @@ function chooseCards(ctx, m, list, want) {
     else if (!opp && c.location === L.HAND && (hint === 501 || hint === 504)) s = (gyGood.has(c.code) ? 100000 + v : -v);
     else if (giveUp) s = opp ? 5000 + v : -v + (c.location === L.HAND ? 0 : -200);
     else if (take) s = searchScore(ctx, c, v);
-    else s = opp ? 10000 + v : -v;                       // 対象を取る系：相手の強いカードを優先
+    else s = opp ? 10000 + v + usageBonus(ctx, c) : -v;   // 対象を取る系：相手の強いカードを優先（記事で挙がった対象はさらに優先）
     return { i, s };
   }).sort((a, b) => b.s - a.s);
   return scored.slice(0, n).map(x => x.i);
@@ -351,6 +409,13 @@ function graveyardGood(duel) {
   }
   return duel.data._gyGood;
 }
+// 処理中の自分のカードについて、記事が対象に挙げたカードなら上乗せ
+function usageBonus(ctx, c) {
+  if (!PAR.routeOn) return 0;
+  const src = ctx.duel.chain[ctx.duel.chain.length - 1];
+  const t = src && src.player === ctx.me && ctx.rules?.usageTargets?.[src.code];
+  return t && t.includes(c.code) ? 3000 : 0;
+}
 function searchScore(ctx, c, v) {
   // 今処理している効果のカード（チェーンの一番上）ごとに、記事で推奨された持ってくる順
   const src = ctx.duel.chain[ctx.duel.chain.length - 1];
@@ -364,7 +429,7 @@ function attackTargetScore(ctx, c) {
   if (!q) return 0;
   const la = duel.lastAttack;
   const myAtk = duel.turnPlayer === me && ctx.memo.attackerAtk != null ? ctx.memo.attackerAtk : (la && la.player === me ? la.atk : strongestAtk(f, me));
-  if (q.position & POS.FACEDOWN) return myAtk >= 1900 ? 2500 : 500;
+  if (q.position & POS.FACEDOWN) return myAtk >= PAR.fdAtk ? 2500 : 500;
   const val = q.position & POS.ATTACK ? q.attack : q.defense;
   const win = q.position & POS.ATTACK ? myAtk > q.attack : myAtk > q.defense;
   return win ? 4000 + cardValue(duel, q.code, q) / 10 : 1000 - val;
@@ -373,7 +438,8 @@ function position(ctx, m) {
   const { duel, f, op } = ctx;
   const e = info(duel, m.code);
   const oppMax = strongestAtk(f, op);
-  const wantAtk = e.attack >= e.defense || e.attack > oppMax || e.attack >= 2000;
+  // 相手の一番強いモンスターより強ければ攻撃表示。相手の場に攻撃役がいなければ攻撃力が守備力以上で攻撃表示。それ以外は守備表示
+  const wantAtk = e.attack > oppMax || (oppMax === 0 && e.attack >= e.defense);
   const order = wantAtk ? [POS.FACEUP_ATTACK, POS.FACEUP_DEFENSE, POS.FACEDOWN_DEFENSE, POS.FACEDOWN_ATTACK]
     : [POS.FACEUP_DEFENSE, POS.FACEDOWN_DEFENSE, POS.FACEUP_ATTACK, POS.FACEDOWN_ATTACK];
   return order.find(p => m.positions & p);
@@ -398,5 +464,5 @@ function rulesFor(duel, me) {
   const r = duel.data.raw.aiRules?.[duel.opts.decks[me]];
   if (!r) return null;
   if (!r._sets) r._sets = { threats: new Set(r.threats), hold: new Set(r.hold) };
-  return { searchBy: r.searchBy, threats: r._sets.threats, hold: r._sets.hold };
+  return { searchBy: r.searchBy, threats: r._sets.threats, hold: r._sets.hold, routes: r.routes || [], usageTargets: r.usageTargets || {}, extraOrder: r.extraOrder || [] };
 }

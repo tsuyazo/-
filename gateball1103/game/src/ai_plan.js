@@ -6,13 +6,18 @@ import { OcgMessageType as M, OcgResponseType as R, OcgLocation as L, OcgPositio
 import { Duel, fallback } from './engine.js';
 
 // 1ターンに先読みする回数と、1回の先読みで試す候補数の上限（ブラウザで待たせすぎないため）
-export const PLAN = { perTurn: 12, candidates: 8, steps: 500 };
+// rollouts：1候補あたりの試行数（1回目は普段の判断どおり、2回目以降は eps の確率で別の手を試す）
+export const PLAN = { perTurn: 8, candidates: 8, steps: 500, rollouts: 3, eps: 0.3 };
 
-export function planIdle(ctx, m, greedy, respond, value) {
+// 局面の要求を見分ける印（同じ局面なら同じ文字列になる）
+export function sigOf(q) { return JSON.stringify(q, (k, v) => typeof v === 'bigint' ? `${v}n` : v); }
+
+export function planIdle(ctx, m, greedy, respond, value, P = {}) {
   const { duel, me, memo } = ctx;
-  if (duel.isSim || !duel.lib || PLAN.perTurn <= 0 || duel.opts.level === 'normal') return null;   // 強さ「普通」は先読みしない
+  const perTurn = P.perTurn ?? PLAN.perTurn, rollouts = P.rollouts ?? PLAN.rollouts, eps = P.eps ?? PLAN.eps;
+  if (duel.isSim || !duel.lib || perTurn <= 0 || duel.opts.level === 'normal') return null;   // 強さ「普通」は先読みしない
   memo.plans = memo.plans || 0;
-  if (memo.plans >= PLAN.perTurn) return null;
+  if (memo.plans >= perTurn) return null;
   const cands = candidates(duel, m, greedy);
   if (cands.length < 2) return null;
   memo.plans++;
@@ -20,13 +25,18 @@ export function planIdle(ctx, m, greedy, respond, value) {
   if (duel.lib.memory) duel._snap = new Uint8Array(duel.lib.memory.buffer).slice();
   let best = null;
   for (const c of cands) {
-    const v = rollout(duel, me, c.res, respond, value);
-    if (v == null) continue;
-    // 同じ評価なら普段の判断（greedy）を優先する
-    const score = v + (c.greedy ? 1 : 0);
-    if (!best || score > best.score) best = { ...c, score };
+    for (let j = 0; j < rollouts; j++) {
+      const r = rollout(duel, me, c.res, respond, value, j === 0 ? 0 : eps);
+      if (!r) continue;
+      // 同じ評価なら普段の判断（greedy）を優先する
+      const score = r.v + (c.greedy && j === 0 ? 1 : 0);
+      if (!best || score > best.score) best = { ...c, score, line: r.line };
+    }
   }
   duel._snap = null;
+  // 一番良かった手順を覚えておき、局面が変わらない限りこのターンはそれをなぞる（ai.js の aiRespond）
+  memo.line = best && P.line ? best.line : null;
+  memo.lineOwner = me;
   return best ? best.res : null;
 }
 
@@ -69,14 +79,14 @@ function shadow(duel) {
   });
   return s;
 }
-function rollout(duel, me, first, respond, value) {
+function rollout(duel, me, first, respond, value, eps = 0) {
   const mem = duel.lib.memory;
   if (mem) {
     const snap = duel._snap;
     new Uint8Array(mem.buffer).set(snap);
     const s = shadow(duel);
     duel.simming = true;
-    try { return play(s, me, first, respond, value); }
+    try { return play(s, me, first, respond, value, eps); }
     catch (e) { return null; }
     finally { new Uint8Array(mem.buffer).set(snap); duel.simming = false; }
   }
@@ -88,41 +98,66 @@ function rollout(duel, me, first, respond, value) {
     const st = s.advance();
     if (st !== 'ai' || s.replay.length || s.req.type !== M.SELECT_IDLECMD) return null;
     s.aiMemo = JSON.parse(JSON.stringify(duel.aiMemo));
-    return play(s, me, first, respond, value);
+    return play(s, me, first, respond, value, eps);
   } catch (e) {
     return null;
   } finally {
     s.destroy();
   }
 }
-function play(s, me, first, respond, value) {
-  let st;
-  {
-    s.respond(first);
-    const turn = s.turn;
-    for (let n = 0; n < PLAN.steps; n++) {
-      st = s.advance();
-      if (st === 'end' || s.turn !== turn) break;
-      const q = s.req;
-      if (q.player !== me) {
-        // 相手：表側のカード（場のモンスター・表側の魔法罠＝誰でも見える情報）の効果だけ使う。
-        // 手札・伏せカードは見えないので使わせない（ライオウや王宮の弾圧は読み込める）
-        if (q.type === M.SELECT_CHAIN) {
-          if (q.forced) { s.respond({ type: R.SELECT_CHAIN, index: 0 }); continue; }
-          const pub = q.selects.map((c, i) => ({ c, i })).filter(({ c }) => isPublic(s, c));
-          let index = null;
-          if (pub.length) {
-            const r = respond(s, { ...q, selects: pub.map(x => x.c) });
-            if (r && r.index != null) index = pub[r.index]?.i ?? null;
-          }
-          s.respond({ type: R.SELECT_CHAIN, index }); continue;
+function play(s, me, first, respond, value, eps) {
+  const line = [];
+  s.respond(first);
+  const turn = s.turn;
+  for (let n = 0; n < PLAN.steps; n++) {
+    const st = s.advance();
+    if (st === 'end' || s.turn !== turn) break;
+    const q = s.req;
+    if (q.player !== me) {
+      // 相手：表側のカード（場のモンスター・表側の魔法罠＝誰でも見える情報）の効果だけ使う。
+      // 手札・伏せカードは見えないので使わせない（ライオウや王宮の弾圧は読み込める）
+      if (q.type === M.SELECT_CHAIN) {
+        if (q.forced) { s.respond({ type: R.SELECT_CHAIN, index: 0 }); continue; }
+        const pub = q.selects.map((c, i) => ({ c, i })).filter(({ c }) => isPublic(s, c));
+        let index = null;
+        if (pub.length) {
+          const r = respond(s, { ...q, selects: pub.map(x => x.c) });
+          if (r && r.index != null) index = pub[r.index]?.i ?? null;
         }
-        if (q.type === M.SELECT_EFFECTYN) { s.respond({ type: R.SELECT_EFFECTYN, yes: isPublic(s, q) }); continue; }
+        s.respond({ type: R.SELECT_CHAIN, index }); continue;
       }
+      if (q.type === M.SELECT_EFFECTYN) { s.respond({ type: R.SELECT_EFFECTYN, yes: isPublic(s, q) }); continue; }
       s.respond(s.retry > 1 ? fallback(q) : respond(s, q));
+      continue;
     }
-    return value(s, me);
+    // 自分：普段の判断。eps の確率で別の手を試す（コンボの順番やサーチ先の別の可能性を探す）
+    const sig = sigOf(q);
+    let res = s.retry > 1 ? fallback(q) : (eps && Math.random() < eps && explore(q)) || respond(s, q);
+    line.push({ sig, res });
+    s.respond(res);
   }
+  return { v: value(s, me), line };
+}
+
+// 試しに選ぶ別の手（メインフェイズの行動と、カードの選択だけ。バトルは普段どおり）
+function explore(q) {
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  if (q.type === M.SELECT_IDLECMD) {
+    const opts = [];
+    [[0, 'summons'], [1, 'special_summons'], [3, 'monster_sets'], [5, 'activates']].forEach(([a, f]) => q[f].forEach((_, i) => opts.push([a, i])));
+    if (q.to_bp) opts.push([6, null]); else if (q.to_ep) opts.push([7, null]);
+    if (!opts.length) return null;
+    const [action, index] = pick(opts);
+    return { type: R.SELECT_IDLECMD, action, index };
+  }
+  if (q.type === M.SELECT_CARD && q.selects.length > 1) {
+    const n = Math.max(q.min, 1);
+    if (n > q.max || n > q.selects.length) return null;
+    const idx = [...q.selects.keys()].sort(() => Math.random() - 0.5).slice(0, n);
+    return { type: R.SELECT_CARD, indicies: idx };
+  }
+  if (q.type === M.SELECT_EFFECTYN) return { type: R.SELECT_EFFECTYN, yes: Math.random() < 0.5 };
+  return null;
 }
 
 function isPublic(s, c) {

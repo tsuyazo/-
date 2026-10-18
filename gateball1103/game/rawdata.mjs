@@ -58,6 +58,23 @@ export function loadAiRules(cards, report = false) {
     };
     out[key] = { plan: d.plan || '', searchBy, threats: ids(d.threats), hold: ids(d.hold), guide };
   }
+  // knowhow2/lines.json（展開ルート・カードごとの使い方・エクストラの優先順）
+  const p2 = path.join(ROOT, 'knowhow2/lines.json');
+  if (fs.existsSync(p2)) {
+    const ACT = { normal_summon: 'summon', special_summon: 'special', activate: 'activate', set: 'set', synchro: 'special', xyz: 'special' };
+    for (const [key, d] of Object.entries(JSON.parse(fs.readFileSync(p2)))) {
+      const o = out[key] || (out[key] = { plan: '', searchBy: {}, threats: [], hold: [] });
+      o.routes = (d.routes || []).map(r => ({
+        name: r.name, prio: r.priority || 5, starters: ids(r.starters),
+        steps: (r.steps || []).filter(st => ACT[st.do]).map(st => ({ act: ACT[st.do], id: id(st.card), choose: ids(st.choose) })).filter(st => st.id),
+      })).filter(r => r.starters.length && r.steps.length).sort((a, b) => b.prio - a.prio);
+      // 発動して選ぶカード（サーチ先など）は、ルートの指定を優先する
+      for (const r of o.routes) for (const st of r.steps) if (st.act === 'activate' && st.choose.length && !o.searchBy[st.id]) o.searchBy[st.id] = st.choose;
+      o.usageTargets = {};
+      for (const [name, u] of Object.entries(d.card_usage || {})) { const k = id(name); const t = ids(u.targets); if (k && t.length) o.usageTargets[k] = t; }
+      o.extraOrder = ids(d.extra_priority);
+    }
+  }
   if (report && missing.size) console.error(`ai_rules：名前が合わないカード ${missing.size}件：${[...missing].slice(0, 40).join('、')}`);
   return out;
 }
@@ -79,6 +96,8 @@ export function loadRaw() {
     recipes: JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/recipes_meta.json'))),
     images: fs.existsSync(path.join(HERE, 'card_images.json')) ? JSON.parse(fs.readFileSync(path.join(HERE, 'card_images.json'))) : {},
     aiRules: loadAiRules(cards, process.env.REPORT_RULES === '1'),
+    // CPU同士の対戦で調整したデッキごとの数値（tune.mjs が書く）
+    aiParams: fs.existsSync(path.join(HERE, 'ai_params.json')) ? JSON.parse(fs.readFileSync(path.join(HERE, 'ai_params.json'))) : {},
     effectStrings: renameAll(JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json')))),
     scripts,
   };
