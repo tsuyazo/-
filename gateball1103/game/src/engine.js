@@ -213,6 +213,8 @@ export class Duel {
     }
   }
   // p: その出来事の主体のプレイヤー（分かる場合）。画面側の演出用に uiEvents にも積む
+  // 画面の演出用（召喚・攻撃・ダメージ・発動・場から離れる）。影のデュエルでは積まない
+  fx(e) { if (!this.isSim) this.uiEvents.push({ k: 'fx', ...e }); }
   say(s, p = null) { this.log.push({ t: this.turn, s, p }); this.uiEvents.push({ k: 'log', s, p }); }
   takeUiEvents() { const e = this.uiEvents; this.uiEvents = []; return e; }
   cardLabel(loc, code) {
@@ -231,28 +233,32 @@ export class Duel {
         else if (m.hint_type === HT.OPSELECTED || m.hint_type === HT.EFFECT) { /* 相手の選択の表示は省略 */ }
         break;
       case M.DRAW: this.say(`${n(m.player)}が${m.drawn.length}枚ドロー`, m.player); break;
-      case M.SUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'normal', turn: this.turn }; if (m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`, m.controller); break;
-      case M.SPSUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'special', loc: m.location, turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`, m.controller); break;
-      case M.FLIPSUMMONING: this.lastSummon = { code: m.code, player: m.controller, kind: 'flip', turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`, m.controller); break;
+      case M.SUMMONING: this.fx({ t: 'summon', kind: 'normal', p: m.controller, loc: m.location, seq: m.sequence, code: m.code }); this.lastSummon = { code: m.code, player: m.controller, kind: 'normal', turn: this.turn }; if (m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}が「${D.name(m.code)}」を召喚`, m.controller); break;
+      case M.SPSUMMONING: this.fx({ t: 'summon', kind: 'special', p: m.controller, loc: m.location, seq: m.sequence, code: m.code }); this.lastSummon = { code: m.code, player: m.controller, kind: 'special', loc: m.location, turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を特殊召喚`, m.controller); break;
+      case M.FLIPSUMMONING: this.fx({ t: 'summon', kind: 'flip', p: m.controller, loc: m.location, seq: m.sequence, code: m.code }); this.lastSummon = { code: m.code, player: m.controller, kind: 'flip', turn: this.turn }; this.say(`${n(m.controller)}が「${D.name(m.code)}」を反転召喚`, m.controller); break;
       case M.SET: if (m.location === L.MZONE && m.controller === this.turnPlayer) this.nsUsed = true; this.say(`${n(m.controller)}がカードをセット`, m.controller); break;
       case M.CHAINING:
         this.chain.push({ code: m.code, player: m.controller, desc: m.description });
+        this.fx({ t: 'activate', p: m.controller, loc: m.location, seq: m.sequence, code: m.code, n: m.chain_size });
         this.say(`チェーン${m.chain_size}：${n(m.controller)}の「${D.name(m.code)}」（${D.desc(m.description)}）`, m.controller); break;
       case M.CHAIN_NEGATED: this.say(`チェーン${m.chain_size}の発動が無効になった`); break;
       case M.CHAIN_DISABLED: this.say(`チェーン${m.chain_size}の効果が無効になった`); break;
       case M.CHAIN_SOLVED: this.chain.pop(); break;
       case M.CHAIN_END: this.chain = []; break;
-      case M.DAMAGE: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}に${m.amount}ダメージ（LP ${this.lp[m.player]}）`, m.player); break;
-      case M.RECOVER: this.lp[m.player] += m.amount; this.say(`${n(m.player)}が${m.amount}回復（LP ${this.lp[m.player]}）`, m.player); break;
-      case M.PAY_LPCOST: this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}が${m.amount}LPを払った（LP ${this.lp[m.player]}）`, m.player); break;
+      case M.DAMAGE: this.fx({ t: 'damage', p: m.player, amount: m.amount }); this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}に${m.amount}ダメージ（LP ${this.lp[m.player]}）`, m.player); break;
+      case M.RECOVER: this.fx({ t: 'recover', p: m.player, amount: m.amount }); this.lp[m.player] += m.amount; this.say(`${n(m.player)}が${m.amount}回復（LP ${this.lp[m.player]}）`, m.player); break;
+      case M.PAY_LPCOST: this.fx({ t: 'cost', p: m.player, amount: m.amount }); this.lp[m.player] = Math.max(0, this.lp[m.player] - m.amount); this.say(`${n(m.player)}が${m.amount}LPを払った（LP ${this.lp[m.player]}）`, m.player); break;
       case M.LPUPDATE: this.lp[m.player] = m.lp; break;
       case M.ATTACK: {
         const a = this.query(m.card), t = m.target ? this.query(m.target) : null;
+        this.fx({ t: 'attack', p: m.card.controller, from: { p: m.card.controller, loc: m.card.location, seq: m.card.sequence }, to: m.target ? { p: m.target.controller, loc: m.target.location, seq: m.target.sequence } : null });
         this.lastAttack = { player: m.card.controller, code: a?.code, atk: a?.attack ?? 0, target: t ? { code: t.code, atk: t.attack, def: t.defense, position: t.position } : null, turn: this.turn };
         this.say(`${n(m.card.controller)}の「${D.name(a?.code)}」が${t ? `「${D.name(t.code)}」に` : '直接'}攻撃`, m.card.controller); break;
       }
       case M.MOVE: {
         const f = m.from, t = m.to;
+        if (f.location & L.MZONE && t.location & (L.GRAVE | L.REMOVED) && m.card)
+          this.fx({ t: 'leave', p: f.controller, loc: f.location, seq: f.sequence, to: t.location });
         if (f.location & (L.MZONE | L.SZONE) && t.location & (L.GRAVE | L.REMOVED | L.HAND | L.DECK | L.EXTRA) && m.card)
           this.say(`「${D.name(m.card)}」が${locName(t.location)}へ`);
         break;

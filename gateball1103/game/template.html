@@ -137,6 +137,38 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .hintline{margin:4px 0 8px;font-size:12.5px;color:var(--brass);font-weight:700}
 .li.rec{border-color:var(--brass)!important;box-shadow:0 0 0 1px var(--brass) inset}
 .recmark{font-style:normal;font-weight:700;display:inline-block;background:var(--brass);color:var(--brassInk);font-size:10px;border-radius:3px;padding:0 5px;margin-right:6px;vertical-align:1px}
+/* ---- 演出（召喚・攻撃・ダメージ・発動） ---- */
+#caption.low{top:auto;bottom:16%;transform:translate(-50%,0)}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:24;overflow:hidden}
+.fx{position:absolute;pointer-events:none;will-change:transform,opacity}
+.fx.ring{width:90px;height:90px;border-radius:50%;border:3px solid var(--brass);box-shadow:0 0 18px var(--brass),inset 0 0 14px var(--brass)}
+.fx.ring.special{border-color:#bfe9ff;box-shadow:0 0 22px #8fd3ff,inset 0 0 16px #8fd3ff}
+.fx.ring.flip{border-color:#e8c58a}
+.fx.pillar{width:70px;height:60vh;transform-origin:50% 100%;background:linear-gradient(to top,rgba(190,235,255,.85),rgba(190,235,255,.25) 60%,transparent);filter:blur(2px);mix-blend-mode:screen}
+.fx.tag{font-family:var(--display);font-size:13px;letter-spacing:.06em;white-space:nowrap;color:#fff;text-shadow:0 0 6px var(--brass),0 1px 2px #000}
+.fx.tag.special{text-shadow:0 0 8px #6cc6ff,0 1px 2px #000}
+.fx.srcglow{transform:translate(-50%,-50%);border-radius:4px;box-shadow:0 0 0 2px #fff,0 0 22px 6px var(--glow)}
+.fx.srcglow.spell{--glow:#3fd1a8}.fx.srcglow.trap{--glow:#ff5fb0}.fx.srcglow.monster{--glow:#ffb35c}
+.fx.cutin{display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%)}
+.fx.cutin .ci-band{font-family:var(--display);font-size:22px;letter-spacing:.08em;color:#fff;padding:4px 22px;border-radius:3px;background:var(--band);box-shadow:0 0 24px var(--band);white-space:nowrap}
+.fx.cutin .ci-band small{font-family:var(--body);font-size:11px;margin-left:8px;opacity:.85}
+.fx.cutin .ci-card{width:118px;aspect-ratio:59/86;border-radius:5px;overflow:hidden;background:var(--band);box-shadow:0 0 0 2px #fff,0 0 28px var(--band),0 10px 30px rgba(0,0,0,.6)}
+.fx.cutin .ci-card img{width:100%;height:100%;object-fit:cover;display:block}
+.fx.cutin .ci-blank{width:100%;height:100%;background:repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 6px,transparent 6px 12px)}
+.fx.cutin .ci-name{font-weight:700;font-size:15px;color:#fff;background:rgba(10,6,4,.85);padding:3px 12px;border-radius:3px;max-width:80vw;text-align:center}
+.fx.cutin.spell{--band:#1f9c78}.fx.cutin.trap{--band:#b8306f}.fx.cutin.monster{--band:#c4672a}
+.fx.impact{width:80px;height:80px;transform:translate(-50%,-50%)}
+.fx.impact i{position:absolute;left:50%;top:50%;width:96px;height:6px;margin:-3px 0 0 -48px;border-radius:3px;background:linear-gradient(90deg,transparent,#fff,#ffd27a,#fff,transparent);box-shadow:0 0 12px #ffcf6a}
+.fx.impact i:nth-child(1){transform:rotate(30deg)}.fx.impact i:nth-child(2){transform:rotate(-30deg)}.fx.impact i:nth-child(3){transform:rotate(90deg);width:60px;margin-left:-30px}
+.fx.impact.direct i{background:linear-gradient(90deg,transparent,#fff,#ff6a55,#fff,transparent);box-shadow:0 0 14px #ff5a45}
+.fx.lpnum{font-family:var(--display);font-size:26px;color:var(--hurt);text-shadow:0 0 10px rgba(224,96,79,.8),0 2px 0 #000;white-space:nowrap}
+.fx.lpnum.heavy{font-size:36px}
+.fx.lpnum.recover{color:var(--heal);text-shadow:0 0 10px rgba(127,191,134,.8),0 2px 0 #000}
+.fx.lpnum.cost{font-size:20px;color:#e8a35c;text-shadow:0 2px 0 #000}
+.fx.vignette{inset:0;left:0!important;top:0!important;box-shadow:inset 0 0 90px 10px rgba(224,60,40,.55)}
+.fx.vignette.mine{box-shadow:inset 0 0 120px 24px rgba(224,40,30,.75)}
+.fx.shard{width:7px;height:7px;background:#e9dcc6;box-shadow:0 0 6px rgba(255,220,170,.8);border-radius:1px}
+.fx.shard.ban{background:#b9a3ff;box-shadow:0 0 6px #9a7dff}
 .logbox{font-size:12px;line-height:1.7;display:flex;flex-direction:column-reverse;gap:2px}
 .logbox div{border-bottom:1px solid var(--line);padding-block:2px}
 @media (prefers-reduced-motion:no-preference){ .sheet{animation:up .16s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}} }
@@ -189,6 +221,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 </style>
 <div id="app"><div class="setup"><h1 class="brand">ゲートボール1103<small>デュエルエンジンを読み込み中…</small></h1></div></div>
 <aside id="sidelog" hidden></aside>
+<div id="fx" aria-hidden="true"></div>
 <div id="layer"></div>
 <div id="banner" class="banner" hidden></div>
 <div id="caption" class="caption" hidden></div>

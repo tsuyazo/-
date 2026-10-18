@@ -2,6 +2,7 @@
 import { cardMatchesOpcode } from 'ocgcore-wasm';
 import { Duel, GameData, PHASE_NAME, L, POS, M, R, locName, sumSolve } from './engine.js';
 import { aiRespond } from './ai.js';
+import { playFx } from './fx.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -12,7 +13,7 @@ const SUBTYPE_LABEL = { 同調: 'シンクロ', 重ね: 'エクシーズ', 調�
 const TYPE_COLOR = { 通常: 'normal', 効果: 'effect', 融合: 'fusion', 同調: 'synchro', 重ね: 'xyz' };
 
 let lib, data, duel = null;
-let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'events', speed: 'normal', level: 'strong' };
+let setup = { mode: 'cpu', deck: ['rabbit', 'agent'], first: 'rand', curtain: true, chainMode: 'events', speed: 'normal', level: 'strong', fx: 'on' };
 let view = 0;              // 画面の持ち主（下側に表示するプレイヤー）
 let curtain = false;
 let busy = false;          // CPUが考え中
@@ -93,16 +94,33 @@ async function loop() {
 /* ---------------- 演出：ターン交代の帯、フェイズ、相手の行動の字幕 ---------------- */
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let capCount = 0;   // このターンに出したCPUの字幕の数
+const capWorthy = e => e && e.k === 'log' && e.p != null && setup.mode === 'cpu' && e.p !== view && /召喚|セット|チェーン|攻撃/.test(e.s);
+// 演出で出すカードの情報（種類・名前・画像）
+function fxInfo(code) {
+  const c = data.card(code);
+  const kind = c?.category === '魔法' ? 'spell' : c?.category === '罠' ? 'trap' : 'monster';
+  return { kind, name: esc(data.name(code)), img: imageOf(code) };
+}
 async function playEvents(evs) {
   const fast = setup.speed === 'fast';
-  for (const e of evs) {
+  for (let i = 0; i < evs.length; i++) {
+    const e = evs[i];
+    if (e.k === 'fx') {
+      if (setup.fx === 'off') continue;
+      render();
+      // CPUの行動なら、直後の字幕を演出と同時に出す（待ち時間を増やさない）
+      let cap = null;
+      if (capWorthy(evs[i + 1])) { i++; capCount++; cap = caption(evs[i].s, (fast ? 450 : 1100) * (capCount > 6 ? 0.5 : 1), e.t === 'activate'); }
+      await Promise.all([playFx(e, { speed: fast ? 0.6 : 1, view, info: fxInfo }), cap]);
+      continue;
+    }
     if (e.k === 'turn') {
       capCount = 0;
       render();
       await banner(e.p, e.t, fast ? 700 : 1500);
     } else if (e.k === 'phase') {
       if (e.p !== view || setup.mode === 'pvp') { render(); await wait(fast ? 120 : 380); }
-    } else if (e.k === 'log' && e.p != null && setup.mode === 'cpu' && e.p !== view && /召喚|セット|チェーン|攻撃/.test(e.s)) {
+    } else if (capWorthy(e)) {
       render();
       // 展開の長いターンは、7つ目以降の字幕を短くして待ち時間を減らす
       const long = ++capCount > 6;
@@ -118,9 +136,10 @@ function banner(p, t, ms) {
   el.hidden = false;
   return wait(ms).then(() => { el.hidden = true; });
 }
-function caption(text, ms) {
+function caption(text, ms, low = false) {
   const el = $('#caption');
   el.textContent = text; el.hidden = false;
+  el.classList.toggle('low', low);   // 演出（カットイン）と重ならないよう下に出す
   el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
   return wait(ms).then(() => { el.hidden = true; });
 }
@@ -142,9 +161,9 @@ function render() {
     ${duel.win ? winHTML() : ''}
     <div class="side ${duel.turnPlayer === op ? 'turnside theirs' : ''}">${pilesHTML(op)}${zonesHTML(op, 'sz')}${zonesHTML(op, 'mz')}</div>
     <div class="mid">
-      <div class="lp ${duel.turnPlayer === op ? 'cur' : ''}"><small>${esc(duel.names[op])}${duel.turnPlayer === op ? '（ターン中）' : ''}</small>${duel.lp[op]}</div>
+      <div class="lp ${duel.turnPlayer === op ? 'cur' : ''}" data-lp="${op}"><small>${esc(duel.names[op])}${duel.turnPlayer === op ? '（ターン中）' : ''}</small>${duel.lp[op]}</div>
       <div class="phase"><span class="t">ターン${duel.turn}</span><span class="who ${duel.turnPlayer === me ? 'mine' : 'theirs'}">${esc(duel.names[duel.turnPlayer])}のターン</span><span class="t ns">通常召喚：${duel.nsUsed ? '済' : '未'}</span></div>
-      <div class="lp r ${duel.turnPlayer === me ? 'cur' : ''}"><small>${esc(duel.names[me])}${duel.turnPlayer === me ? '（ターン中）' : ''}</small>${duel.lp[me]}</div>
+      <div class="lp r ${duel.turnPlayer === me ? 'cur' : ''}" data-lp="${me}"><small>${esc(duel.names[me])}${duel.turnPlayer === me ? '（ターン中）' : ''}</small>${duel.lp[me]}</div>
     </div>
     ${phaseStrip()}
     ${duel.chain.length ? `<div class="chain">${duel.chain.map((c, i) => `<span>C${i + 1} ${esc(data.name(c.code))}</span>`).join('')}</div>` : ''}
@@ -214,7 +233,7 @@ function pilesHTML(p) {
 function zonesHTML(p, zone) {
   const arr = F[p][zone];
   const loc = zone === 'mz' ? L.MZONE : L.SZONE;
-  return `<div class="zones">${arr.map((q, i) => `<div class="cell ${zone === 'sz' ? 'st' : ''}">${q ? tileHTML(q, p, loc, i) : ''}</div>`).join('')}</div>`;
+  return `<div class="zones">${arr.map((q, i) => `<div class="cell ${zone === 'sz' ? 'st' : ''}" data-zone="${p}:${loc}:${i}">${q ? tileHTML(q, p, loc, i) : ''}</div>`).join('')}</div>`;
 }
 function hiddenFor(q, p, loc) {
   if (loc === L.HAND) return p !== view && !q.isPublic;
@@ -476,6 +495,7 @@ function moreSheet() {
     { label: 'ログを見る', pri: true, fn: () => setTimeout(logSheet) },
     { label: `チェーン確認：${setup.chainMode === 'events' ? '要所のみ' : '毎回'}`, fn: () => { setup.chainMode = setup.chainMode === 'events' ? 'always' : 'events'; duel.chainMode = setup.chainMode; toast(`チェーン確認を「${setup.chainMode === 'events' ? '要所のみ' : '毎回'}」にしました`); } },
     { label: `CPUの速さ：${setup.speed === 'fast' ? '速い' : 'ゆっくり'}`, fn: () => { setup.speed = setup.speed === 'fast' ? 'normal' : 'fast'; } },
+    { label: `演出：${setup.fx === 'off' ? 'なし' : 'あり'}`, fn: () => { setup.fx = setup.fx === 'off' ? 'on' : 'off'; toast(`演出を「${setup.fx === 'off' ? 'なし' : 'あり'}」にしました`); } },
     { label: '降参する', fn: () => setTimeout(() => sheet(`<h3>降参しますか？</h3><p class="note">このデュエルは負けになり、デッキ選択に戻ります。</p>${btns([{ label: '降参する', fn: quit }, { label: '続ける', pri: true, fn: () => {} }])}`)) },
   ])}`);
 }
