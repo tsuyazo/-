@@ -54,29 +54,39 @@ if (isMainThread) {
     const res = await Promise.all(jobs.map(runJob));
     return res.reduce((w, r) => w + (r.win === r.seat ? 1 : 0), 0) / res.length;
   }
-  function mutate(base) {
+  // 変えても勝敗が変わらなかった数値は選ばれにくくする（めったに使われない数値で時間を使わない）
+  state.weight = state.weight || {};
+  const wOf = (d, k) => state.weight[`${d}:${k}`] ?? 1;
+  function pickName(d, names) {
+    const total = names.reduce((a, k) => a + wOf(d, k), 0);
+    let r = Math.random() * total;
+    for (const k of names) { r -= wOf(d, k); if (r <= 0) return k; }
+    return names[names.length - 1];
+  }
+  function mutate(base, d) {
     const p = { ...base };
     const names = Object.keys(SPACE);
-    const n = 1 + Math.floor(Math.random() * 3);
+    const n = 2 + Math.floor(Math.random() * 4);
     const changed = [];
     for (let i = 0; i < n; i++) {
-      const k = names[Math.floor(Math.random() * names.length)];
+      const k = pickName(d, names);
       const [lo, hi, kind] = SPACE[k];
       let v = kind === 'int' ? lo + Math.floor(Math.random() * (hi - lo + 1))
         : Math.min(hi, Math.max(lo, p[k] * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * (hi - lo) * 0.1));
       if (kind !== 'int') v = Math.round(v * 1000) / 1000;
       p[k] = v; changed.push(`${k}=${v}`);
     }
-    return { p, changed };
+    return { p, changed, keys: changed.map(c => c.split('=')[0]) };
   }
   const diff = (p) => Object.fromEntries(Object.entries(p).filter(([k, v]) => DEFAULTS[k] !== v && !k.startsWith('_')));
 
   for (let r = 0; r < ROUNDS; r++) {
     for (const d of keys) {
       const base = full(d);
-      const { p, changed } = mutate(base);
+      const { p, changed, keys: ks } = mutate(base, d);
       const seeds1 = [state.seed++, state.seed++, state.seed++, state.seed++];
       const [b1, c1] = [await evaluate(d, base, seeds1), await evaluate(d, p, seeds1)];
+      if (c1 === b1) for (const k of ks) state.weight[`${d}:${k}`] = Math.max(0.15, wOf(d, k) * 0.6);
       let verdict = 'reject', b2 = null, c2 = null;
       if (c1 - b1 >= 0.04) {
         const seeds2 = [state.seed++, state.seed++, state.seed++, state.seed++];
