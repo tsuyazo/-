@@ -13,8 +13,10 @@ for (let s = 1; s <= 40; s++) {
     let owed = null;   // 人間がまだ応答していない相手の出来事
     const onMessage = d.onMessage.bind(d);
     d.onMessage = m => {
-      if ((m.type === M.SUMMONED || m.type === M.SPSUMMONED || m.type === M.ATTACK) && d.turnPlayer !== HUMAN) owed = m.type;
       onMessage(m);
+      // 相手（CPU）の召喚・攻撃だけを数える（自分の手札誘発などで自分が召喚したものは除く）
+      const who = m.type === M.ATTACK ? d.lastAttack?.player : d.lastSummon?.player;
+      if ((m.type === M.SUMMONED || m.type === M.SPSUMMONED || m.type === M.ATTACK) && d.turnPlayer !== HUMAN && who !== HUMAN) owed = m.type;
     };
     const auto = d.autoResponse.bind(d);
     d.autoResponse = m => {

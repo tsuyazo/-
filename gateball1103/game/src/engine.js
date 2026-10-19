@@ -295,8 +295,10 @@ export class Duel {
   // オートのチェーン確認で「相手が何かした」とみなす出来事と、その行動をしたプレイヤー
   actorOf(m) {
     switch (m.type) {
-      case M.CHAINING: case M.SUMMONING: case M.SPSUMMONING: case M.FLIPSUMMONING: return m.controller;
-      case M.SUMMONED: case M.SPSUMMONED: case M.FLIPSUMMONED: return this.lastSummon?.player ?? null;
+      case M.SUMMONING: case M.SPSUMMONING: case M.FLIPSUMMONING: this.pendingSummon = m.controller; return m.controller;
+      case M.CHAINING: return m.controller;
+      // 召喚の宣言（SUMMONING 等）の直後でなければ誰の召喚か分からないので、両方に記録する（止まる側に倒す）
+      case M.SUMMONED: case M.SPSUMMONED: case M.FLIPSUMMONED: { const p = this.pendingSummon; this.pendingSummon = null; return p ?? -1; }
       case M.ATTACK: return m.card?.controller ?? null;
       case M.BATTLE: case M.DAMAGE_STEP_START: return this.lastAttack?.player ?? null;
       default: return null;
