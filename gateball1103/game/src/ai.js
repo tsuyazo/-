@@ -13,11 +13,12 @@ import {
 import { planIdle, sigOf } from './ai_plan.js';
 
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
-const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000;
+const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000, T_EFFECT = 0x20;
 const PH_DRAW = 1, PH_STANDBY = 2, PH_MAIN1 = 4, PH_END = 512;
 const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893, HURRICANE = 42703248;
+const SKILL_DRAIN = 82732705, FORBIDDEN_LANCE = 27243130, SCAPEGOAT = 73915051;
 const SELF_TURN_ONLY = new Set([21007444, 32603633]);
-const LOCKS = new Set([29981921, 71564252]);   // シエン・ライオウ
+const LOCKS = new Set([29981921, 71564252, 33198837]);   // シエン・ライオウ・ナチュル・ビースト
 
 // 判断に使う数値。デッキごとの値（ai_params.json、CPU同士の対戦で調整したもの）があればそれを使う
 export const DEFAULTS = {
@@ -315,6 +316,29 @@ function chain(ctx, m) {
       return 60;   // ゴーズなど（条件はエンジンが判定）
     }
     if (DAMAGE_STEP.has(code)) return 70;                                   // ダメージステップで出てくる時は使う
+    // トラップ・スタン：相手が罠を発動した時にチェーンして、その罠を無効にする（ミラーフォース・奈落・激流葬など）
+    if (code === TRAP_STUN) return oppTop && top && (info(duel, top.code).type & T_TRAP) && impact(duel, top.code, ctx.rules) >= 2 ? 85 : 0;
+    // スキルドレイン：相手の効果モンスターが召喚に成功した時か、相手の場に効果の強いモンスターがいる時に表にする
+    if (code === SKILL_DRAIN) {
+      const effMon = q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_EFFECT) && (KEY_THREATS.has(q.code) || cardValue(duel, q.code, q) >= 2200);
+      if (oppSummoned && ls && (info(duel, ls.code).type & T_EFFECT) && (KEY_THREATS.has(ls.code) || summonValue >= 1900 || ctx.rules?.threats.has(ls.code))) return 80;
+      if (oppTop && top && (info(duel, top.code).type & T_MONSTER) && impact(duel, top.code, ctx.rules) >= 2 && lp > 1000) return 75;
+      if (!myTurn && duel.phase === PH_END && f[op].mz.some(effMon) && lp > 1000) return 60;
+      return 0;
+    }
+    // 禁じられた聖槍：攻撃力を800下げて戦闘の勝ち負けを変える（相手の攻撃を返す／自分の攻撃を通す）
+    if (code === FORBIDDEN_LANCE && la && la.target && la.turn === duel.turn) {
+      const tv = la.target.position & POS.DEFENSE ? la.target.def : la.target.atk;
+      if (oppAttacking && la.atk >= tv && la.atk - 800 < tv) return 80;
+      if (myTurn && la.player === me && la.target.position & POS.ATTACK && la.atk <= la.target.atk && la.atk > la.target.atk - 800) return 80;
+      return 0;
+    }
+    // スケープ・ゴート：相手の直接攻撃を止める。相手ターンのエンドフェイズに、素材用に出しておく
+    if (code === SCAPEGOAT) {
+      if (oppAttacking && !la.target && la.atk >= 1200 && !f[me].mz.some(Boolean)) return 85;
+      if (!myTurn && duel.phase === PH_END && f[me].mz.filter(Boolean).length <= 1) return 55;
+      return 0;
+    }
     if (code === BOOK_OF_MOON) {
       // 月の書：強い攻撃を止める／重要なモンスターの召喚成功時に裏にして効果を使わせない
       if (oppAttacking) return la.atk >= PAR.bookAtk || lethal ? 80 : 0;

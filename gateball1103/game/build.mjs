@@ -12,6 +12,7 @@ const out = await esbuild.build({ entryPoints: ['src/main.js'], bundle: true, fo
   target: 'es2020', minifyWhitespace: true, minifySyntax: true, minifyIdentifiers: false, write: false, plugins: [stubJspi], logLevel: 'warning' });
 const js = out.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const raw = loadRaw();
+raw.build = new Date().toISOString();   // 対戦記録の書き出しに入れて、どの版で遊んだ記録かを分かるようにする
 const json = JSON.stringify(raw).replace(/</g, '\\u003c');
 const tpl = fs.readFileSync('template.html', 'utf8');
 const html = tpl.replace('__DATA__', () => json).replace('__APP__', () => js);

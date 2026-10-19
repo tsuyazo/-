@@ -191,7 +191,7 @@ function phaseStrip() {
 }
 const isCommand = r => r.type === M.SELECT_IDLECMD || r.type === M.SELECT_BATTLECMD;
 function toolsHTML() {
-  if (duel.win) return `<button class="go" data-a="rematch">もう一度</button><button data-a="quit">デッキ選択へ</button><button data-a="log">ログ</button><button data-a="more">その他</button>`;
+  if (duel.win) return `<button class="go" data-a="rematch">もう一度</button><button data-a="quit">デッキ選択へ</button><button data-a="export">記録を送る</button><button data-a="more">その他</button>`;
   if (busy) {
     // 相手の番に人間がいる時だけ「ここで止める」を出す（マスターデュエルの長押しにあたる）
     const human = duel.ai.some(a => !a);
@@ -548,8 +548,19 @@ function moreSheet() {
     { label: `チェーン確認：${chainLabel()}（タップで切り替え）`, fn: nextChainMode },
     { label: `CPUの速さ：${setup.speed === 'fast' ? '速い' : 'ゆっくり'}`, fn: () => { setup.speed = setup.speed === 'fast' ? 'normal' : 'fast'; } },
     { label: `演出：${setup.fx === 'off' ? 'なし' : 'あり'}`, fn: () => { setup.fx = setup.fx === 'off' ? 'on' : 'off'; toast(`演出を「${setup.fx === 'off' ? 'なし' : 'あり'}」にしました`); } },
+    { label: '対戦記録をコピー（報告用）', fn: () => setTimeout(exportSheet) },
     { label: '降参する', fn: () => setTimeout(() => sheet(`<h3>降参しますか？</h3><p class="note">このデュエルは負けになり、デッキ選択に戻ります。</p>${btns([{ label: '降参する', fn: quit }, { label: '続ける', pri: true, fn: () => {} }])}`)) },
   ])}`);
+}
+// 対戦記録の書き出し（不具合やCPUの判断の報告用）。全手順を含むので、開発側で同じ対戦をそのまま再現できる
+function exportSheet() {
+  const save = currentSave(); if (!save) return;
+  const text = 'GB1103:' + JSON.stringify({ build: data.raw.build || '', ...save }, (k, v) => typeof v === 'bigint' ? `${v}n` : v);
+  try { navigator.clipboard?.writeText(text).then(() => toast('対戦記録をコピーしました')).catch(() => {}); } catch (e) { /* 手でコピーしてもらう */ }
+  sheet(`<h3>対戦記録</h3><p class="note">気になった場面の直後にこの記録を貼り付けて送ってください。どの場面かを一言（例：「ターン5でCPUが攻撃しなかった」）添えてもらえると、同じ対戦を再現して原因を調べます。自動でコピーされない時は、下の枠を長押し（またはクリック）して全部コピーしてください。</p>
+    <textarea class="export" readonly>${esc(text)}</textarea>${btns([{ label: '閉じる', pri: true, fn: () => {} }])}`);
+  const ta = $('#layer textarea.export');
+  if (ta) { ta.addEventListener('focus', () => ta.select()); ta.addEventListener('click', () => ta.select()); }
 }
 function quit() { if (duel) duel.destroy(); duel = null; pend = null; clearSaved(); render(); }
 function showCurtain() {
@@ -649,6 +660,7 @@ function onClick(e) {
   if (a === 'log') logSheet();
   else if (a === 'more') moreSheet();
   else if (a === 'stop') requestStop();
+  else if (a === 'export') exportSheet();
   else if (a === 'acts' || a === 'prompt') openPrompt();
   else if (a === 'hint' && pend) openPrompt(true);
   else if (a === 'tobp') answer({ type: R.SELECT_IDLECMD, action: 6, index: null });
