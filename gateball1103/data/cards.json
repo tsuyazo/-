@@ -69,6 +69,23 @@
  },
  {
   "code": "GB-005",
+  "id": 72896720,
+  "name": "インフェルニティ・デス・ドラゴン",
+  "category": "モンスター",
+  "subtype": "同調",
+  "level": 8,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "ドラゴン族",
+  "tags": [],
+  "atk": 3000,
+  "def_": 2400,
+  "text": "闇属性チューナー＋チューナー以外のモンスター１体以上\t\n①：自分の手札が０枚の場合、１ターンに１度、相手フィールドのモンスター１体を対象として発動できる（この効果を発動するターン、このカードは攻撃できない）。\nその相手モンスターを破壊し、表側表示モンスターを破壊した場合、その攻撃力の半分のダメージを相手に与える。",
+  "limit": "無制限",
+  "ref": "Infernity Doom Dragon"
+ },
+ {
+  "code": "GB-006",
   "id": 13839120,
   "name": "イエロー・ガジェット",
   "category": "モンスター",
@@ -85,7 +102,7 @@
   "ref": "Yellow Gadget"
  },
  {
-  "code": "GB-006",
+  "code": "GB-007",
   "id": 86445415,
   "name": "レッド・ガジェット",
   "category": "モンスター",
@@ -102,7 +119,7 @@
   "ref": "Red Gadget"
  },
  {
-  "code": "GB-007",
+  "code": "GB-008",
   "id": 41172955,
   "name": "グリーン・ガジェット",
   "category": "モンスター",
@@ -119,7 +136,24 @@
   "ref": "Green Gadget"
  },
  {
-  "code": "GB-008",
+  "code": "GB-009",
+  "id": 23693634,
+  "name": "ギガンテック・ファイター",
+  "category": "モンスター",
+  "subtype": "同調",
+  "level": 8,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 2800,
+  "def_": 1000,
+  "text": "チューナー＋チューナー以外のモンスター１体以上\t\n①：このカードの攻撃力は、お互いの墓地の戦士族モンスターの数×１００アップする。\n②：このカードが戦闘で破壊され墓地へ送られた時、自分か相手の墓地の戦士族モンスター１体を対象として発動できる。\nその戦士族モンスターを自分フィールドに特殊召喚する。",
+  "limit": "無制限",
+  "ref": "Colossal Fighter"
+ },
+ {
+  "code": "GB-010",
   "id": 25259669,
   "name": "ゴブリンドバーグ",
   "category": "モンスター",
@@ -136,24 +170,24 @@
   "ref": "Goblindbergh"
  },
  {
-  "code": "GB-009",
-  "id": 42810973,
-  "name": "ジャンク・アーチャー",
+  "code": "GB-011",
+  "id": 43385557,
+  "name": "マジカル・アンドロイド",
   "category": "モンスター",
   "subtype": "同調",
-  "level": 7,
+  "level": 5,
   "rank_or_level": "レベル",
-  "attribute": "地",
-  "race": "戦士族",
+  "attribute": "光",
+  "race": "サイキック族",
   "tags": [],
-  "atk": 2300,
-  "def_": 2000,
-  "text": "「ジャンク・シンクロン」＋チューナー以外のモンスター1体以上\n1ターンに1度、相手フィールドのモンスター1体を対象として発動できる。そのモンスターを除外する。除外したモンスターはこのターンのエンドフェイズに相手フィールドに戻る。",
+  "atk": 2400,
+  "def_": 1700,
+  "text": "チューナー＋チューナー以外のモンスター1体以上\n自分のエンドフェイズ毎に、自分フィールドのサイキック族モンスターの数×600LP回復する。",
   "limit": "無制限",
-  "ref": "Junk Archer"
+  "ref": "Magical Android"
  },
  {
-  "code": "GB-010",
+  "code": "GB-012",
   "id": 74860293,
   "name": "ジャンク・デストロイヤー",
   "category": "モンスター",
@@ -170,24 +204,24 @@
   "ref": "Junk Destroyer"
  },
  {
-  "code": "GB-011",
-  "id": 60800381,
-  "name": "ジャンク・ウォリアー",
+  "code": "GB-013",
+  "id": 91133740,
+  "name": "スノーマンイーター",
   "category": "モンスター",
-  "subtype": "同調",
-  "level": 5,
+  "subtype": "効果",
+  "level": 3,
   "rank_or_level": "レベル",
-  "attribute": "闇",
-  "race": "戦士族",
+  "attribute": "水",
+  "race": "水族",
   "tags": [],
-  "atk": 2300,
-  "def_": 1300,
-  "text": "「ジャンク・シンクロン」＋チューナー以外のモンスター1体以上\nこのカードがシンクロ召喚に成功した時、このカードの攻撃力は、自分フィールドのレベル2以下のモンスターの攻撃力の合計分アップする。",
+  "atk": 0,
+  "def_": 1900,
+  "text": "①：このカードがリバースした場合、フィールドの表側表示モンスター１体を対象として発動する。\nその表側表示モンスターを破壊する。",
   "limit": "無制限",
-  "ref": "Junk Warrior"
+  "ref": "Snowman Eater"
  },
  {
-  "code": "GB-012",
+  "code": "GB-014",
   "id": 3429238,
   "name": "ドリル・ウォリアー",
   "category": "モンスター",
@@ -204,26 +238,24 @@
   "ref": "Drill Warrior"
  },
  {
-  "code": "GB-013",
-  "id": 15310033,
-  "name": "アンノウン・シンクロン",
+  "code": "GB-015",
+  "id": 18013090,
+  "name": "ニトロ・ウォリアー",
   "category": "モンスター",
-  "subtype": "効果",
-  "level": 1,
+  "subtype": "同調",
+  "level": 7,
   "rank_or_level": "レベル",
-  "attribute": "闇",
-  "race": "機械族",
-  "tags": [
-   "調律"
-  ],
-  "atk": 0,
-  "def_": 0,
-  "text": "（チューナー）相手フィールドにモンスターが存在し、自分フィールドにモンスターが存在しない場合、このカードは手札から特殊召喚できる。（回数制限なし）",
+  "attribute": "炎",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 2800,
+  "def_": 1800,
+  "text": "「ニトロ・シンクロン」＋チューナー以外のモンスター１体以上\t\n①：このカードがモンスターゾーンに存在する限り、自分ターンに自分が魔法カードを発動した場合、このカードの攻撃力はそのターンのダメージ計算時のみ１度だけ１０００アップする。\n②：このカードの攻撃で相手モンスターを破壊したダメージ計算後、相手フィールドの表側守備表示モンスター１体を対象として発動できる。\nその相手の表側守備表示モンスターを攻撃表示にし、このカードはそのモンスターにもう１度だけ続けて攻撃できる。",
   "limit": "無制限",
-  "ref": "Unknown Synchron"
+  "ref": "Nitro Warrior"
  },
  {
-  "code": "GB-014",
+  "code": "GB-016",
   "id": 20932152,
   "name": "クイック・シンクロン",
   "category": "モンスター",
@@ -242,7 +274,7 @@
   "ref": "Quickdraw Synchron"
  },
  {
-  "code": "GB-015",
+  "code": "GB-017",
   "id": 63977008,
   "name": "ジャンク・シンクロン",
   "category": "モンスター",
@@ -261,7 +293,7 @@
   "ref": "Junk Synchron"
  },
  {
-  "code": "GB-016",
+  "code": "GB-018",
   "id": 50091196,
   "name": "フォーミュラ・シンクロン",
   "category": "モンスター",
@@ -280,7 +312,24 @@
   "ref": "Formula Synchron"
  },
  {
-  "code": "GB-017",
+  "code": "GB-019",
+  "id": 51119924,
+  "name": "パペット・プラント",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 3,
+  "rank_or_level": "レベル",
+  "attribute": "地",
+  "race": "植物族",
+  "tags": [],
+  "atk": 1000,
+  "def_": 1000,
+  "text": "①：このカードを手札から墓地へ捨て、相手フィールドの戦士族・魔法使い族モンスター１体を対象として発動できる。\nその戦士族・魔法使い族モンスターのコントロールをエンドフェイズまで得る。",
+  "limit": "無制限",
+  "ref": "Puppet Plant"
+ },
+ {
+  "code": "GB-020",
   "id": 97268402,
   "name": "エフェクト・ヴェーラー",
   "category": "モンスター",
@@ -299,7 +348,24 @@
   "ref": "Effect Veiler"
  },
  {
-  "code": "GB-018",
+  "code": "GB-021",
+  "id": 33365932,
+  "name": "ヴォルカニック・バレット",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 1,
+  "rank_or_level": "レベル",
+  "attribute": "炎",
+  "race": "炎族",
+  "tags": [],
+  "atk": 100,
+  "def_": 0,
+  "text": "①：このカードが墓地に存在する場合、１ターンに１度、５００ＬＰを払って発動できる。\nこのカードが墓地に存在する場合、デッキから「ヴォルカニック・バレット」１体を手札に加える。",
+  "limit": "無制限",
+  "ref": "Volcanic Shell"
+ },
+ {
+  "code": "GB-022",
   "id": 26202165,
   "name": "クリッター",
   "category": "モンスター",
@@ -316,24 +382,7 @@
   "ref": "Sangan"
  },
  {
-  "code": "GB-019",
-  "id": 57421866,
-  "name": "レベル・スティーラー",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 1,
-  "rank_or_level": "レベル",
-  "attribute": "闇",
-  "race": "昆虫族",
-  "tags": [],
-  "atk": 600,
-  "def_": 0,
-  "text": "このカードが墓地に存在する場合、自分フィールドのレベル5以上のモンスター1体を対象として発動できる。そのモンスターのレベルを1つ下げ、このカードを墓地から特殊召喚する。フィールドのこのカードは、アドバンス召喚以外のためにはリリースできない。",
-  "limit": "無制限",
-  "ref": "Level Eater"
- },
- {
-  "code": "GB-020",
+  "code": "GB-023",
   "id": 37926346,
   "name": "インヴェルズ・ローチ",
   "category": "モンスター",
@@ -350,24 +399,7 @@
   "ref": "Steelswarm Roach"
  },
  {
-  "code": "GB-021",
-  "id": 5220687,
-  "name": "素早いビッグハムスター",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 4,
-  "rank_or_level": "レベル",
-  "attribute": "地",
-  "race": "獣族",
-  "tags": [],
-  "atk": 1100,
-  "def_": 1800,
-  "text": "（リバース）このカードがリバースした時、デッキからレベル3以下の獣族モンスター1体を裏側守備表示で特殊召喚できる。",
-  "limit": "無制限",
-  "ref": "Super-Nimble Mega Hamster"
- },
- {
-  "code": "GB-022",
+  "code": "GB-024",
   "id": 76372778,
   "name": "イビリチュア・メロウガイスト",
   "category": "モンスター",
@@ -384,7 +416,7 @@
   "ref": "Evigishki Merrowgeist"
  },
  {
-  "code": "GB-023",
+  "code": "GB-025",
   "id": 16304628,
   "name": "E・HERO ガイア",
   "category": "モンスター",
@@ -401,7 +433,7 @@
   "ref": "Elemental HERO Gaia"
  },
  {
-  "code": "GB-024",
+  "code": "GB-026",
   "id": 40044918,
   "name": "E・HERO エアーマン",
   "category": "モンスター",
@@ -418,7 +450,7 @@
   "ref": "Elemental HERO Stratos"
  },
  {
-  "code": "GB-025",
+  "code": "GB-027",
   "id": 33574806,
   "name": "E・HERO エスクリダオ",
   "category": "モンスター",
@@ -435,7 +467,7 @@
   "ref": "Elemental HERO Escuridao"
  },
  {
-  "code": "GB-026",
+  "code": "GB-028",
   "id": 37195861,
   "name": "E・HERO オーシャン",
   "category": "モンスター",
@@ -452,7 +484,7 @@
   "ref": "Elemental HERO Ocean"
  },
  {
-  "code": "GB-027",
+  "code": "GB-029",
   "id": 3642509,
   "name": "E・HERO Great TORNADO",
   "category": "モンスター",
@@ -469,7 +501,7 @@
   "ref": "Elemental HERO Great Tornado"
  },
  {
-  "code": "GB-028",
+  "code": "GB-030",
   "id": 69884162,
   "name": "E・HERO アナザー・ネオス",
   "category": "モンスター",
@@ -488,7 +520,7 @@
   "ref": "Elemental HERO Neos Alius"
  },
  {
-  "code": "GB-029",
+  "code": "GB-031",
   "id": 79979666,
   "name": "E・HERO バブルマン",
   "category": "モンスター",
@@ -505,7 +537,7 @@
   "ref": "Elemental HERO Bubbleman"
  },
  {
-  "code": "GB-030",
+  "code": "GB-032",
   "id": 1945387,
   "name": "E・HERO ノヴァマスター",
   "category": "モンスター",
@@ -522,7 +554,7 @@
   "ref": "Elemental HERO Nova Master"
  },
  {
-  "code": "GB-031",
+  "code": "GB-033",
   "id": 40854197,
   "name": "E・HERO アブソルートZero",
   "category": "モンスター",
@@ -539,7 +571,7 @@
   "ref": "Elemental HERO Absolute Zero"
  },
  {
-  "code": "GB-032",
+  "code": "GB-034",
   "id": 22061412,
   "name": "E・HERO The シャイニング",
   "category": "モンスター",
@@ -556,7 +588,7 @@
   "ref": "Elemental HERO The Shining"
  },
  {
-  "code": "GB-033",
+  "code": "GB-035",
   "id": 39552864,
   "name": "神聖なる球体",
   "category": "モンスター",
@@ -573,7 +605,24 @@
   "ref": "Mystical Shine Ball"
  },
  {
-  "code": "GB-034",
+  "code": "GB-036",
+  "id": 37742478,
+  "name": "オネスト",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 4,
+  "rank_or_level": "レベル",
+  "attribute": "光",
+  "race": "天使族",
+  "tags": [],
+  "atk": 1100,
+  "def_": 1900,
+  "text": "自分のメインフェイズに、フィールドの表側表示のこのカードを持ち主の手札に戻す事ができる。自分の光属性モンスターが戦闘を行うダメージステップ時に、このカードを手札から墓地へ送って発動できる。そのモンスターの攻撃力は、ターン終了時まで戦闘を行う相手モンスターの攻撃力分アップする。",
+  "limit": "制限",
+  "ref": "Honest"
+ },
+ {
+  "code": "GB-037",
   "id": 21502796,
   "name": "ライトロード・ハンター ライコウ",
   "category": "モンスター",
@@ -590,24 +639,24 @@
   "ref": "Ryko, Lightsworn Hunter"
  },
  {
-  "code": "GB-035",
-  "id": 22624373,
-  "name": "ライトロード・マジシャン ライラ",
+  "code": "GB-038",
+  "id": 27782503,
+  "name": "六武衆-イロウ",
   "category": "モンスター",
   "subtype": "効果",
   "level": 4,
   "rank_or_level": "レベル",
-  "attribute": "光",
-  "race": "魔法使い族",
+  "attribute": "闇",
+  "race": "戦士族",
   "tags": [],
   "atk": 1700,
-  "def_": 200,
-  "text": "自分フィールドの表側攻撃表示のこのカードを守備表示にし、相手フィールドの魔法・罠カード1枚を対象として発動できる。そのカードを破壊する。この効果を発動した後、次の自分ターンの終了時までこのカードの表示形式は変更できない。自分のエンドフェイズに、自分のデッキの上からカードを3枚墓地へ送る。",
+  "def_": 1200,
+  "text": "①：このカードが裏側守備表示モンスターを攻撃するダメージステップ開始時に発動する（この効果は自分フィールドに「六武衆－イロウ」以外の「六武衆」モンスターが存在する場合に発動と処理を行う）。\nその裏側守備表示モンスターを破壊する。\n②：フィールドのこのカードが破壊される場合、代わりに自分フィールドの「六武衆」モンスター１体を破壊できる。",
   "limit": "無制限",
-  "ref": "Lyla, Lightsworn Sorceress"
+  "ref": "The Six Samurai - Irou"
  },
  {
-  "code": "GB-036",
+  "code": "GB-039",
   "id": 44330098,
   "name": "冥府の使者ゴーズ",
   "category": "モンスター",
@@ -624,7 +673,7 @@
   "ref": "Gorz the Emissary of Darkness"
  },
  {
-  "code": "GB-037",
+  "code": "GB-040",
   "id": 69069911,
   "name": "カチコチドラゴン",
   "category": "モンスター",
@@ -641,24 +690,7 @@
   "ref": "Kachi Kochi Dragon"
  },
  {
-  "code": "GB-038",
-  "id": 53855409,
-  "name": "ドッペル・ウォリアー",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 2,
-  "rank_or_level": "レベル",
-  "attribute": "闇",
-  "race": "戦士族",
-  "tags": [],
-  "atk": 800,
-  "def_": 800,
-  "text": "自分の墓地のモンスターが特殊召喚に成功した時（ダメージステップ以外）、このカードを手札から特殊召喚できる。このカードがシンクロ素材として墓地へ送られた時、自分フィールドに「ドッペル・トークン」（戦士族・闇・星1・攻/守400）2体を攻撃表示で特殊召喚できる。",
-  "limit": "無制限",
-  "ref": "Doppelwarrior"
- },
- {
-  "code": "GB-039",
+  "code": "GB-041",
   "id": 37265642,
   "name": "セイバーザウルス",
   "category": "モンスター",
@@ -675,7 +707,7 @@
   "ref": "Sabersaurus"
  },
  {
-  "code": "GB-040",
+  "code": "GB-042",
   "id": 64734921,
   "name": "創造の代行者 ヴィーナス",
   "category": "モンスター",
@@ -692,7 +724,7 @@
   "ref": "The Agent of Creation - Venus"
  },
  {
-  "code": "GB-041",
+  "code": "GB-043",
   "id": 52352005,
   "name": "XX-セイバー ガトムズ",
   "category": "モンスター",
@@ -709,7 +741,7 @@
   "ref": "XX-Saber Gottoms"
  },
  {
-  "code": "GB-042",
+  "code": "GB-044",
   "id": 25862681,
   "name": "エンシェント・フェアリー・ドラゴン",
   "category": "モンスター",
@@ -726,26 +758,43 @@
   "ref": "Ancient Fairy Dragon"
  },
  {
-  "code": "GB-043",
-  "id": 22835145,
-  "name": "BF-極北のブリザード",
+  "code": "GB-045",
+  "id": 4906301,
+  "name": "ネクロ・ガードナー",
   "category": "モンスター",
   "subtype": "効果",
-  "level": 2,
+  "level": 3,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 600,
+  "def_": 1300,
+  "text": "相手ターンに、自分の墓地のこのカードを除外して発動できる。このターン、相手モンスター1体の攻撃を無効にする。",
+  "limit": "制限",
+  "ref": "Necro Gardna"
+ },
+ {
+  "code": "GB-046",
+  "id": 72714392,
+  "name": "BF-大旆のヴァーユ",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 1,
   "rank_or_level": "レベル",
   "attribute": "闇",
   "race": "鳥獣族",
   "tags": [
    "調律"
   ],
-  "atk": 1300,
+  "atk": 800,
   "def_": 0,
-  "text": "（チューナー）このカードは特殊召喚できない。このカードが召喚に成功した時、自分の墓地のレベル4以下の「BF」モンスター1体を対象として発動できる。そのモンスターを表側守備表示で特殊召喚する。",
+  "text": "（チューナー）フィールドの表側表示のこのカードはシンクロ素材にできない。このカードが墓地に存在する場合、自分の墓地のチューナー以外の「BF」モンスター1体を対象として発動できる。このカードとそのモンスターを除外し、除外したモンスターのレベルの合計と同じレベルの「BF」シンクロモンスター1体を、効果を無効にしてエクストラデッキから特殊召喚する。",
   "limit": "無制限",
-  "ref": "Blackwing - Blizzard the Far North"
+  "ref": "Blackwing - Vayu the Emblem of Honor"
  },
  {
-  "code": "GB-044",
+  "code": "GB-047",
   "id": 2009101,
   "name": "BF-疾風のゲイル",
   "category": "モンスター",
@@ -764,24 +813,24 @@
   "ref": "Blackwing - Gale the Whirlwind"
  },
  {
-  "code": "GB-045",
-  "id": 85215458,
-  "name": "BF-月影のカルート",
+  "code": "GB-048",
+  "id": 75498415,
+  "name": "BF-暁のシロッコ",
   "category": "モンスター",
   "subtype": "効果",
-  "level": 3,
+  "level": 5,
   "rank_or_level": "レベル",
   "attribute": "闇",
   "race": "鳥獣族",
   "tags": [],
-  "atk": 1400,
-  "def_": 1000,
-  "text": "自分の「BF」モンスターが戦闘を行うダメージステップ時に、このカードを手札から墓地へ送って発動できる。そのモンスターの攻撃力はターン終了時まで1400アップする。",
-  "limit": "制限",
-  "ref": "Blackwing - Kalut the Moon Shadow"
+  "atk": 2000,
+  "def_": 900,
+  "text": "相手フィールドにモンスターが存在し、自分フィールドにモンスターが存在しない場合、このカードはリリースなしで召喚できる。1ターンに1度、自分のメインフェイズ1に自分フィールドの「BF」モンスター1体を対象として発動できる。そのモンスターの攻撃力は、ターン終了時まで、フィールドのそれ以外の「BF」モンスターの攻撃力の合計分アップする。このターン、対象モンスター以外は攻撃できない。",
+  "limit": "無制限",
+  "ref": "Blackwing - Sirocco the Dawn"
  },
  {
-  "code": "GB-046",
+  "code": "GB-049",
   "id": 14785765,
   "name": "BF-精鋭のゼピュロス",
   "category": "モンスター",
@@ -798,41 +847,24 @@
   "ref": "Blackwing - Zephyros the Elite"
  },
  {
-  "code": "GB-047",
-  "id": 58820853,
-  "name": "BF-蒼炎のシュラ",
+  "code": "GB-050",
+  "id": 33236860,
+  "name": "BF-孤高のシルバー・ウィンド",
   "category": "モンスター",
-  "subtype": "効果",
-  "level": 4,
+  "subtype": "同調",
+  "level": 8,
   "rank_or_level": "レベル",
   "attribute": "闇",
   "race": "鳥獣族",
   "tags": [],
-  "atk": 1800,
-  "def_": 1200,
-  "text": "このカードが戦闘で相手モンスターを破壊し墓地へ送った時、自分のデッキから攻撃力1500以下の「BF」モンスター1体を特殊召喚できる。この効果で特殊召喚したモンスターの効果は無効化される。",
+  "atk": 2800,
+  "def_": 2000,
+  "text": "「BF」チューナー＋チューナー以外のモンスター2体以上\nこのカードがシンクロ召喚に成功した時、このカードの攻撃力より低い守備力を持つフィールドの表側表示モンスターを2体まで対象として破壊できる。この効果を発動するターン、自分はバトルフェイズを行えない。相手ターン毎に1度、自分フィールドの「BF」モンスターが戦闘で破壊される場合、代わりにその破壊を無効にする。",
   "limit": "無制限",
-  "ref": "Blackwing - Shura the Blue Flame"
+  "ref": "Blackwing - Silverwind the Ascendant"
  },
  {
-  "code": "GB-048",
-  "id": 49003716,
-  "name": "BF-黒槍のブラスト",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 4,
-  "rank_or_level": "レベル",
-  "attribute": "闇",
-  "race": "鳥獣族",
-  "tags": [],
-  "atk": 1700,
-  "def_": 800,
-  "text": "自分フィールドに「BF-黒槍のブラスト」以外の「BF」モンスターが存在する場合、このカードは手札から特殊召喚できる。このカードが守備表示モンスターを攻撃した場合、その守備力を攻撃力が超えた分だけ戦闘ダメージを与える。",
-  "limit": "無制限",
-  "ref": "Blackwing - Bora the Spear"
- },
- {
-  "code": "GB-049",
+  "code": "GB-051",
   "id": 76913983,
   "name": "BF-アームズ・ウィング",
   "category": "モンスター",
@@ -849,7 +881,7 @@
   "ref": "Blackwing Armed Wing"
  },
  {
-  "code": "GB-050",
+  "code": "GB-052",
   "id": 69031175,
   "name": "BF-アーマード・ウィング",
   "category": "モンスター",
@@ -866,7 +898,7 @@
   "ref": "Blackwing Armor Master"
  },
  {
-  "code": "GB-051",
+  "code": "GB-053",
   "id": 97204936,
   "name": "大地の騎士ガイアナイト",
   "category": "モンスター",
@@ -883,7 +915,7 @@
   "ref": "Gaia Knight, the Force of Earth"
  },
  {
-  "code": "GB-052",
+  "code": "GB-054",
   "id": 29981921,
   "name": "真六武衆-シエン",
   "category": "モンスター",
@@ -900,7 +932,7 @@
   "ref": "Legendary Six Samurai - Shi En"
  },
  {
-  "code": "GB-053",
+  "code": "GB-055",
   "id": 75326861,
   "name": "天刑王 ブラック・ハイランダー",
   "category": "モンスター",
@@ -917,7 +949,7 @@
   "ref": "Dark Highlander"
  },
  {
-  "code": "GB-054",
+  "code": "GB-056",
   "id": 48686504,
   "name": "ローンファイア・ブロッサム",
   "category": "モンスター",
@@ -934,7 +966,26 @@
   "ref": "Lonefire Blossom"
  },
  {
-  "code": "GB-055",
+  "code": "GB-057",
+  "id": 33420078,
+  "name": "ゾンビキャリア",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 2,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "アンデット族",
+  "tags": [
+   "調律"
+  ],
+  "atk": 400,
+  "def_": 200,
+  "text": "このカードが墓地に存在する場合、手札を1枚デッキの一番上に戻して発動できる。このカードを墓地から特殊召喚する。この効果で特殊召喚したこのカードは、フィールドから離れた場合除外される。",
+  "limit": "制限",
+  "ref": "Plaguespreader Zombie"
+ },
+ {
+  "code": "GB-058",
   "id": 45170821,
   "name": "V・HERO アドレイション",
   "category": "モンスター",
@@ -951,7 +1002,7 @@
   "ref": "Vision HERO Adoration"
  },
  {
-  "code": "GB-056",
+  "code": "GB-059",
   "id": 76774528,
   "name": "スクラップ・ドラゴン",
   "category": "モンスター",
@@ -968,7 +1019,7 @@
   "ref": "Scrap Dragon"
  },
  {
-  "code": "GB-057",
+  "code": "GB-060",
   "id": 85087012,
   "name": "カードガンナー",
   "category": "モンスター",
@@ -985,7 +1036,7 @@
   "ref": "Card Trooper"
  },
  {
-  "code": "GB-058",
+  "code": "GB-061",
   "id": 70780151,
   "name": "メンタルスフィア・デーモン",
   "category": "モンスター",
@@ -1002,7 +1053,7 @@
   "ref": "Thought Ruler Archfiend"
  },
  {
-  "code": "GB-059",
+  "code": "GB-062",
   "id": 98777036,
   "name": "トラゴエディア",
   "category": "モンスター",
@@ -1019,7 +1070,7 @@
   "ref": "Tragoedia"
  },
  {
-  "code": "GB-060",
+  "code": "GB-063",
   "id": 69247929,
   "name": "ジェネティック・ワーウルフ",
   "category": "モンスター",
@@ -1036,7 +1087,7 @@
   "ref": "Gene-Warped Warwolf"
  },
  {
-  "code": "GB-061",
+  "code": "GB-064",
   "id": 85138716,
   "name": "レスキューラビット",
   "category": "モンスター",
@@ -1053,7 +1104,7 @@
   "ref": "Rescue Rabbit"
  },
  {
-  "code": "GB-062",
+  "code": "GB-065",
   "id": 55794644,
   "name": "マスター・ヒュペリオン",
   "category": "モンスター",
@@ -1070,7 +1121,7 @@
   "ref": "Master Hyperion"
  },
  {
-  "code": "GB-063",
+  "code": "GB-066",
   "id": 80344569,
   "name": "N・グラン・モール",
   "category": "モンスター",
@@ -1087,7 +1138,7 @@
   "ref": "Neo-Spacian Grand Mole"
  },
  {
-  "code": "GB-064",
+  "code": "GB-067",
   "id": 83011277,
   "name": "キラー・トマト",
   "category": "モンスター",
@@ -1104,7 +1155,7 @@
   "ref": "Mystic Tomato"
  },
  {
-  "code": "GB-065",
+  "code": "GB-068",
   "id": 65192027,
   "name": "ダーク・アームド・ドラゴン",
   "category": "モンスター",
@@ -1121,7 +1172,7 @@
   "ref": "Dark Armed Dragon"
  },
  {
-  "code": "GB-066",
+  "code": "GB-069",
   "id": 43932460,
   "name": "ナチュル・ランドオルス",
   "category": "モンスター",
@@ -1138,7 +1189,7 @@
   "ref": "Naturia Landoise"
  },
  {
-  "code": "GB-067",
+  "code": "GB-070",
   "id": 33198837,
   "name": "ナチュル・ビースト",
   "category": "モンスター",
@@ -1155,7 +1206,7 @@
   "ref": "Naturia Beast"
  },
  {
-  "code": "GB-068",
+  "code": "GB-071",
   "id": 2956282,
   "name": "ナチュル・パルキオン",
   "category": "モンスター",
@@ -1172,24 +1223,7 @@
   "ref": "Naturia Barkion"
  },
  {
-  "code": "GB-069",
-  "id": 35952884,
-  "name": "シューティング・クェーサー・ドラゴン",
-  "category": "モンスター",
-  "subtype": "同調",
-  "level": 12,
-  "rank_or_level": "レベル",
-  "attribute": "光",
-  "race": "ドラゴン族",
-  "tags": [],
-  "atk": 4000,
-  "def_": 4000,
-  "text": "シンクロモンスターのチューナー＋チューナー以外のシンクロモンスター2体以上\nこのカードはシンクロ召喚でしか特殊召喚できない。このカードは、シンクロ素材にしたチューナー以外のモンスターの数まで1度のバトルフェイズ中に攻撃できる。1ターンに1度、魔法・罠・効果モンスターの効果が発動した時に発動できる。その発動を無効にし破壊する。表側表示のこのカードがフィールドを離れた時、エクストラデッキから「シューティング・スター・ドラゴン」1体を特殊召喚できる。",
-  "limit": "無制限",
-  "ref": "Shooting Quasar Dragon"
- },
- {
-  "code": "GB-070",
+  "code": "GB-072",
   "id": 39987164,
   "name": "ヴァイロン・ディシグマ",
   "category": "モンスター",
@@ -1206,7 +1240,7 @@
   "ref": "Vylon Disigma"
  },
  {
-  "code": "GB-071",
+  "code": "GB-073",
   "id": 3846170,
   "name": "カラクリ兵 弐参六",
   "category": "モンスター",
@@ -1223,7 +1257,7 @@
   "ref": "Karakuri Soldier mdl 236 \"Nisamu\""
  },
  {
-  "code": "GB-072",
+  "code": "GB-074",
   "id": 30230789,
   "name": "カラクリ商人 壱七七",
   "category": "モンスター",
@@ -1240,7 +1274,7 @@
   "ref": "Karakuri Merchant mdl 177 \"Inashichi\""
  },
  {
-  "code": "GB-073",
+  "code": "GB-075",
   "id": 24621460,
   "name": "カラクリ小町 弐弐四",
   "category": "モンスター",
@@ -1259,7 +1293,7 @@
   "ref": "Karakuri Komachi mdl 224 \"Ninishi\""
  },
  {
-  "code": "GB-074",
+  "code": "GB-076",
   "id": 23874409,
   "name": "カラクリ将軍 無零",
   "category": "モンスター",
@@ -1276,7 +1310,7 @@
   "ref": "Karakuri Shogun mdl 00 \"Burei\""
  },
  {
-  "code": "GB-075",
+  "code": "GB-077",
   "id": 6276588,
   "name": "カラクリ忍者 九壱九",
   "category": "モンスター",
@@ -1293,7 +1327,7 @@
   "ref": "Karakuri Ninja mdl 919 \"Kuick\""
  },
  {
-  "code": "GB-076",
+  "code": "GB-078",
   "id": 70271583,
   "name": "カラクリ守衛 参壱参",
   "category": "モンスター",
@@ -1312,7 +1346,7 @@
   "ref": "Karakuri Watchdog mdl 313 \"Saizan\""
  },
  {
-  "code": "GB-077",
+  "code": "GB-079",
   "id": 66625883,
   "name": "カラクリ参謀 弐四八",
   "category": "モンスター",
@@ -1331,7 +1365,7 @@
   "ref": "Karakuri Strategist mdl 248 \"Nishipachi\""
  },
  {
-  "code": "GB-078",
+  "code": "GB-080",
   "id": 66976526,
   "name": "カラクリ大将軍 無零怒",
   "category": "モンスター",
@@ -1348,7 +1382,7 @@
   "ref": "Karakuri Steel Shogun mdl 00X \"Bureido\""
  },
  {
-  "code": "GB-079",
+  "code": "GB-081",
   "id": 89112729,
   "name": "メカ・ザウルス",
   "category": "モンスター",
@@ -1365,7 +1399,7 @@
   "ref": "Cyber Saurus"
  },
  {
-  "code": "GB-080",
+  "code": "GB-082",
   "id": 9888196,
   "name": "A・O・J ディサイシブ・アームズ",
   "category": "モンスター",
@@ -1382,7 +1416,7 @@
   "ref": "Ally of Justice Decisive Armor"
  },
  {
-  "code": "GB-081",
+  "code": "GB-083",
   "id": 26593852,
   "name": "A・O・J カタストル",
   "category": "モンスター",
@@ -1399,41 +1433,24 @@
   "ref": "Ally of Justice Catastor"
  },
  {
-  "code": "GB-082",
-  "id": 64398890,
-  "name": "六武衆-ヤイチ",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 3,
-  "rank_or_level": "レベル",
-  "attribute": "水",
-  "race": "戦士族",
-  "tags": [],
-  "atk": 1300,
-  "def_": 800,
-  "text": "1ターンに1度、自分フィールドにこのカード以外の「六武衆」モンスターが存在する場合、フィールドの裏側表示の魔法・罠カード1枚を対象として発動できる。そのカードを破壊する。この効果を発動するターン、このカードは攻撃宣言できない。フィールドのこのカードが破壊される場合、代わりに自分フィールドの「六武衆」モンスター1体を破壊できる。",
-  "limit": "無制限",
-  "ref": "The Six Samurai - Yaichi"
- },
- {
-  "code": "GB-083",
-  "id": 78792195,
-  "name": "六武衆の露払い",
-  "category": "モンスター",
-  "subtype": "効果",
-  "level": 3,
-  "rank_or_level": "レベル",
-  "attribute": "炎",
-  "race": "戦士族",
-  "tags": [],
-  "atk": 1600,
-  "def_": 1000,
-  "text": "自分フィールドにこのカード以外の「六武衆」モンスターが存在する場合、自分フィールドの「六武衆」モンスター1体をリリースし、フィールドのモンスター1体を対象として発動できる。そのモンスターを破壊する。",
-  "limit": "無制限",
-  "ref": "Hand of the Six Samurai"
- },
- {
   "code": "GB-084",
+  "id": 95519486,
+  "name": "六武衆-ザンジ",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 4,
+  "rank_or_level": "レベル",
+  "attribute": "光",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 1800,
+  "def_": 1300,
+  "text": "自分フィールドにこのカード以外の「六武衆」モンスターが存在する場合、このカードが攻撃したモンスターをダメージステップ終了時に破壊する。フィールドのこのカードが破壊される場合、代わりにこのカード以外の自分フィールドの「六武衆」モンスター1体を破壊できる。",
+  "limit": "無制限",
+  "ref": "The Six Samurai - Zanji"
+ },
+ {
+  "code": "GB-085",
   "id": 83039729,
   "name": "六武衆の師範",
   "category": "モンスター",
@@ -1450,7 +1467,7 @@
   "ref": "Grandmaster of the Six Samurai"
  },
  {
-  "code": "GB-085",
+  "code": "GB-086",
   "id": 1498130,
   "name": "六武衆の影武者",
   "category": "モンスター",
@@ -1469,7 +1486,7 @@
   "ref": "Kagemusha of the Six Samurai"
  },
  {
-  "code": "GB-086",
+  "code": "GB-087",
   "id": 61737116,
   "name": "六武衆のご隠居",
   "category": "モンスター",
@@ -1486,7 +1503,7 @@
   "ref": "Elder of the Six Samurai"
  },
  {
-  "code": "GB-087",
+  "code": "GB-088",
   "id": 29071332,
   "name": "アームズ・エイド",
   "category": "モンスター",
@@ -1503,7 +1520,7 @@
   "ref": "Armory Arm"
  },
  {
-  "code": "GB-088",
+  "code": "GB-089",
   "id": 52687916,
   "name": "氷結界の龍 トリシューラ",
   "category": "モンスター",
@@ -1520,7 +1537,7 @@
   "ref": "Trishula, Dragon of the Ice Barrier"
  },
  {
-  "code": "GB-089",
+  "code": "GB-090",
   "id": 50321796,
   "name": "氷結界の龍 ブリューナク",
   "category": "モンスター",
@@ -1537,7 +1554,24 @@
   "ref": "Brionac, Dragon of the Ice Barrier"
  },
  {
-  "code": "GB-090",
+  "code": "GB-091",
+  "id": 65749035,
+  "name": "氷結界の龍 グングニール",
+  "category": "モンスター",
+  "subtype": "同調",
+  "level": 7,
+  "rank_or_level": "レベル",
+  "attribute": "水",
+  "race": "ドラゴン族",
+  "tags": [],
+  "atk": 2500,
+  "def_": 1700,
+  "text": "チューナー＋チューナー以外の水属性モンスター１体以上\t\n①：１ターンに１度、手札を２枚まで墓地へ捨て、捨てた数だけ相手フィールドのカードを対象として発動できる。\nそのカードを破壊する。",
+  "limit": "無制限",
+  "ref": "Gungnir, Dragon of the Ice Barrier"
+ },
+ {
+  "code": "GB-092",
   "id": 44508094,
   "name": "スターダスト・ドラゴン",
   "category": "モンスター",
@@ -1554,7 +1588,7 @@
   "ref": "Stardust Dragon"
  },
  {
-  "code": "GB-091",
+  "code": "GB-093",
   "id": 76891401,
   "name": "神海竜ギシルノドン",
   "category": "モンスター",
@@ -1571,7 +1605,7 @@
   "ref": "Sea Dragon Lord Gishilnodon"
  },
  {
-  "code": "GB-092",
+  "code": "GB-094",
   "id": 9596126,
   "name": "カオス・ソーサラー",
   "category": "モンスター",
@@ -1588,7 +1622,7 @@
   "ref": "Chaos Sorcerer"
  },
  {
-  "code": "GB-093",
+  "code": "GB-095",
   "id": 36407615,
   "name": "デーモン・カオス・キング",
   "category": "モンスター",
@@ -1605,7 +1639,7 @@
   "ref": "Chaos King Archfiend"
  },
  {
-  "code": "GB-094",
+  "code": "GB-096",
   "id": 14943837,
   "name": "デブリ・ドラゴン",
   "category": "モンスター",
@@ -1624,7 +1658,7 @@
   "ref": "Debris Dragon"
  },
  {
-  "code": "GB-095",
+  "code": "GB-097",
   "id": 2766877,
   "name": "ダイガスタ・フェニクス",
   "category": "モンスター",
@@ -1641,7 +1675,7 @@
   "ref": "Daigusto Phoenix"
  },
  {
-  "code": "GB-096",
+  "code": "GB-098",
   "id": 68597372,
   "name": "発条機甲ゼンマイスター",
   "category": "モンスター",
@@ -1658,7 +1692,7 @@
   "ref": "Wind-Up Zenmaister"
  },
  {
-  "code": "GB-097",
+  "code": "GB-099",
   "id": 49721904,
   "name": "真六武衆-キザン",
   "category": "モンスター",
@@ -1675,7 +1709,7 @@
   "ref": "Legendary Six Samurai - Kizan"
  },
  {
-  "code": "GB-098",
+  "code": "GB-100",
   "id": 2511717,
   "name": "真六武衆-カゲキ",
   "category": "モンスター",
@@ -1692,7 +1726,24 @@
   "ref": "Legendary Six Samurai - Kageki"
  },
  {
-  "code": "GB-099",
+  "code": "GB-101",
+  "id": 75116619,
+  "name": "真六武衆-エニシ",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 4,
+  "rank_or_level": "レベル",
+  "attribute": "光",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 1700,
+  "def_": 700,
+  "text": "1ターンに1度、自分の墓地の「六武衆」モンスター2体を除外し、フィールドの表側表示モンスター1体を対象として発動できる。そのモンスターを持ち主の手札に戻す。この効果は相手ターンでも発動でき、自分フィールドにこのカード以外の「六武衆」モンスターが存在する場合のみ発動・適用できる。自分フィールドにこのカード以外の「六武衆」モンスターが2体以上存在する場合、このカードの攻撃力・守備力は500アップする。",
+  "limit": "無制限",
+  "ref": "Legendary Six Samurai - Enishi"
+ },
+ {
+  "code": "GB-102",
   "id": 71594310,
   "name": "ジェムナイト・パール",
   "category": "モンスター",
@@ -1709,7 +1760,7 @@
   "ref": "Gem-Knight Pearl"
  },
  {
-  "code": "GB-100",
+  "code": "GB-103",
   "id": 54541900,
   "name": "カルボナーラ戦士",
   "category": "モンスター",
@@ -1726,7 +1777,7 @@
   "ref": "Karbonala Warrior"
  },
  {
-  "code": "GB-101",
+  "code": "GB-104",
   "id": 91188343,
   "name": "神秘の代行者 アース",
   "category": "モンスター",
@@ -1745,24 +1796,7 @@
   "ref": "The Agent of Mystery - Earth"
  },
  {
-  "code": "GB-102",
-  "id": 31924889,
-  "name": "アーカナイト・マジシャン",
-  "category": "モンスター",
-  "subtype": "同調",
-  "level": 7,
-  "rank_or_level": "レベル",
-  "attribute": "光",
-  "race": "魔法使い族",
-  "tags": [],
-  "atk": 400,
-  "def_": 1800,
-  "text": "チューナー＋チューナー以外の魔法使い族モンスター1体以上\nこのカードがシンクロ召喚に成功した時、このカードに魔力カウンターを2つ置く。このカードの攻撃力は、このカードの魔力カウンターの数×1000アップする。自分フィールドの魔力カウンターを1つ取り除いて、フィールドのカード1枚を対象として発動できる。そのカードを破壊する。",
-  "limit": "無制限",
-  "ref": "Arcanite Magician"
- },
- {
-  "code": "GB-103",
+  "code": "GB-105",
   "id": 88643579,
   "name": "ダークエンド・ドラゴン",
   "category": "モンスター",
@@ -1779,7 +1813,24 @@
   "ref": "Dark End Dragon"
  },
  {
-  "code": "GB-104",
+  "code": "GB-106",
+  "id": 28985331,
+  "name": "終末の騎士",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 4,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 1400,
+  "def_": 1200,
+  "text": "このカードが召喚・反転召喚・特殊召喚に成功した時、自分のデッキから闇属性モンスター1体を墓地へ送る事ができる。",
+  "limit": "無制限",
+  "ref": "Armageddon Knight"
+ },
+ {
+  "code": "GB-107",
   "id": 15341821,
   "name": "ダンディライオン",
   "category": "モンスター",
@@ -1796,7 +1847,7 @@
   "ref": "Dandylion"
  },
  {
-  "code": "GB-105",
+  "code": "GB-108",
   "id": 67441435,
   "name": "グローアップ・バルブ",
   "category": "モンスター",
@@ -1815,7 +1866,7 @@
   "ref": "Glow-Up Bulb"
  },
  {
-  "code": "GB-106",
+  "code": "GB-109",
   "id": 11747708,
   "name": "スポーア",
   "category": "モンスター",
@@ -1834,7 +1885,7 @@
   "ref": "Spore"
  },
  {
-  "code": "GB-107",
+  "code": "GB-110",
   "id": 95992081,
   "name": "虚空海竜リヴァイエール",
   "category": "モンスター",
@@ -1851,24 +1902,7 @@
   "ref": "Leviair the Sea Dragon"
  },
  {
-  "code": "GB-108",
-  "id": 2322421,
-  "name": "ロード・ウォリアー",
-  "category": "モンスター",
-  "subtype": "同調",
-  "level": 8,
-  "rank_or_level": "レベル",
-  "attribute": "光",
-  "race": "戦士族",
-  "tags": [],
-  "atk": 3000,
-  "def_": 1500,
-  "text": "「ロード・シンクロン」＋チューナー以外のモンスター2体以上\n1ターンに1度、自分のメインフェイズに発動できる。デッキからレベル2以下の戦士族・機械族モンスター1体を特殊召喚する。",
-  "limit": "無制限",
-  "ref": "Road Warrior"
- },
- {
-  "code": "GB-109",
+  "code": "GB-111",
   "id": 74294676,
   "name": "エヴォルカイザー・ラギア",
   "category": "モンスター",
@@ -1885,7 +1919,7 @@
   "ref": "Evolzar Laggia"
  },
  {
-  "code": "GB-110",
+  "code": "GB-112",
   "id": 293542,
   "name": "TG ワーウルフ",
   "category": "モンスター",
@@ -1902,7 +1936,7 @@
   "ref": "T.G. Warwolf"
  },
  {
-  "code": "GB-111",
+  "code": "GB-113",
   "id": 1315120,
   "name": "TG ストライカー",
   "category": "モンスター",
@@ -1921,7 +1955,7 @@
   "ref": "T.G. Striker"
  },
  {
-  "code": "GB-112",
+  "code": "GB-114",
   "id": 90953320,
   "name": "TG ハイパー・ライブラリアン",
   "category": "モンスター",
@@ -1938,7 +1972,7 @@
   "ref": "T.G. Hyper Librarian"
  },
  {
-  "code": "GB-113",
+  "code": "GB-115",
   "id": 98558751,
   "name": "TG ワンダー・マジシャン",
   "category": "モンスター",
@@ -1957,7 +1991,7 @@
   "ref": "T.G. Wonder Magician"
  },
  {
-  "code": "GB-114",
+  "code": "GB-116",
   "id": 47217354,
   "name": "魔轟神レイヴン",
   "category": "モンスター",
@@ -1976,7 +2010,7 @@
   "ref": "Fabled Raven"
  },
  {
-  "code": "GB-115",
+  "code": "GB-117",
   "id": 39477584,
   "name": "魔轟神レヴュアタン",
   "category": "モンスター",
@@ -1993,7 +2027,7 @@
   "ref": "Fabled Leviathan"
  },
  {
-  "code": "GB-116",
+  "code": "GB-118",
   "id": 10002346,
   "name": "ガチガチガンテツ",
   "category": "モンスター",
@@ -2010,7 +2044,7 @@
   "ref": "Gachi Gachi Gantetsu"
  },
  {
-  "code": "GB-117",
+  "code": "GB-119",
   "id": 19974580,
   "name": "C・ドラゴン",
   "category": "モンスター",
@@ -2027,7 +2061,24 @@
   "ref": "Iron Chain Dragon"
  },
  {
-  "code": "GB-118",
+  "code": "GB-120",
+  "id": 14536035,
+  "name": "ダーク・グレファー",
+  "category": "モンスター",
+  "subtype": "効果",
+  "level": 4,
+  "rank_or_level": "レベル",
+  "attribute": "闇",
+  "race": "戦士族",
+  "tags": [],
+  "atk": 1700,
+  "def_": 1600,
+  "text": "このカードは手札からレベル5以上の闇属性モンスター1体を捨てて、手札から特殊召喚できる。1ターンに1度、手札から闇属性モンスター1体を捨てて発動できる。自分のデッキから闇属性モンスター1体を墓地へ送る。",
+  "limit": "無制限",
+  "ref": "Dark Grepher"
+ },
+ {
+  "code": "GB-121",
   "id": 71564252,
   "name": "ライオウ",
   "category": "モンスター",
@@ -2044,7 +2095,7 @@
   "ref": "Thunder King Rai-Oh"
  },
  {
-  "code": "GB-119",
+  "code": "GB-122",
   "id": 79229522,
   "name": "キメラテック・フォートレス・ドラゴン",
   "category": "モンスター",
@@ -2061,7 +2112,7 @@
   "ref": "Chimeratech Fortress Dragon"
  },
  {
-  "code": "GB-120",
+  "code": "GB-123",
   "id": 23205979,
   "name": "魂を削る死霊",
   "category": "モンスター",
@@ -2078,7 +2129,7 @@
   "ref": "Spirit Reaper"
  },
  {
-  "code": "GB-121",
+  "code": "GB-124",
   "id": 71413901,
   "name": "魔導戦士 ブレイカー",
   "category": "モンスター",
@@ -2095,7 +2146,7 @@
   "ref": "Breaker the Magical Warrior"
  },
  {
-  "code": "GB-122",
+  "code": "GB-125",
   "id": 60228941,
   "name": "暗黒界の術師 スノウ",
   "category": "モンスター",
@@ -2112,7 +2163,7 @@
   "ref": "Snoww, Unlight of Dark World"
  },
  {
-  "code": "GB-123",
+  "code": "GB-126",
   "id": 33731070,
   "name": "暗黒界の尖兵 ベージ",
   "category": "モンスター",
@@ -2129,7 +2180,7 @@
   "ref": "Beiige, Vanguard of Dark World"
  },
  {
-  "code": "GB-124",
+  "code": "GB-127",
   "id": 78004197,
   "name": "暗黒界の武神 ゴルド",
   "category": "モンスター",
@@ -2146,7 +2197,7 @@
   "ref": "Goldd, Wu-Lord of Dark World"
  },
  {
-  "code": "GB-125",
+  "code": "GB-128",
   "id": 79126789,
   "name": "暗黒界の狩人 ブラウ",
   "category": "モンスター",
@@ -2163,7 +2214,7 @@
   "ref": "Broww, Huntsman of Dark World"
  },
  {
-  "code": "GB-126",
+  "code": "GB-129",
   "id": 32619583,
   "name": "暗黒界の軍神 シルバ",
   "category": "モンスター",
@@ -2180,7 +2231,7 @@
   "ref": "Sillva, Warlord of Dark World"
  },
  {
-  "code": "GB-127",
+  "code": "GB-130",
   "id": 34230233,
   "name": "暗黒界の龍神 グラファ",
   "category": "モンスター",
@@ -2197,7 +2248,7 @@
   "ref": "Grapha, Dragon Lord of Dark World"
  },
  {
-  "code": "GB-128",
+  "code": "GB-131",
   "id": 73580471,
   "name": "ブラック・ローズ・ドラゴン",
   "category": "モンスター",
@@ -2214,7 +2265,7 @@
   "ref": "Black Rose Dragon"
  },
  {
-  "code": "GB-129",
+  "code": "GB-132",
   "id": 2295440,
   "name": "ワン・フォー・ワン",
   "category": "魔法",
@@ -2224,7 +2275,7 @@
   "ref": "One for One"
  },
  {
-  "code": "GB-130",
+  "code": "GB-133",
   "id": 33846209,
   "name": "デュアルスパーク",
   "category": "魔法",
@@ -2234,7 +2285,7 @@
   "ref": "Gemini Spark"
  },
  {
-  "code": "GB-131",
+  "code": "GB-134",
   "id": 94886282,
   "name": "光の援軍",
   "category": "魔法",
@@ -2244,7 +2295,7 @@
   "ref": "Charge of the Light Brigade"
  },
  {
-  "code": "GB-132",
+  "code": "GB-135",
   "id": 37318031,
   "name": "R-ライトジャスティス",
   "category": "魔法",
@@ -2254,7 +2305,7 @@
   "ref": "R - Righteous Justice"
  },
  {
-  "code": "GB-133",
+  "code": "GB-136",
   "id": 8949584,
   "name": "ヒーローアライブ",
   "category": "魔法",
@@ -2264,17 +2315,7 @@
   "ref": "A Hero Lives"
  },
  {
-  "code": "GB-134",
-  "id": 91351370,
-  "name": "黒い旋風",
-  "category": "魔法",
-  "subtype": "永続",
-  "text": "（永続魔法）自分フィールドに「BF」モンスターが召喚された時、そのモンスターより攻撃力が低い「BF」モンスター1体を自分のデッキから手札に加える事ができる。",
-  "limit": "制限",
-  "ref": "Black Whirlwind"
- },
- {
-  "code": "GB-135",
+  "code": "GB-137",
   "id": 97169186,
   "name": "地砕き",
   "category": "魔法",
@@ -2284,7 +2325,7 @@
   "ref": "Smashing Ground"
  },
  {
-  "code": "GB-136",
+  "code": "GB-138",
   "id": 42703248,
   "name": "ハリケーン",
   "category": "魔法",
@@ -2294,7 +2335,7 @@
   "ref": "Giant Trunade"
  },
  {
-  "code": "GB-137",
+  "code": "GB-139",
   "id": 45906428,
   "name": "ミラクル・フュージョン",
   "category": "魔法",
@@ -2304,7 +2345,7 @@
   "ref": "Miracle Fusion"
  },
  {
-  "code": "GB-138",
+  "code": "GB-140",
   "id": 81439173,
   "name": "おろかな埋葬",
   "category": "魔法",
@@ -2314,7 +2355,7 @@
   "ref": "Foolish Burial"
  },
  {
-  "code": "GB-139",
+  "code": "GB-141",
   "id": 70368879,
   "name": "成金ゴブリン",
   "category": "魔法",
@@ -2324,7 +2365,7 @@
   "ref": "Upstart Goblin"
  },
  {
-  "code": "GB-140",
+  "code": "GB-142",
   "id": 72892473,
   "name": "手札抹殺",
   "category": "魔法",
@@ -2334,7 +2375,7 @@
   "ref": "Card Destruction"
  },
  {
-  "code": "GB-141",
+  "code": "GB-143",
   "id": 32807846,
   "name": "増援",
   "category": "魔法",
@@ -2344,7 +2385,7 @@
   "ref": "Reinforcement of the Army"
  },
  {
-  "code": "GB-142",
+  "code": "GB-144",
   "id": 14087893,
   "name": "月の書",
   "category": "魔法",
@@ -2354,7 +2395,7 @@
   "ref": "Book of Moon"
  },
  {
-  "code": "GB-143",
+  "code": "GB-145",
   "id": 77565204,
   "name": "未来融合-フューチャー・フュージョン",
   "category": "魔法",
@@ -2364,7 +2405,7 @@
   "ref": "Future Fusion"
  },
  {
-  "code": "GB-144",
+  "code": "GB-146",
   "id": 48130397,
   "name": "超融合",
   "category": "魔法",
@@ -2374,7 +2415,7 @@
   "ref": "Super Polymerization"
  },
  {
-  "code": "GB-145",
+  "code": "GB-147",
   "id": 80204957,
   "name": "借カラクリ蔵",
   "category": "魔法",
@@ -2384,7 +2425,7 @@
   "ref": "Karakuri Cash Cache"
  },
  {
-  "code": "GB-146",
+  "code": "GB-148",
   "id": 85541675,
   "name": "カラクリ解体新書",
   "category": "魔法",
@@ -2394,7 +2435,7 @@
   "ref": "Karakuri Anatomy"
  },
  {
-  "code": "GB-147",
+  "code": "GB-149",
   "id": 67169062,
   "name": "貪欲な壺",
   "category": "魔法",
@@ -2404,7 +2445,7 @@
   "ref": "Pot of Avarice"
  },
  {
-  "code": "GB-148",
+  "code": "GB-150",
   "id": 72345736,
   "name": "六武衆の結束",
   "category": "魔法",
@@ -2414,7 +2455,7 @@
   "ref": "Six Samurai United"
  },
  {
-  "code": "GB-149",
+  "code": "GB-151",
   "id": 27821104,
   "name": "六武衆の荒行",
   "category": "魔法",
@@ -2424,7 +2465,7 @@
   "ref": "Asceticism of the Six Samurai"
  },
  {
-  "code": "GB-150",
+  "code": "GB-152",
   "id": 27970830,
   "name": "六武の門",
   "category": "魔法",
@@ -2434,7 +2475,7 @@
   "ref": "Gateway of the Six"
  },
  {
-  "code": "GB-151",
+  "code": "GB-153",
   "id": 83764718,
   "name": "死者蘇生",
   "category": "魔法",
@@ -2444,7 +2485,7 @@
   "ref": "Monster Reborn"
  },
  {
-  "code": "GB-152",
+  "code": "GB-154",
   "id": 1845204,
   "name": "簡易融合",
   "category": "魔法",
@@ -2454,7 +2495,17 @@
   "ref": "Instant Fusion"
  },
  {
-  "code": "GB-153",
+  "code": "GB-155",
+  "id": 48976825,
+  "name": "異次元からの埋葬",
+  "category": "魔法",
+  "subtype": "速攻",
+  "text": "①：自分・相手の除外状態のモンスターを合計３体まで対象として発動できる。\nそのモンスターを墓地に戻す。",
+  "limit": "制限",
+  "ref": "Burial from a Different Dimension"
+ },
+ {
+  "code": "GB-156",
   "id": 5318639,
   "name": "サイクロン",
   "category": "魔法",
@@ -2464,7 +2515,7 @@
   "ref": "Mystical Space Typhoon"
  },
  {
-  "code": "GB-154",
+  "code": "GB-157",
   "id": 27243130,
   "name": "禁じられた聖槍",
   "category": "魔法",
@@ -2474,7 +2525,7 @@
   "ref": "Forbidden Lance"
  },
  {
-  "code": "GB-155",
+  "code": "GB-158",
   "id": 37520316,
   "name": "精神操作",
   "category": "魔法",
@@ -2484,7 +2535,7 @@
   "ref": "Mind Control"
  },
  {
-  "code": "GB-156",
+  "code": "GB-159",
   "id": 213326,
   "name": "E-エマージェンシーコール",
   "category": "魔法",
@@ -2494,7 +2545,7 @@
   "ref": "E - Emergency Call"
  },
  {
-  "code": "GB-157",
+  "code": "GB-160",
   "id": 54031490,
   "name": "紫炎の狼煙",
   "category": "魔法",
@@ -2504,7 +2555,7 @@
   "ref": "Shien's Smoke Signal"
  },
  {
-  "code": "GB-158",
+  "code": "GB-161",
   "id": 53129443,
   "name": "ブラック・ホール",
   "category": "魔法",
@@ -2514,7 +2565,7 @@
   "ref": "Dark Hole"
  },
  {
-  "code": "GB-159",
+  "code": "GB-162",
   "id": 96363153,
   "name": "調律",
   "category": "魔法",
@@ -2524,7 +2575,7 @@
   "ref": "Tuning"
  },
  {
-  "code": "GB-160",
+  "code": "GB-163",
   "id": 98645731,
   "name": "強欲で謙虚な壺",
   "category": "魔法",
@@ -2534,7 +2585,7 @@
   "ref": "Pot of Duality"
  },
  {
-  "code": "GB-161",
+  "code": "GB-164",
   "id": 69279219,
   "name": "我が身を盾に",
   "category": "魔法",
@@ -2544,7 +2595,7 @@
   "ref": "My Body as a Shield"
  },
  {
-  "code": "GB-162",
+  "code": "GB-165",
   "id": 73915051,
   "name": "スケープ・ゴート",
   "category": "魔法",
@@ -2554,7 +2605,7 @@
   "ref": "Scapegoat"
  },
  {
-  "code": "GB-163",
+  "code": "GB-166",
   "id": 16435215,
   "name": "墓穴の道連れ",
   "category": "魔法",
@@ -2564,7 +2615,17 @@
   "ref": "Dragged Down into the Grave"
  },
  {
-  "code": "GB-164",
+  "code": "GB-167",
+  "id": 1475311,
+  "name": "闇の誘惑",
+  "category": "魔法",
+  "subtype": "通常",
+  "text": "自分のデッキから2枚ドローし、その後手札の闇属性モンスター1体を除外する。手札に闇属性モンスターが無い場合、手札を全て墓地へ送る。",
+  "limit": "制限",
+  "ref": "Allure of Darkness"
+ },
+ {
+  "code": "GB-168",
   "id": 74117290,
   "name": "暗黒界の取引",
   "category": "魔法",
@@ -2574,7 +2635,7 @@
   "ref": "Dark World Dealings"
  },
  {
-  "code": "GB-165",
+  "code": "GB-169",
   "id": 33017655,
   "name": "暗黒界の門",
   "category": "魔法",
@@ -2584,7 +2645,7 @@
   "ref": "The Gates of Dark World"
  },
  {
-  "code": "GB-166",
+  "code": "GB-170",
   "id": 93554166,
   "name": "暗黒界の雷",
   "category": "魔法",
@@ -2594,17 +2655,27 @@
   "ref": "Dark World Lightning"
  },
  {
-  "code": "GB-167",
-  "id": 59839761,
-  "name": "デルタ・クロウ-アンチ・リバース",
+  "code": "GB-171",
+  "id": 4178474,
+  "name": "サンダー・ブレイク",
   "category": "罠",
   "subtype": "通常",
-  "text": "自分フィールドに「BF」モンスターが存在する場合に発動できる。相手フィールドにセットされた魔法・罠カードを全て破壊する。自分フィールドに「BF」モンスターがちょうど3体存在する場合、このカードは手札からも発動できる。",
+  "text": "①：手札を１枚捨て、フィールドのカード１枚を対象として発動できる。\nそのカードを破壊する。",
   "limit": "無制限",
-  "ref": "Delta Crow - Anti Reverse"
+  "ref": "Raigeki Break"
  },
  {
-  "code": "GB-168",
+  "code": "GB-172",
+  "id": 50078509,
+  "name": "デモンズ・チェーン",
+  "category": "罠",
+  "subtype": "永続",
+  "text": "フィールドの効果モンスター１体を対象としてこのカードを発動できる。\n①：このカードが魔法＆罠ゾーンに存在する限り、対象の表側表示モンスターは攻撃できず、効果は無効化される。\n対象のモンスターが破壊された時にこのカードは破壊される。",
+  "limit": "無制限",
+  "ref": "Fiendish Chain"
+ },
+ {
+  "code": "GB-173",
   "id": 37412656,
   "name": "ヒーロー・ブラスト",
   "category": "罠",
@@ -2614,7 +2685,7 @@
   "ref": "Hero Blast"
  },
  {
-  "code": "GB-169",
+  "code": "GB-174",
   "id": 41458579,
   "name": "六尺瓊勾玉",
   "category": "罠",
@@ -2624,7 +2695,7 @@
   "ref": "Musakani Magatama"
  },
  {
-  "code": "GB-170",
+  "code": "GB-175",
   "id": 44095762,
   "name": "聖なるバリア -ミラーフォース-",
   "category": "罠",
@@ -2634,7 +2705,7 @@
   "ref": "Mirror Force"
  },
  {
-  "code": "GB-171",
+  "code": "GB-176",
   "id": 53567095,
   "name": "ゴッドバードアタック",
   "category": "罠",
@@ -2644,7 +2715,7 @@
   "ref": "Icarus Attack"
  },
  {
-  "code": "GB-172",
+  "code": "GB-177",
   "id": 53582587,
   "name": "激流葬",
   "category": "罠",
@@ -2654,7 +2725,7 @@
   "ref": "Torrential Tribute"
  },
  {
-  "code": "GB-173",
+  "code": "GB-178",
   "id": 41420027,
   "name": "神の宣告",
   "category": "罠",
@@ -2664,7 +2735,7 @@
   "ref": "Solemn Judgment"
  },
  {
-  "code": "GB-174",
+  "code": "GB-179",
   "id": 84749824,
   "name": "神の警告",
   "category": "罠",
@@ -2674,7 +2745,7 @@
   "ref": "Solemn Warning"
  },
  {
-  "code": "GB-175",
+  "code": "GB-180",
   "id": 29401950,
   "name": "奈落の落とし穴",
   "category": "罠",
@@ -2684,7 +2755,7 @@
   "ref": "Bottomless Trap Hole"
  },
  {
-  "code": "GB-176",
+  "code": "GB-181",
   "id": 64697231,
   "name": "ダスト・シュート",
   "category": "罠",
@@ -2694,7 +2765,7 @@
   "ref": "Trap Dustshoot"
  },
  {
-  "code": "GB-177",
+  "code": "GB-182",
   "id": 98427577,
   "name": "くず鉄のかかし",
   "category": "罠",
@@ -2704,7 +2775,7 @@
   "ref": "Scrap-Iron Scarecrow"
  },
  {
-  "code": "GB-178",
+  "code": "GB-183",
   "id": 94192409,
   "name": "強制脱出装置",
   "category": "罠",
@@ -2714,7 +2785,7 @@
   "ref": "Compulsory Evacuation Device"
  },
  {
-  "code": "GB-179",
+  "code": "GB-184",
   "id": 21007444,
   "name": "諸刃の活人剣術",
   "category": "罠",
@@ -2724,7 +2795,7 @@
   "ref": "Double-Edged Sword Technique"
  },
  {
-  "code": "GB-180",
+  "code": "GB-185",
   "id": 70342110,
   "name": "次元幽閉",
   "category": "罠",
@@ -2734,17 +2805,17 @@
   "ref": "Dimensional Prison"
  },
  {
-  "code": "GB-181",
-  "id": 32603633,
-  "name": "究極・背水の陣",
+  "code": "GB-186",
+  "id": 51452091,
+  "name": "王宮のお触れ",
   "category": "罠",
-  "subtype": "通常",
-  "text": "LPが100になるように払って発動できる。自分の墓地から、フィールドに同名カードが存在しない「六武衆」モンスターを可能な限り特殊召喚する（同名カードは1枚まで）。",
+  "subtype": "永続",
+  "text": "①：このカードが魔法＆罠ゾーンに存在する限り、フィールドの他の罠カードの効果は無効化される。",
   "limit": "無制限",
-  "ref": "Backs to the Wall"
+  "ref": "Royal Decree"
  },
  {
-  "code": "GB-182",
+  "code": "GB-187",
   "id": 93016201,
   "name": "王宮の弾圧",
   "category": "罠",
@@ -2754,7 +2825,17 @@
   "ref": "Royal Oppression"
  },
  {
-  "code": "GB-183",
+  "code": "GB-188",
+  "id": 27174286,
+  "name": "異次元からの帰還",
+  "category": "罠",
+  "subtype": "通常",
+  "text": "①：ＬＰを半分払って発動できる。\n自分の除外状態のモンスターを可能な限り特殊召喚する。\nこの効果で特殊召喚したモンスターはエンドフェイズに除外される。",
+  "limit": "制限",
+  "ref": "Return from the Different Dimension"
+ },
+ {
+  "code": "GB-189",
   "id": 3819470,
   "name": "盗賊の七つ道具",
   "category": "罠",
@@ -2764,7 +2845,7 @@
   "ref": "Seven Tools of the Bandit"
  },
  {
-  "code": "GB-184",
+  "code": "GB-190",
   "id": 10118318,
   "name": "トゥルース・リインフォース",
   "category": "罠",
@@ -2774,7 +2855,7 @@
   "ref": "Reinforce Truth"
  },
  {
-  "code": "GB-185",
+  "code": "GB-191",
   "id": 60082869,
   "name": "砂塵の大竜巻",
   "category": "罠",
@@ -2784,7 +2865,7 @@
   "ref": "Dust Tornado"
  },
  {
-  "code": "GB-186",
+  "code": "GB-192",
   "id": 59616123,
   "name": "トラップ・スタン",
   "category": "罠",
@@ -2794,7 +2875,7 @@
   "ref": "Trap Stun"
  },
  {
-  "code": "GB-187",
+  "code": "GB-193",
   "id": 82732705,
   "name": "スキルドレイン",
   "category": "罠",
@@ -2804,7 +2885,7 @@
   "ref": "Skill Drain"
  },
  {
-  "code": "GB-188",
+  "code": "GB-194",
   "id": 38411870,
   "name": "つり天井",
   "category": "罠",
@@ -2814,7 +2895,7 @@
   "ref": "Needle Ceiling"
  },
  {
-  "code": "GB-189",
+  "code": "GB-195",
   "id": 97077563,
   "name": "リビングデッドの呼び声",
   "category": "罠",
@@ -2824,7 +2905,7 @@
   "ref": "Call of the Haunted"
  },
  {
-  "code": "GB-190",
+  "code": "GB-196",
   "id": 54974237,
   "name": "闇のデッキ破壊ウイルス",
   "category": "罠",
@@ -2834,7 +2915,7 @@
   "ref": "Eradicator Epidemic Virus"
  },
  {
-  "code": "GB-191",
+  "code": "GB-197",
   "id": 27551,
   "name": "リミット・リバース",
   "category": "罠",
@@ -2842,5 +2923,25 @@
   "text": "（永続罠）自分の墓地の攻撃力1000以下のモンスター1体を対象としてこのカードを発動できる。そのモンスターを攻撃表示で特殊召喚する。そのモンスターが守備表示になった時、そのモンスターとこのカードを破壊する。このカードがフィールドを離れた時にそのモンスターは破壊され、そのモンスターが破壊された時にこのカードは破壊される。",
   "limit": "無制限",
   "ref": "Limit Reverse"
+ },
+ {
+  "code": "GB-198",
+  "id": 35027493,
+  "name": "魔のデッキ破壊ウイルス",
+  "category": "罠",
+  "subtype": "通常",
+  "text": "①：自分フィールドの攻撃力２０００以上の闇属性モンスター１体をリリースして発動できる。\n相手フィールドのモンスター、相手の手札、相手ターンで数えて３ターンの間に相手がドローしたカードを全て確認し、その内の攻撃力１５００以下のモンスターを全て破壊する。",
+  "limit": "無制限",
+  "ref": "Deck Devastation Virus"
+ },
+ {
+  "code": "GB-199",
+  "id": 63356631,
+  "name": "鳳翼の爆風",
+  "category": "罠",
+  "subtype": "通常",
+  "text": "①：手札を１枚捨て、相手フィールドのカード１枚を対象として発動できる。\nその相手のカードをデッキの一番上に戻す。",
+  "limit": "無制限",
+  "ref": "Phoenix Wing Wind Blast"
  }
 ]

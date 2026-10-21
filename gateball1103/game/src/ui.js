@@ -610,7 +610,7 @@ function recipeSheet(k) {
   const part = arr => arr.map(([n, id]) => `<button class="li" data-show="${id}">${swatch(id)}<span class="tx"><b>${esc(data.name(id))} ×${n}</b><span>${esc(metaLine(data.card(id)))}</span></span></button>`).join('');
   const m = data.raw.recipes?.[k] || {};
   sheet(`<h3>【${esc(d.name)}】</h3><p class="meta">${esc(recipeLabel(k))}${m.player ? ` ・ 使用者：${esc(m.player)}` : ''}</p><p class="meta">参照：${esc(d.ref)} ・ メイン${d.main.reduce((s, x) => s + x[0], 0)} ／ EX${d.extra.reduce((s, x) => s + x[0], 0)}</p>
-    ${guideHTML(k)}<div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
+    ${guideHTML(k)}${jspeedHTML(k)}<div class="list">${part(d.main)}</div><p class="meta">エクストラデッキ</p><div class="list">${part(d.extra)}</div>`);
 }
 // 記事から集めたこのデッキの戦い方（knowhow）。CPUもこの方針の一部（サーチ先・止めるべきカード）で動く
 function guideHTML(k) {
@@ -621,6 +621,17 @@ function guideHTML(k) {
     ${p('方針', g.plan)}${p('先攻', g.first)}${p('後攻', g.second)}${p('罠の読み', g.setPolicy)}
     ${g.combos.length ? `<p class="gline"><b>主な動き</b></p><ol class="gcombo">${g.combos.map(c => `<li><b>${esc(c.name)}</b>${c.steps.length ? `<ul>${c.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>` : ''}
     ${Object.keys(g.matchups).length ? `<p class="gline"><b>相性</b></p><ul class="gmatch">${Object.entries(g.matchups).map(([o, t]) => `<li><b>対${esc(deckName(o))}</b> ${esc(t)}</li>`).join('')}</ul>` : ''}
+  </details>`;
+}
+
+// jspeed氏（ブログ「くされにっき」）の助言。CPUも一部をルールにして使う（ai.js の「jspeed」の印のところ）
+function jspeedHTML(k) {
+  const j = data.raw.jspeed?.[k]; if (!j || (!j.deck.length && !j.cards.length)) return '';
+  const li = x => `<li><b>${esc(x.s)}</b> → ${esc(x.d)}<span class="jwhy">${esc(x.w)}${x.p ? `（${esc(x.p)}環境）` : ''}</span></li>`;
+  const n = j.deck.length + j.cards.reduce((s, c) => s + c.items.length, 0);
+  return `<details class="guide"><summary>jspeed氏「くされにっき」より（${n}件）</summary>
+    ${j.deck.length ? `<ul class="jtips">${j.deck.map(li).join('')}</ul>` : ''}
+    ${j.cards.map(c => `<p class="jcard">${esc(c.card)}</p><ul class="jtips">${c.items.map(li).join('')}</ul>`).join('')}
   </details>`;
 }
 

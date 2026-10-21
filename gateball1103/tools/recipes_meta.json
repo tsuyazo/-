@@ -55,41 +55,47 @@
  },
  "agent": {
   "archetype": "代行天使",
-  "title": "1103寒波亭@代行天使",
-  "event": null,
-  "date": null,
-  "placing": null,
-  "player": "寒波亭（登録者）",
-  "source_url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=4f4149b1c2dc6f04e62dc47a6ff2f2e9&dno=33&request_locale=ja",
-  "placing_confirmed": false,
+  "title": "TG天使（2011.10 浜松CS）",
+  "event": "第9回浜松CS（2011.10.08）",
+  "date": "2011-10-09",
+  "placing": "個人7-1、チーム2位",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20111009/1318156534",
+  "placing_confirmed": true,
+  "period": "1109",
   "side": [
    [
     3,
-    "スノーマンイーター"
+    "サイクロン"
    ],
    [
     2,
-    "サイバー・ドラゴン"
+    "スノーマンイーター"
    ],
    [
     3,
-    "パペット・プラント"
+    "ヂェミナイ・デビル"
    ],
    [
     3,
     "ライオウ"
    ],
    [
-    2,
-    "連鎖除外"
+    3,
+    "王宮のお触れ"
    ],
    [
     1,
-    "昇天の黒角笛"
+    "連鎖除外"
    ]
   ],
   "uncertain": [],
-  "illegible": []
+  "illegible": [],
+  "changes": [
+   "カオス・ソルジャー -開闢の使者-→オネスト（1103では禁止）",
+   "大嵐→サイクロン（1103では禁止）"
+  ],
+  "source": "jspeed（くされにっき）"
  },
  "hero": {
   "archetype": "HERO（アライブHERO）",
@@ -224,13 +230,14 @@
  },
  "debris_plant": {
   "archetype": "デブリダンディ",
-  "title": "らいたろ",
-  "event": "寒波亭 エリア予選 北海道",
-  "date": null,
-  "placing": "優勝",
-  "player": "らいたろ",
-  "source_url": "https://note.com/kanpatei1103/n/n16d42d0521cd",
+  "title": "TOKYOデブリ（2010.11 東京CS）",
+  "event": "東京CS",
+  "date": "2010-11-29",
+  "placing": "個人6-2、チーム3位",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20101129/1291045219",
   "placing_confirmed": true,
+  "period": "1009",
   "side": [
    [
     2,
@@ -238,159 +245,116 @@
    ],
    [
     2,
-    "魔導戦士 ブレイカー"
+    "サイクロン"
    ],
    [
-    1,
+    2,
+    "トラップ・スタン"
+   ],
+   [
+    2,
     "パペット・プラント"
    ],
    [
-    1,
-    "月の書"
+    2,
+    "ライトロード・マジシャン ライラ"
    ],
    [
     1,
-    "地砕き"
+    "聖なるあかり"
+   ],
+   [
+    1,
+    "冥府の使者ゴーズ"
+   ],
+   [
+    3,
+    "連鎖除外"
+   ]
+  ],
+  "uncertain": [],
+  "illegible": [],
+  "changes": [
+   "デブリ・ドラゴン→キラー・トマト（1103では準制限（2枚まで））",
+   "ダンディライオン→カードガンナー（1103では制限（1枚まで））",
+   "大寒波→サイクロン（1103では禁止）",
+   "ゴヨウ・ガーディアン→TG ハイパー・ライブラリアン（1103では禁止）"
+  ],
+  "source": "jspeed（くされにっき）"
+ },
+ "quick_plant": {
+  "archetype": "クイックダンディ",
+  "title": "クイックダンディ（お触れ型、2010.09 フリー）",
+  "event": "フリー対戦（大須）",
+  "date": "2010-09-04",
+  "placing": "なし",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20100904/1283619294",
+  "placing_confirmed": true,
+  "period": "1009",
+  "side": [],
+  "uncertain": [],
+  "illegible": [],
+  "changes": [
+   "デブリ・ドラゴン→スノーマンイーター（1103では準制限（2枚まで））",
+   "ダンディライオン→カードガンナー（1103では制限（1枚まで））",
+   "大寒波→ハリケーン（1103では禁止。同じく相手の魔法罠を止めて展開を通す役割）"
+  ],
+  "source": "jspeed（くされにっき）"
+ },
+ "six_samurai": {
+  "archetype": "六武衆",
+  "title": "六武衆（2012.05 LCS）",
+  "event": "LCS",
+  "date": "2012-05-23",
+  "placing": "記事参照",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20120523/1337769091",
+  "placing_confirmed": true,
+  "period": "1203",
+  "side": [
+   [
+    3,
+    "サイクロン"
+   ],
+   [
+    3,
+    "マクロコスモス"
+   ],
+   [
+    2,
+    "ライオウ"
+   ],
+   [
+    1,
+    "聖なるバリア -ミラーフォース-"
+   ],
+   [
+    1,
+    "大成仏"
    ],
    [
     2,
     "奈落の落とし穴"
    ],
    [
-    2,
-    "砂塵の大竜巻"
-   ],
-   [
-    1,
-    "強制脱出装置"
-   ],
-   [
-    1,
-    "ダスト・シュート"
-   ],
-   [
-    1,
-    "王宮のお触れ"
-   ],
-   [
-    1,
-    "聖なるバリア －ミラーフォース－"
-   ]
-  ],
-  "uncertain": [],
-  "illegible": []
- },
- "quick_plant": {
-  "archetype": "クイックダンディ",
-  "title": "クイックダンディウォリアー",
-  "event": "第5回 寒波亭 with 博多ドラグーン",
-  "date": null,
-  "placing": "準優勝",
-  "player": "Kratos",
-  "source_url": "https://note.com/kanpatei1103/n/n78c9ff12657e",
-  "placing_confirmed": true,
-  "side": [
-   [
     1,
     "冥府の使者ゴーズ"
    ],
    [
     1,
-    "素早いビッグハムスター"
-   ],
-   [
-    1,
-    "エレクトリック・ワーム"
-   ],
-   [
-    2,
-    "パペット・プラント"
-   ],
-   [
-    2,
-    "スノーマンイーター"
-   ],
-   [
-    3,
-    "D.D.クロウ"
-   ],
-   [
-    1,
-    "ブラック・ホール"
-   ],
-   [
-    1,
-    "ダスト・シュート"
-   ],
-   [
-    3,
-    "王宮のお触れ"
+    "六尺瓊勾玉"
    ]
   ],
   "uncertain": [],
-  "illegible": []
- },
- "six_samurai": {
-  "archetype": "六武衆",
-  "title": "6/21 六武衆",
-  "event": "寒波亭 第45回 チーム戦",
-  "date": "2026-06-21",
-  "placing": "準優勝（チーム）",
-  "player": "さーにゃ",
-  "source_url": "https://note.com/kanpatei1103/n/ne38a2114aece",
-  "placing_confirmed": true,
-  "side": [
-   [
-    1,
-    "冥府の使者ゴーズ"
-   ],
-   [
-    2,
-    "スノーマンイーター"
-   ],
-   [
-    2,
-    "D.D.クロウ"
-   ],
-   [
-    1,
-    "六武衆－ヤイチ"
-   ],
-   [
-    1,
-    "パペット・プラント"
-   ],
-   [
-    1,
-    "ブラック・ホール"
-   ],
-   [
-    1,
-    "精神操作"
-   ],
-   [
-    1,
-    "激流葬"
-   ],
-   [
-    1,
-    "ダスト・シュート"
-   ],
-   [
-    2,
-    "砂塵の大竜巻"
-   ],
-   [
-    1,
-    "次元幽閉"
-   ],
-   [
-    1,
-    "群雄割拠"
-   ]
+  "illegible": [],
+  "changes": [
+   "大嵐→サイクロン（1103では禁止）",
+   "H-C エクスカリバー→No.17 リバイス・ドラゴン（2012年4月発売で1103のカードプール外）",
+   "M.X-セイバー インヴォーカー→ジェムナイト・パール（2011年11月発売で1103のカードプール外）",
+   "機甲忍者ブレード・ハート→A・O・J ディサイシブ・アームズ（2011年11月発売で1103のカードプール外）"
   ],
-  "uncertain": [],
-  "illegible": []
+  "source": "jspeed（くされにっき）"
  },
  "dark_world": {
   "archetype": "暗黒界",
@@ -452,37 +416,30 @@
  },
  "karakuri": {
   "archetype": "カラクリ",
-  "title": "26.03.08. 寒波亭メモリアル2025Winter　シンヤ(カラクリ)",
-  "event": "メモリアル2025 Winter with 福福トレカ",
-  "date": "2026-03-08",
-  "placing": "準優勝",
-  "player": "シンヤ",
-  "source_url": "https://note.com/kanpatei1103/n/na7893c2f37af",
+  "title": "カラクリ（2011.11 岡山CS）",
+  "event": "岡山CS第3回（2011.11.26）",
+  "date": "2011-12-15",
+  "placing": "個人5-1-2、チーム2位",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20111215/1323883076",
   "placing_confirmed": true,
+  "period": "1109",
   "side": [
    [
     1,
-    "冥府の使者ゴーズ"
+    "カラクリ忍者 参参九"
    ],
    [
     2,
     "サイバー・ドラゴン"
    ],
    [
-    1,
-    "カラクリ忍者 参参九"
+    2,
+    "スノーマンイーター"
    ],
    [
     1,
-    "グレイブ・スクワーマー"
-   ],
-   [
-    1,
-    "D.D.クロウ"
-   ],
-   [
-    1,
-    "エフェクト・ヴェーラー"
+    "トラップ・スタン"
    ],
    [
     1,
@@ -490,78 +447,89 @@
    ],
    [
     2,
-    "砂塵の大竜巻"
+    "マクロコスモス"
    ],
    [
     1,
-    "くず鉄のかかし"
+    "暗闇を吸い込むマジック・ミラー"
+   ],
+   [
+    2,
+    "王宮のお触れ"
+   ],
+   [
+    2,
+    "昇天の黒角笛"
    ],
    [
     1,
-    "強制脱出装置"
+    "連鎖除外"
+   ]
+  ],
+  "uncertain": [],
+  "illegible": [],
+  "changes": [
+   "カラクリ無双 八壱八→カラクリ参謀 弐四八（2011年9月発売で1103のカードプール外）",
+   "大嵐→ハリケーン（1103では禁止）",
+   "サイクロン→トラップ・スタン（1103では準制限（2枚まで））"
+  ],
+  "source": "jspeed（くされにっき）"
+ },
+ "blackwing": {
+  "archetype": "BF（旋風BF）",
+  "title": "【1103】墓地BF（2011.03 ISDCS第10回）",
+  "event": "ISDCS第10回（2011.03.05、新ルール適用）",
+  "date": "2011-03-07",
+  "placing": "個人4-4、チーム3位",
+  "player": "jspeed",
+  "source_url": "https://jspeed.hatenadiary.jp/entry/20110307/1299484130",
+  "placing_confirmed": true,
+  "period": "1103",
+  "side": [
+   [
+    1,
+    "A・ジェネクス・クラッシャー"
    ],
    [
     1,
-    "激流葬"
+    "ダスト・シュート"
+   ],
+   [
+    1,
+    "ドッペルゲンガー"
+   ],
+   [
+    2,
+    "フォッシル・ダイナ パキケファロ"
    ],
    [
     1,
     "御前試合"
-   ],
-   [
-    1,
-    "キメラテック・フォートレス・ドラゴン"
-   ]
-  ],
-  "uncertain": [
-   "カラクリ忍者 九壱九"
-  ],
-  "illegible": []
- },
- "blackwing": {
-  "archetype": "BF（旋風BF）",
-  "title": "ふつーの旋風BF",
-  "event": "寒波亭 第43回 チーム戦",
-  "date": null,
-  "placing": "優勝（チーム）",
-  "player": "ヒョウハク",
-  "source_url": "https://note.com/kanpatei1103/n/n78c9ff12657e",
-  "placing_confirmed": true,
-  "side": [
-   [
-    1,
-    "冥府の使者ゴーズ"
-   ],
-   [
-    3,
-    "スノーマンイーター"
-   ],
-   [
-    1,
-    "D.D.クロウ"
-   ],
-   [
-    1,
-    "N・グラン・モール"
-   ],
-   [
-    1,
-    "エフェクト・ヴェーラー"
    ],
    [
     3,
     "次元幽閉"
    ],
    [
-    3,
-    "御前試合"
+    1,
+    "魔のデッキ破壊ウイルス"
    ],
    [
     2,
-    "砂塵の大竜巻"
+    "抹殺の使徒"
+   ],
+   [
+    1,
+    "霊滅術師 カイクウ"
+   ],
+   [
+    2,
+    "連鎖除外"
    ]
   ],
   "uncertain": [],
-  "illegible": []
+  "illegible": [],
+  "changes": [],
+  "source": "jspeed（くされにっき）"
  }
 }

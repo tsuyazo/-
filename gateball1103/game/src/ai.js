@@ -9,6 +9,7 @@ import { sumSolve, firstBits, fallback } from './engine.js';
 import {
   NEGATE_SUMMON, NEGATE_SPSUMMON, ON_SUMMON, WIPE_ON_SUMMON, ATTACK_RESPONSE, NEGATE_ACTIVATION, ST_REMOVAL,
   HAND_TRAP, DAMAGE_STEP, BOARD_WIPE, OWN_TURN_TRAPS, HOLD_TRAPS, SUMMON_PRIORITY, KEY_THREATS, EXTRA_VALUE,
+  JS, NO_LEAD, RECRUITERS, PROBES,
 } from './ai_cards.js';
 import { planIdle, sigOf } from './ai_plan.js';
 
@@ -39,6 +40,10 @@ export function paramsFor(duel, seat) {
 }
 const info = (duel, code) => duel.data.eng(code) || { type: 0, attack: 0, defense: 0, level: 0 };
 const isExtra = t => (t & (T_FUSION | T_SYNCHRO | T_XYZ)) !== 0;
+const ATTR_LIGHT = 0x10, RACE_WINDBEAST = 0x200n;
+const OFF = new Set((globalThis.process?.env?.JS_OFF || '').split(',').filter(Boolean));   // 比較実験用：jspeedのルールを個別に止める（JS_OFF=probe,tri,cap,fine,brd,dh,cyc）
+// 相手のデッキにそのカードが入っているか（デッキは対戦前に公開されている）
+const oppHas = (ctx, code) => !!ctx.duel.data.raw.decks[ctx.duel.opts.decks[ctx.op]]?.main.some(([, id]) => id === code);
 
 // モンスター・カードの「価値」：攻撃力を基本に、重要カードと大型を上乗せ
 function cardValue(duel, code, q) {
@@ -60,7 +65,7 @@ export function aiRespond(duel, m) {
   PAR = paramsFor(duel, me);
   const f = duel.field();
   const memo = duel.aiMemo;
-  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; memo.plans = 0; memo.attackerAtk = null; memo.line = null; }
+  if (memo.turn !== duel.turn) { memo.turn = duel.turn; memo.used = {}; memo.idle = 0; memo.plans = 0; memo.attackerAtk = null; memo.attackerCode = null; memo.line = null; }
   // 先読みで見つけた手順：局面が予定どおりなら、その手をそのまま打つ（相手が何かして局面が変わったら捨てる）
   if (!duel.isSim && memo.line && memo.line.length && duel.turnPlayer === me && memo.lineOwner === me) {
     const head = memo.line[0];
@@ -112,7 +117,7 @@ function idle(ctx, m) {
   // ターンを終える（バトルへ進む）前に、伏せるべきカードは必ず伏せる（先読みの候補に「伏せる」は無いため）
   const ending = r => r && r.type === R.SELECT_IDLECMD && (r.action === 6 || r.action === 7);
   if (ending(planned || greedy)) { const sc = setChoice(ctx, m); if (sc) { memo.used = after; return sc; } }
-  if (!planned || planned === greedy) { memo.used = after; return greedy; }
+  if (!planned || planned === greedy || jspeedVeto(ctx, m, planned)) { memo.used = after; return greedy; }
   // 普段の判断と違う行動を選んだ時は、その行動に「使った」印を付ける（同じ発動を繰り返さない）
   const f = ['summons', 'special_summons', 'pos_changes', 'monster_sets', 'spell_sets', 'activates'][planned.action];
   const c = f && m[f][planned.index];
@@ -178,6 +183,11 @@ function idleGreedy(ctx, m) {
     if (SELF_TURN_ONLY.has(c.code)) return false;                        // 普段は使わず、先読みで得になる時だけ
     if (c.code === BOOK_OF_MOON) return false;                           // 月の書は相手の攻撃・召喚に合わせて使う
     if (e.type & T_TRAP) return OWN_TURN_TRAPS.has(c.code) && !HOLD_TRAPS.has(c.code);
+    if (c.code === JS.ARAGYO) return false;                              // 六武衆の荒行はバトルフェイズに（jspeed）
+    // 強欲で謙虚な壺：このターンに特殊召喚できるなら撃たない（撃つと特殊召喚できなくなる）（jspeed）
+    if (c.code === JS.PROSPERITY && m.special_summons.some(x => spValue(ctx, x) > 0)) return false;
+    // ブラック・ホールは「我慢しすぎなぐらい」温存する（jspeed）
+    if (!OFF.has('dh') && c.code === JS.DARK_HOLE) return opVal > myVal + PAR.wipeDiff + 1000 && (f[op].mz.filter(Boolean).length >= 2 || f[op].mz.some(q => q && KEY_THREATS.has(q.code)));
     if (BOARD_WIPE.has(c.code)) return opVal > myVal + PAR.wipeDiff;
     // 温存するよう勧められた除去（王宮の弾圧などへの回答）は、表側の永続カードにだけ使う
     if (ST_REMOVAL.has(c.code) && hold.has(c.code)) return f[op].sz.some(q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_CONT));
@@ -192,22 +202,20 @@ function idleGreedy(ctx, m) {
 
   // 3. 特殊召喚（エクストラは価値の高い順。手札からの特殊召喚は素直に出す）
   if (m.special_summons.length) {
-    const opts = m.special_summons.map((c, i) => ({ c, i, v: spValue(ctx, c) })).filter(x => used(x.c) < 2 && x.v > 0).sort((a, b) => b.v - a.v);
+    const opts = m.special_summons.map((c, i) => ({ c, i, v: spValue(ctx, c) })).filter(x => used(x.c) < 2 && x.v > 0 && !(x.c.code === JS.TRISHULA && trishulaLater(ctx, m))).sort((a, b) => b.v - a.v);
     if (opts.length) { mark(opts[0].c); return { type: R.SELECT_IDLECMD, action: 1, index: opts[0].i }; }
   }
   // 4. 通常召喚（展開の起点を優先）
   // リバース効果モンスターは表で出さず、セットする（下の5で）
-  const summons = m.summons.map((c, i) => ({ c, i })).filter(({ c }) => !(info(duel, c.code).type & T_FLIP));
+  const summons = m.summons.map((c, i) => ({ c, i })).filter(({ c }) => !(info(duel, c.code).type & T_FLIP) && !noLead(ctx, c.code));
   if (summons.length) {
     const best = summons.map(({ c, i }) => ({ i, v: (SUMMON_PRIORITY[c.code] || 0) * 100 + cardValue(duel, c.code) - (hold.has(c.code) ? 20000 : 0) })).sort((a, b) => b.v - a.v)[0];
     return { type: R.SELECT_IDLECMD, action: 0, index: best.i };
   }
   if (acts.length) { mark(acts[0].c); return { type: R.SELECT_IDLECMD, action: 5, index: acts[0].i }; }
   // 5. 弱いモンスターは裏守備で出しておく
-  if (m.monster_sets.length && !duel.nsUsed) {
-    const i = m.monster_sets.map((c, i) => ({ i, v: cardValue(duel, c.code) })).sort((a, b) => b.v - a.v)[0].i;
-    return { type: R.SELECT_IDLECMD, action: 3, index: i };
-  }
+  const sets = m.monster_sets.map((c, i) => ({ i, c, v: cardValue(duel, c.code) })).filter(x => x.c.code !== JS.GREPHER || duel.turn > 2);
+  if (sets.length && !duel.nsUsed) return { type: R.SELECT_IDLECMD, action: 3, index: sets.sort((a, b) => b.v - a.v)[0].i };
   // 6. 罠・速攻魔法を伏せる（バトルの後、メイン2で伏せる方が情報を与えない）
   const setNow = setChoice(ctx, m);
   if (setNow) return setNow;
@@ -225,7 +233,12 @@ function setChoice(ctx, m) {
   const { duel, f, me } = ctx;
   if (!(duel.phase !== PH_MAIN1 || duel.turn === 1 || !canAttackUsefully(ctx))) return null;
   if (f[me].sz.filter(Boolean).length >= 5) return null;
-  const si = m.spell_sets.findIndex(c => { const t = info(duel, c.code).type; return (t & T_TRAP) || (t & T_QUICK); });
+  // 伏せすぎない（jspeed：「少数の伏せで戦う。ガバ伏せは損をしないことが保証されている時だけ」）。
+  // 3枚まで（墓地BFの先攻は2枚まで）。サイクロン・神の宣告と、手札があふれる時は別
+  const down = f[me].sz.filter(q => q && (q.position & POS.FACEDOWN)).length;
+  const cap = OFF.has('cap') ? 5 : duel.opts.decks[me] === 'blackwing' && duel.turn <= 2 ? 2 : 3;
+  const free = c => c.code === JS.CYCLONE || c.code === 41420027 || f[me].hand.length > 6;
+  const si = m.spell_sets.findIndex(c => { const t = info(duel, c.code).type; return ((t & T_TRAP) || (t & T_QUICK)) && (down < cap || free(c)); });
   return si >= 0 ? { type: R.SELECT_IDLECMD, action: 4, index: si } : null;
 }
 function actPriority(ctx, { c, e }) {
@@ -244,6 +257,8 @@ function spValue(ctx, c) {
   const { duel } = ctx;
   const ord = ctx.rules?.extraOrder || [];
   const rank = ord.indexOf(c.code);
+  // ブラック・ローズ・ドラゴンは、場を流して得をする時だけ優先する（jspeed：あまり出さない、アドが取れる場面なら投げる）
+  if (!OFF.has('brd') && c.code === JS.BRD && !brdWorth(ctx)) return 1000 + 300 + info(duel, c.code).attack / 10;
   if (c.location === L.EXTRA) return 1000 + (EXTRA_VALUE[c.code] || 50) * 10 + (info(duel, c.code).attack / 10) + (rank >= 0 && PAR.routeOn ? (ord.length - rank) * 40 : 0);
   return 500 + cardValue(duel, c.code) / 10;
 }
@@ -270,9 +285,17 @@ function battle(ctx, m) {
   // 直接攻撃できるなら最優先、次に勝てる相手がいるもの（攻撃力の高い順）
   const direct = atks.filter(x => x.c.can_direct).sort((a, b) => (b.q.attack || 0) - (a.q.attack || 0));
   // 攻撃対象を選ぶ時に使うので、攻撃するモンスターの攻撃力を覚えておく
-  const go = x => { memo.attackerAtk = x.q.attack || 0; return { type: R.SELECT_BATTLECMD, action: 1, index: x.i }; };
+  const go = x => { memo.attackerAtk = x.q.attack || 0; memo.attackerCode = x.q.code; return { type: R.SELECT_BATTLECMD, action: 1, index: x.i }; };
+  // 六武衆の荒行はバトルフェイズに使う（想定外の打点、ヴェーラーをかわす）（jspeed）
+  const ar = m.chains.findIndex(c => c.code === JS.ARAGYO);
+  if (ar >= 0 && !memo.used.bAragyo && atks.length) { memo.used.bAragyo = 1; return { type: R.SELECT_BATTLECMD, action: 0, index: ar }; }
   if (direct.length) return go(direct[0]);
-  const good = atks.filter(x => opMons.some(t => beats(x.q, t))).sort((a, b) => (b.q.attack || 0) - (a.q.attack || 0));
+  // 裏守備（ライコウなど）は、失っても損の少ないモンスター（トマト・ガンナー）で先に叩く（jspeed）
+  const probe = !OFF.has('probe') && opMons.some(t => t.position & POS.FACEDOWN) && atks.find(x => PROBES.has(x.q.code) && (x.q.position & POS.ATTACK));
+  if (probe) return go(probe);
+  // オネストが返ってくる光属性と、倒すと相手が得をするリクルーターは、自分から殴らない（jspeed）
+  const fine = t => OFF.has('fine') || (!honestRisk(ctx, t) && !((t.position & POS.FACEUP) && RECRUITERS.has(t.code)));
+  const good = atks.filter(x => opMons.some(t => beats(x.q, t) && fine(t))).sort((a, b) => (b.q.attack || 0) - (a.q.attack || 0));
   if (good.length) return go(good[0]);
   if (!m.to_m2 && !m.to_ep && atks.length) return go(atks[0]);  // 攻撃が強制される場合
   if (!m.to_m2 && !m.to_ep && m.attacks.length) return { type: R.SELECT_BATTLECMD, action: 1, index: 0 };
@@ -304,6 +327,8 @@ function chain(ctx, m) {
     const code = c.code, t = info(duel, code).type;
     // 自分のモンスターの誘発効果・墓地や手札から出る効果は基本的に使う
     if (ATTACK_RESPONSE.has(code) && (t & T_MONSTER)) return oppAttacking ? 75 : 0;   // ホープ：相手の攻撃にだけ
+    // シエン：止めない理由が無ければ魔法・罠は止める（jspeed：「止めない理由を探す。謙虚には8〜9割止める」）
+    if (code === JS.SHIEN && oppTop && top && (info(duel, top.code).type & (T_SPELL | T_TRAP))) return 85;
     if (NEGATE_ACTIVATION.has(code) && (t & T_MONSTER) && code !== 74294676) return oppTop && top && impact(duel, top.code, ctx.rules) >= 2 ? 88 : 0;  // シエンなど
     if ((c.location === L.MZONE || c.location === L.GRAVE || c.location === L.REMOVED) && (t & T_MONSTER)) {
       if (NEGATE_SPSUMMON.has(code) || code === 74294676) return oppSummoning && summonValue >= 1800 ? 80 : (oppTop && top && impact(duel, top.code, ctx.rules) >= 2 ? 70 : 0);
@@ -363,9 +388,30 @@ function chain(ctx, m) {
     if (NEGATE_ACTIVATION.has(code)) return oppTop && top && impact(duel, top.code, ctx.rules) >= 2 ? 88 : 0;
     if (ST_REMOVAL.has(code)) {
       // 相手ターンのエンドフェイズに伏せを割る／相手の永続カードが表になった時に割る
-      if (!myTurn && duel.phase === PH_END && f[op].sz.some(q => q && (q.position & POS.FACEDOWN))) return 65;
+      // 目的の無いエンドサイクはしない（jspeed）：次のターンに攻撃を通したい時か、伏せが2枚以上ある時だけ
+      const downs = f[op].sz.filter(q => q && (q.position & POS.FACEDOWN)).length;
+      if (!myTurn && duel.phase === PH_END && downs) return OFF.has('cyc') || code !== JS.CYCLONE || downs >= 2 || f[me].mz.some(q => q && (q.position & POS.FACEUP) && (q.attack || 0) >= 1500) ? 65 : 0;
       if (oppTop && top && (info(duel, top.code).type & (T_CONT | T_EQUIP | T_FIELD))) return 70;
       if (myTurn && duel.phase === PH_MAIN1 && f[op].sz.some(q => q && (q.position & POS.FACEDOWN))) return 50;
+      return 0;
+    }
+    // ゴッドバードアタック：鳥獣を逃がしながら2枚割る（jspeed：除去への返し・攻撃された時のサクリファイス・エスケープ、
+    // 相手ターンのエンドフェイズに伏せを割る。割る先が2枚無い時は撃たない）
+    if (code === JS.GODBIRD) {
+      const bird = q => q && (q.position & POS.FACEUP) && (info(duel, q.code).race & RACE_WINDBEAST);
+      const targets = f[op].mz.filter(Boolean).length + f[op].sz.filter(Boolean).length;
+      if (!f[me].mz.some(bird) || targets < 2) return 0;
+      if (oppTop && top && impact(duel, top.code, ctx.rules) >= 2) return 82;
+      if (oppAttacking && la.target && (info(duel, la.target.code).race & RACE_WINDBEAST)) return 80;
+      if (!myTurn && duel.phase === PH_END && f[op].sz.some(q => q && (q.position & POS.FACEDOWN))) return 62;
+      return 0;
+    }
+    // 王宮のお触れ：自分の罠も止めるので、相手の重要な罠にチェーンして止めるのが基本。
+    // 相手ターンのエンドフェイズに表にするのは、自分の伏せ罠が無い時だけ（jspeed：お触れは自分の罠を否定する）
+    if (code === JS.DECREE) {
+      if (oppTop && top && (info(duel, top.code).type & T_TRAP) && impact(duel, top.code, ctx.rules) >= 2) return 86;
+      const myTraps = f[me].sz.filter(q => q && (q.position & POS.FACEDOWN) && q.code !== JS.DECREE && (info(duel, q.code).type & T_TRAP)).length;
+      if (!myTurn && duel.phase === PH_END && !myTraps && f[op].sz.some(q => q && (q.position & POS.FACEDOWN))) return PAR.endTrap;
       return 0;
     }
     if (HOLD_TRAPS.has(code)) return 0;
@@ -455,9 +501,11 @@ function attackTargetScore(ctx, c) {
   if (!q) return 0;
   const la = duel.lastAttack;
   const myAtk = duel.turnPlayer === me && ctx.memo.attackerAtk != null ? ctx.memo.attackerAtk : (la && la.player === me ? la.atk : strongestAtk(f, me));
-  if (q.position & POS.FACEDOWN) return myAtk >= PAR.fdAtk ? 2500 : 500;
+  if (q.position & POS.FACEDOWN) return !OFF.has('probe') && PROBES.has(ctx.memo.attackerCode) ? 6000 : myAtk >= PAR.fdAtk ? 2500 : 500;
   const val = q.position & POS.ATTACK ? q.attack : q.defense;
   const win = q.position & POS.ATTACK ? myAtk > q.attack : myAtk > q.defense;
+  if (!OFF.has('fine') && honestRisk(ctx, q)) return 100 - val / 10;
+  if (!OFF.has('fine') && win && RECRUITERS.has(q.code)) return 3000 + cardValue(duel, q.code, q) / 10;
   return win ? 4000 + cardValue(duel, q.code, q) / 10 : 1000 - val;
 }
 function position(ctx, m) {
@@ -473,6 +521,7 @@ function position(ctx, m) {
 // 「効果を使いますか」：攻撃を止める効果（ホープなど）は相手の攻撃にだけ。それ以外は使う
 function effectYes(ctx, m) {
   const { duel, op } = ctx;
+  if (!OFF.has('brd') && m.code === JS.BRD) return brdWorth(ctx, true);
   if (ATTACK_RESPONSE.has(m.code)) {
     const la = duel.lastAttack;
     return !!(la && la.turn === duel.turn && la.player === op);
@@ -491,4 +540,34 @@ function rulesFor(duel, me) {
   if (!r) return null;
   if (!r._sets) r._sets = { threats: new Set(r.threats), hold: new Set(r.hold) };
   return { searchBy: r.searchBy, threats: r._sets.threats, hold: r._sets.hold, routes: r.routes || [], usageTargets: r.usageTargets || {}, extraOrder: r.extraOrder || [] };
+}
+
+/* ---------------- jspeed氏（くされにっき）の助言から作ったルール ---------------- */
+// 先出ししない札（グレファー、墓地BFのガンナー）：序盤や、相手の場に殴る相手がいない時は出さない
+function noLead(ctx, code) {
+  if (!NO_LEAD.has(code)) return false;
+  if (code === JS.GREPHER) return ctx.duel.turn <= 2;
+  // ガンナーの後出しは墓地BFの助言（植物系ではシンクロ素材として早く出す）
+  return ctx.duel.opts.decks[ctx.me] === 'blackwing' && (ctx.duel.turn <= 2 || !ctx.f[ctx.op].mz.some(Boolean));
+}
+// トリシューラはメイン2に出す（相手の反応でヴェーラーの有無が分かる）。攻撃で得ができるならバトルを先に
+function trishulaLater(ctx, m) { return !OFF.has('tri') && ctx.duel.phase === PH_MAIN1 && ctx.duel.turn > 1 && !!m.to_bp && canAttackUsefully(ctx); }
+// ブラック・ローズ・ドラゴンで場を流して得をするか（onField：ローズ自身がもう場にいる）
+function brdWorth(ctx, onField = false) {
+  const { duel, f, me, op } = ctx;
+  const mine = fieldValue(duel, f, me) - (onField ? cardValue(duel, JS.BRD) : 0);
+  return fieldValue(duel, f, op) > mine + 500;
+}
+// オネストを持つデッキ（ライトロード・天使）の、光属性の表側攻撃表示モンスターは、相手に手札がある間は殴らない
+function honestRisk(ctx, t) {
+  if (!(t.position & POS.FACEUP) || !(t.position & POS.ATTACK)) return false;
+  if (!(info(ctx.duel, t.code).attribute & ATTR_LIGHT) || !ctx.f[ctx.op].hand.length) return false;
+  return oppHas(ctx, JS.HONEST);
+}
+// 先読みが選んだ手でも、助言に反するもの（先出し・メイン1のトリシューラ）は採らない
+function jspeedVeto(ctx, m, r) {
+  if (r.type !== R.SELECT_IDLECMD) return false;
+  const c = r.action === 0 ? m.summons[r.index] : r.action === 1 ? m.special_summons[r.index] : null;
+  if (!c) return false;
+  return (r.action === 0 && noLead(ctx, c.code)) || (c.code === JS.TRISHULA && trishulaLater(ctx, m));
 }

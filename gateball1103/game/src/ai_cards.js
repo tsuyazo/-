@@ -76,3 +76,15 @@ export const EXTRA_VALUE = {
   42810973: 80, // ジャンク・アーチャー
   74860293: 84, // ジャンク・デストロイヤー
 };
+
+// jspeed氏（ブログ「くされにっき」）の助言から作ったルールで使うカード（ai.js の「jspeed」の印のところ）
+export const JS = {
+  GREPHER: 14536035, GUNNER: 85087012, TOMATO: 83011277, GODBIRD: 53567095, TRISHULA: 52687916, BRD: 73580471,
+  DARK_HOLE: 53129443, HONEST: 37742478, ARAGYO: 27821104, SHIEN: 29981921, CYCLONE: 5318639, PROSPERITY: 98645731, DECREE: 51452091,
+};
+// 先出ししない（ガンナーは後出し、グレファーは効果やアタックが要る場面まで温存）
+export const NO_LEAD = ids(`14536035 85087012`);
+// 自分のターンに戦闘で倒すと相手に得をさせるリクルーター・ドロー（相手から殴らせるか、効果で除く）
+export const RECRUITERS = ids(`83011277 85087012 26202165`);
+// 裏守備（ライコウなど）を叩くのに使う、失っても損の少ないモンスター
+export const PROBES = ids(`83011277 85087012`);

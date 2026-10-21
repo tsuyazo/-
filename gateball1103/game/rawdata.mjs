@@ -79,6 +79,25 @@ export function loadAiRules(cards, report = false) {
   return out;
 }
 
+function loadJspeed(cards, decks) {
+  const p = path.join(ROOT, 'jspeed/advice.json');
+  if (!fs.existsSync(p)) return null;
+  const src = JSON.parse(fs.readFileSync(p));
+  const item = x => ({ s: x.situation, d: x.do, w: x.why, p: x.period || '', u: x.url });
+  // 1103の記事を先に
+  const order = list => list.map(item).sort((a, b) => (b.p === '1103') - (a.p === '1103'));
+  const nameOf = {}; cards.forEach(c => { nameOf[c.code] = c.name; });
+  const out = {};
+  for (const [k, d] of Object.entries(decks)) {
+    const names = new Set([...d.main, ...d.extra].map(e => nameOf[e.code]));
+    out[k] = {
+      deck: order(src.decks[k] || []),
+      cards: Object.entries(src.cards).filter(([n]) => names.has(n)).map(([n, list]) => ({ card: n, items: order(list) })),
+    };
+  }
+  return out;
+}
+
 export function loadRaw() {
   const cards = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cards.json')));
   const decks = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/decks.json')));
@@ -96,6 +115,8 @@ export function loadRaw() {
     recipes: JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/recipes_meta.json'))),
     images: fs.existsSync(path.join(HERE, 'card_images.json')) ? JSON.parse(fs.readFileSync(path.join(HERE, 'card_images.json'))) : {},
     aiRules: loadAiRules(cards, process.env.REPORT_RULES === '1'),
+    // jspeed氏（ブログ「くされにっき」）の助言：デッキ別と、デッキに入っているカード別（デッキの説明に表示）
+    jspeed: loadJspeed(cards, decks),
     // CPU同士の対戦で調整したデッキごとの数値（tune.mjs が書く）
     aiParams: fs.existsSync(path.join(HERE, 'ai_params.json')) ? JSON.parse(fs.readFileSync(path.join(HERE, 'ai_params.json'))) : {},
     effectStrings: renameAll(JSON.parse(fs.readFileSync(path.join(HERE, 'effect_strings.json')))),

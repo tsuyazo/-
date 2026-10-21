@@ -208,6 +208,8 @@ def write_decklists_md(decks, by_ref):
         if m.get("date"):
             src.append(m["date"])
         lines.append(f"- 出典：{' ／ '.join(src) if src else m.get('title') or ''}（[元ページ]({m.get('source_url')})）")
+        if m.get("source", "").startswith("jspeed"):
+            lines.append(f"- jspeed氏のブログ「くされにっき」のリスト（{m.get('period')}環境のもの）。" + ("1103で使えないカードの差し替え：" + "、".join(m["changes"]) if m.get("changes") else "差し替えなし（1103のリストそのまま）。"))
         if not m.get("placing_confirmed"):
             lines.append("- 注意：このレシピは寒波亭が公式デッキDBに登録した参考デッキで、ページ上に入賞記録の記載はない。")
         if m.get("uncertain"):
