@@ -158,7 +158,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2005年1月期（旧環境）",
+  "environment": "2005年3月より前（制限リストの期間は不明）",
+  "period": "不明",
+  "period_basis": "記事日 2005-01-22",
   "note": "ブログ初期の自作リスト。"
  },
  "開闢スタン（2005.02 アニメリア2位）": {
@@ -304,7 +306,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2005年1月期（旧環境）"
+  "environment": "2005年3月より前（制限リストの期間は不明）",
+  "period": "不明",
+  "period_basis": "記事日 2005-02-05"
  },
  "開闢スタン（2005.02 アニメリア優勝）": {
   "archetype_key": null,
@@ -486,7 +490,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2005年1月期（旧環境）"
+  "environment": "2005年3月より前（制限リストの期間は不明）",
+  "period": "不明",
+  "period_basis": "記事日 2005-02-14"
  },
  "暗黒界ゴルドシルバ＋エアーマン（2006.10 試作）": {
   "archetype_key": "dark_world",
@@ -615,7 +621,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2006年9月期（旧環境）"
+  "environment": "2006年9月制限（0609）",
+  "period": "0609",
+  "period_basis": "記事日 2006-10-10"
  },
  "サイバー・ガジェ系（ギアゴーレム・デコイチ、2007.01 大会）": {
   "archetype_key": null,
@@ -712,7 +720,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2006年9月期（旧環境）"
+  "environment": "2006年9月制限（0609）",
+  "period": "0609",
+  "period_basis": "記事日 2007-01-21"
  },
  "エアブレ（2007.02 近畿CS）": {
   "archetype_key": null,
@@ -834,7 +844,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2006年9月期（旧環境）"
+  "environment": "2006年9月制限（0609）",
+  "period": "0609",
+  "period_basis": "記事日 2007-02-13"
  },
  "ライダー（2007.02 近畿CS用候補）": {
   "archetype_key": null,
@@ -955,7 +967,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2006年9月期（旧環境）"
+  "environment": "2006年9月制限（0609）",
+  "period": "0609",
+  "period_basis": "記事日 2007-02-13"
  },
  "サイバー（2007.02 近畿CS用候補）": {
   "archetype_key": null,
@@ -1072,7 +1086,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2006年9月期（旧環境）"
+  "environment": "2006年9月制限（0609）",
+  "period": "0609",
+  "period_basis": "記事日 2007-02-13"
  },
  "ロックバーン（2007.05）": {
   "archetype_key": null,
@@ -1177,7 +1193,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年3月期（旧環境）"
+  "environment": "2007年3月制限（0703）",
+  "period": "0703",
+  "period_basis": "記事日 2007-05-13"
  },
  "HEROビート（オーシャン型、2007.06）": {
   "archetype_key": null,
@@ -1282,7 +1300,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年3月期（旧環境）"
+  "environment": "2007年3月制限（0703）",
+  "period": "0703",
+  "period_basis": "記事日 2007-06-21"
  },
  "光と闇の竜ダーク（2007.06）": {
   "archetype_key": null,
@@ -1429,7 +1449,9 @@
   "unreadable": [
    "main: 1枚不明（本人「あと1枚何入れてたか忘れた」）"
   ],
-  "environment": "2007年3月期（旧環境）"
+  "environment": "2007年3月制限（0703）",
+  "period": "0703",
+  "period_basis": "記事日 2007-06-25"
  },
  "ネズミ罠ビート（グリーンバブーン、2007.06 大会）": {
   "archetype_key": null,
@@ -1542,7 +1564,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年3月期（旧環境）"
+  "environment": "2007年3月制限（0703）",
+  "period": "0703",
+  "period_basis": "記事日 2007-06-30"
  },
  "寒波ネズミ（2007.09）": {
   "archetype_key": null,
@@ -1659,7 +1683,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2007-09-04"
  },
  "エアブレ（ブレード型、2007.12）": {
   "archetype_key": null,
@@ -1784,7 +1810,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2007-12-19"
  },
  "マジエク・ワンキル（2008.01）": {
   "archetype_key": null,
@@ -1885,7 +1913,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-01-18"
  },
  "ダムドビート（2008.01 案1）": {
   "archetype_key": null,
@@ -2002,7 +2032,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-01-21"
  },
  "ダークシムルグ儀式（2008.01 案2）": {
   "archetype_key": null,
@@ -2089,7 +2121,9 @@
   "unreadable": [
    "main: 2 ゾーク（カード名を特定できず）"
   ],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-01-21"
  },
  "ダークゲート（2008.02 関西チャンピオンシップ）": {
   "archetype_key": null,
@@ -2239,7 +2273,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-02-03"
  },
  "ファントムノーレ（2008.02）": {
   "archetype_key": null,
@@ -2336,7 +2372,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-02-06"
  },
  "マジエク（2008.02）": {
   "archetype_key": null,
@@ -2445,7 +2483,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-02-06"
  },
  "アンデ・ファントムノーレ（2008.02）": {
   "archetype_key": null,
@@ -2538,7 +2578,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2007年9月期（旧環境）"
+  "environment": "2007年9月制限（0709）",
+  "period": "0709",
+  "period_basis": "記事日 2008-02-14"
  },
  "サモプリ・ゴッドバード・ダーク（2008.03）": {
   "archetype_key": null,
@@ -2655,7 +2697,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-03-04"
  },
  "ダムドビート（2008.04）": {
   "archetype_key": null,
@@ -2780,7 +2824,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-04-18"
  },
  "寒波ダムド（2008.06 メリア4連戦）": {
   "archetype_key": null,
@@ -2918,7 +2964,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-06-01"
  },
  "ガジェット（2008.04 ブランチ）": {
   "archetype_key": null,
@@ -3015,7 +3063,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）",
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "使用日 2008-04-17",
   "note": "本人「確かこんな感じだったと思う」＝記憶による再現。"
  },
  "変則ヒロビ（2008.04-05）": {
@@ -3121,7 +3171,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "使用日 2008-04-19"
  },
  "ライトロード（2008.04）": {
   "archetype_key": null,
@@ -3206,7 +3258,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）",
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "使用日 2008-04-20",
   "note": "本人「なんか1枚多い。40に抑えてたはず」＝41枚。"
  },
  "ワンキルチックダーク（2008.05）": {
@@ -3320,7 +3374,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "使用日 2008-05-11"
  },
  "寒波ダムド（2008.05-06、振り返り版）": {
   "archetype_key": null,
@@ -3433,7 +3489,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "使用日 2008-05-24"
  },
  "ネズミ猫（2008.06）": {
   "archetype_key": null,
@@ -3538,7 +3596,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-06-15"
  },
  "寒波猫（2008.06）": {
   "archetype_key": null,
@@ -3647,7 +3707,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-06-18"
  },
  "HERO融合（2008.07）": {
   "archetype_key": "hero",
@@ -3756,7 +3818,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-07-14"
  },
  "猫シンクロ（2008.08 関西CS）": {
   "archetype_key": null,
@@ -3894,7 +3958,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2008年3月期（旧環境）"
+  "environment": "2008年3月制限（0803）",
+  "period": "0803",
+  "period_basis": "記事日 2008-08-18"
  },
  "シンクロアンデ帝（2008.09）": {
   "archetype_key": null,
@@ -3991,7 +4057,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-12"
  },
  "ごちゃ混ぜ猫剣闘獣（2008.09 ネタ）": {
   "archetype_key": null,
@@ -4108,7 +4176,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-13"
  },
  "緊テレダムド（2008.09）": {
   "archetype_key": null,
@@ -4234,7 +4304,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-17"
  },
  "メタビート（2008.09）": {
   "archetype_key": null,
@@ -4336,7 +4408,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-19"
  },
  "スーパードローライダー（2008.09）": {
   "archetype_key": null,
@@ -4429,7 +4503,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-20"
  },
  "メタビ（2008.09 修正版）": {
   "archetype_key": null,
@@ -4502,7 +4578,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-23"
  },
  "シンクロアンデ（トラゴ型、2008.09）": {
   "archetype_key": null,
@@ -4591,7 +4669,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-09-25"
  },
  "シンクロアンデ（2008.09）": {
   "archetype_key": null,
@@ -4680,7 +4760,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-10-01"
  },
  "光メタビ（2008.11）": {
   "archetype_key": null,
@@ -4785,7 +4867,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-11-26"
  },
  "ブルーアイズHERO（2008.11）": {
   "archetype_key": null,
@@ -4898,7 +4982,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-11-26"
  },
  "ゲート系ダーク（2008.12）": {
   "archetype_key": null,
@@ -5007,7 +5093,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2008-12-09"
  },
  "次元シンクロ（2009.01）": {
   "archetype_key": null,
@@ -5092,7 +5180,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2009-01-05"
  },
  "猫（2008.10頃）": {
   "archetype_key": null,
@@ -5201,7 +5291,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "使用日 2008-10-01"
  },
  "猫（2008.11頃）": {
   "archetype_key": null,
@@ -5314,7 +5406,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "使用日 2008-11-01"
  },
  "姫猫（2008.12頃）": {
   "archetype_key": null,
@@ -5415,7 +5509,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "使用日 2008-12-01"
  },
  "ガジェット猫（2009.01 没）": {
   "archetype_key": null,
@@ -5512,7 +5608,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）"
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "記事日 2009-01-28"
  },
  "闇猫「はらねこ」（2008.09期）": {
   "archetype_key": null,
@@ -5642,7 +5740,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2008年9月期（旧環境）",
+  "environment": "2008年9月制限（0809）",
+  "period": "0809",
+  "period_basis": "使用日 2009-02-28",
   "note": "サイドは本文中の「サイドの最終形」を採用。"
  },
  "墓守猫（2009.03 全国予選中部）": {
@@ -5785,7 +5885,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-03-08"
  },
  "偵察番兵猫（2009.03 近畿CS）": {
   "archetype_key": null,
@@ -5927,7 +6029,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-03-01"
  },
  "ライコウ猫（2009.03 没）": {
   "archetype_key": null,
@@ -6040,7 +6144,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-03-14"
  },
  "墓守猫（2009.03 神奈川選手権／東海CS）": {
   "archetype_key": null,
@@ -6174,7 +6280,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）",
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-03-23",
   "note": "サイドは神奈川版。東海版は side_alt を参照。",
   "side_alt": [
    {
@@ -6308,7 +6416,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-05-05"
  },
  "猫（2009.05 安価構築例）": {
   "archetype_key": null,
@@ -6433,7 +6543,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-05-11"
  },
  "シンクロ否定（雑貨商人・黒光りＧ、2009.05 ネタ）": {
   "archetype_key": null,
@@ -6518,7 +6630,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "記事日 2009-05-12"
  },
  "ライトロード（2009.03.28-31）": {
   "archetype_key": null,
@@ -6664,7 +6778,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-03-28"
  },
  "メタ猫（暗黒界入り、2009.03.28）": {
   "archetype_key": null,
@@ -6773,7 +6889,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-03-28"
  },
  "魔デッキ猫1（2009.03.29-30）": {
   "archetype_key": null,
@@ -6911,7 +7029,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-03-29"
  },
  "魔デッキ猫2（2009.04.05-11）": {
   "archetype_key": null,
@@ -7028,7 +7148,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-04-05"
  },
  "シンクロ猫inUSA（2009.06 構築案）": {
   "archetype_key": null,
@@ -7219,7 +7341,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境、米国カードプール想定）"
+  "environment": "2009年3月制限（0903）、米国カードプール想定",
+  "period": "0903",
+  "period_basis": "記事日 2009-06-13"
  },
  "墓守猫（2009.07 関東CS）": {
   "archetype_key": null,
@@ -7426,7 +7550,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年3月期（旧環境）"
+  "environment": "2009年3月制限（0903）",
+  "period": "0903",
+  "period_basis": "使用日 2009-07-20"
  },
  "シンクロアンデ（2009.08 浜松CS）": {
   "archetype_key": null,
@@ -7641,7 +7767,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-09-01"
  },
  "アンデライロ（2009.12 公開）": {
   "archetype_key": null,
@@ -7746,7 +7874,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "記事日 2009-12-07"
  },
  "猫（2009.12 ファンデッキ）": {
   "archetype_key": null,
@@ -7932,7 +8062,9 @@
   ],
   "side": [],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "記事日 2009-12-08"
  },
  "アンデライロ（2010.01 ISD）": {
   "archetype_key": null,
@@ -8135,7 +8267,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "記事日 2010-01-07"
  },
  "墓地BF（2009.09 横浜CS）": {
   "archetype_key": "blackwing",
@@ -8269,7 +8403,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-09-22"
  },
  "アンデライロ（2009.11 関東CS）": {
   "archetype_key": null,
@@ -8419,7 +8555,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-11-03"
  },
  "アンデライロ（2009.11 東海CS）": {
   "archetype_key": null,
@@ -8567,7 +8705,9 @@
   "unreadable": [
    "side: 2枚不明（本人「サイドが13枚しか思い出せない。確かライボルを他に譲って強制転移を使った気がする」）"
   ],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-11-15"
  },
  "アンデライロ（2009.11 近畿CS）": {
   "archetype_key": null,
@@ -8703,7 +8843,9 @@
   "unreadable": [
    "side: 1枚不明（本人「サイド後1枚思い出せません」）"
   ],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-11-22"
  },
  "テンプレ旋風BF（2009.12 ジャンプフェスタ）": {
   "archetype_key": "blackwing",
@@ -8837,7 +8979,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "使用日 2009-12-19"
  },
  "光ライロ（2010.01）": {
   "archetype_key": null,
@@ -8975,7 +9119,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2009年9月制限（0909）",
+  "period": "0909",
+  "period_basis": "記事日 2010-01-26"
  },
  "罠HEROビート（2010.03 構築案）": {
   "archetype_key": "hero",
@@ -9064,7 +9210,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）",
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-03-08",
   "note": "「シュバリエ」は《エヴォルテクター シュバリエ》と解した（デュアルの戦士族1900はこれのみ）。"
  },
  "インフェルニティ（2010.03 浜松CS）": {
@@ -9252,7 +9400,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2009年9月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "使用日 2010-03-07"
  },
  "インフェルニティ（2010.03 41枚型）": {
   "archetype_key": null,
@@ -9451,7 +9601,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）",
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "使用日 2010-03-20",
   "note": "サイドは2案あり。2案目は side_alt。",
   "side_alt": [
    {
@@ -9605,7 +9757,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-03-30"
  },
  "墓地BF（2010.04 手持ち）": {
   "archetype_key": "blackwing",
@@ -9718,7 +9872,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-04-05"
  },
  "サイコ・リターナー・ジャンク（2010.04）": {
   "archetype_key": null,
@@ -9831,7 +9987,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-04-24"
  },
  "クイックダンディ・フルモン（2010.06 構築案）": {
   "archetype_key": "quick_plant",
@@ -9924,7 +10082,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-06-24"
  },
  "クイックダンディ・ハイブリッド（2010.06 構築案）": {
   "archetype_key": "quick_plant",
@@ -10017,7 +10177,9 @@
   "extra": [],
   "side": [],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-06-24"
  },
  "インフェルニティ（2010.06 選考会）": {
   "archetype_key": null,
@@ -10204,7 +10366,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年3月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-07-03"
  },
  "墓地BF（2010.08 ISDCS）": {
   "archetype_key": "blackwing",
@@ -10399,7 +10563,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）"
+  "environment": "2010年3月制限（1003）",
+  "period": "1003",
+  "period_basis": "記事日 2010-08-31"
  },
  "クイックダンディ（お触れ型、2010.09 フリー）": {
   "archetype_key": "quick_plant",
@@ -10553,7 +10719,9 @@
   ],
   "side": [],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "記事日 2010-09-04",
   "selected_for_archetype": true,
   "note": "1103で禁止の大寒波、制限のダンディライオン2枚を含む。1103の本人のジャンド（ジャンクドッペル）リストはブログに未掲載。"
  },
@@ -10750,7 +10918,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2010-10-11",
   "note": "サイド最後の《魔のデッキ破壊ウイルス》は本文の行と連結していたため手で補った。"
  },
  "墓地BF（2010.11 ISD）": {
@@ -10954,7 +11124,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）"
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "記事日 2010-11-06"
  },
  "デブリヒーロー（2010.11 サンプル）": {
   "archetype_key": "hero",
@@ -11157,7 +11329,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）"
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "記事日 2010-11-07"
  },
  "墓地BF（2010.11 ISDCS、サイド込み）": {
   "archetype_key": "blackwing",
@@ -11356,7 +11530,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（旧環境）",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2010-11-03",
   "note": "本文のサイドは14枚（サイドチェンジ表にある霊滅術師 カイクウがリストに無い）。書かれたまま写した。"
  },
  "TOKYOデブリ（2010.11 東京CS）": {
@@ -11568,7 +11744,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年12月期（真六武発売直後）",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2010-11-28",
   "selected_for_archetype": true,
   "note": "1103で禁止の大寒波1、制限のダンディライオン2を含む。"
  },
@@ -11749,7 +11927,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年12月期",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2010-12-27",
   "note": "六武の門3・月の書3（1103ではどちらも制限）。"
  },
  "女戦士ビート（2010.12 試作）": {
@@ -11865,7 +12045,9 @@
   "unreadable": [
    "main: 1枚不明（罠の見出しは10枚だが列挙は9枚）"
   ],
-  "environment": "2010年12月期"
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "記事日 2010-12-30"
  },
  "六武衆（2011.01 ISDCS第9回）": {
   "archetype_key": "six_samurai",
@@ -12040,7 +12222,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期（ISDCS第9回時点）",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2011-01-01",
   "note": "六武の門3・月の書3（1103ではどちらも制限）。サイドは本文どおり14枚。"
  },
  "墓地BF（2011.02 「最善を打て！」サンプル）": {
@@ -12211,7 +12395,9 @@
   ],
   "side": [],
   "unreadable": [],
-  "environment": "2010年9月期",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "記事日 2011-02-07",
   "note": "本人「実践レベルとかけ離れた」と明言。"
  },
  "墓地BF（2011.02 日本CS・横浜CS）": {
@@ -12427,7 +12613,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2010年9月期",
+  "environment": "2010年9月制限（1009）",
+  "period": "1009",
+  "period_basis": "使用日 2011-02-19",
   "note": "日本CSのサイドはドッペルゲンガー、横浜CSで死霊に変更（本人記載）。"
  },
  "【1103】墓地BF（2011.03 ISDCS第10回）": {
@@ -12640,6 +12828,8 @@
   ],
   "unreadable": [],
   "environment": "1103（2011年3月制限、本ゲームの環境）",
+  "period": "1103",
+  "period_basis": "使用日 2011-03-05",
   "selected_for_archetype": true,
   "note": "ブログ内で唯一の1103環境のリスト。本人の反省：神の警告が弱い（ライフが持たない）、メタ読み失敗、ミラーは全て初戦を落とした。"
  },
@@ -12807,7 +12997,9 @@
   ],
   "side": [],
   "unreadable": [],
-  "environment": "2011年9月期（1103の次）"
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "記事日 2011-10-06"
  },
  "TG天使（2011.10 浜松CS）": {
   "archetype_key": "agent",
@@ -12994,7 +13186,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2011年9月期（1103の次）",
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "使用日 2011-10-08",
   "selected_for_archetype": true,
   "note": "1103の次の環境。大嵐が入っている（1103では禁止）。"
  },
@@ -13183,7 +13377,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2011年9月期（1103の次）",
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "使用日 2011-10-23",
   "note": "浜松版＋六武衆のご隠居2。"
  },
  "カラクリ（2011.11 岡山CS）": {
@@ -13375,7 +13571,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2011年9月期（1103の次）",
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "使用日 2011-11-26",
   "selected_for_archetype": true,
   "note": "1103の次の環境。大嵐入り。"
  },
@@ -13576,7 +13774,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2012年1月期"
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "使用日 2012-01-29"
  },
  "聖刻（2012.02 浜松CS）": {
   "archetype_key": null,
@@ -13743,7 +13943,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2012年3月期",
+  "environment": "2011年9月制限（1109）、1103の次の環境",
+  "period": "1109",
+  "period_basis": "使用日 2012-02-26",
   "note": "サイドは本文どおり13枚。"
  },
  "六武衆（2012.05 LCS）": {
@@ -13943,7 +14145,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2012年3月期",
+  "environment": "2012年3月制限（1203）",
+  "period": "1203",
+  "period_basis": "使用日 2012-05-20",
   "selected_for_archetype": true,
   "note": "六武の門1の型（1103と同じ門制限下のビートダウン）。大嵐（1103禁止）と2011年9月以降のカードを含む。サイドは本文どおり14枚。"
  },
@@ -14132,7 +14336,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2012年9月期",
+  "environment": "2012年9月制限（1209）",
+  "period": "1209",
+  "period_basis": "使用日 2012-09-17",
   "note": "ガジェットは入っていないTG。tg_gadget とは部分一致のみ。"
  },
  "ヴェルズビートダウン（2012.12 TCS）": {
@@ -14320,7 +14526,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2012年9月期"
+  "environment": "2012年9月制限（1209）",
+  "period": "1209",
+  "period_basis": "使用日 2012-12-29"
  },
  "魔導（2013.06 近畿CS）": {
   "archetype_key": null,
@@ -14519,7 +14727,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2013年3月期",
+  "environment": "2013年3月制限（1303）",
+  "period": "1303",
+  "period_basis": "使用日 2013-06-23",
   "note": "メインは本文の見出しどおり41枚（15+24+2）。エクストラの「閃?竜 スターダスト」は1文字が文字化けしているが、同じ筆者が2013.12の記事で「閃コウ竜 スターダスト」と書いているので《閃珖竜 スターダスト》とした。"
  },
  "魔導（2013.06 選考会）": {
@@ -14715,7 +14925,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2013年3月期"
+  "environment": "2013年3月制限（1303）",
+  "period": "1303",
+  "period_basis": "使用日 2013-06-30"
  },
  "征竜（2013.11）": {
   "archetype_key": null,
@@ -14910,7 +15122,9 @@
    ]
   ],
   "unreadable": [],
-  "environment": "2013年9月期",
+  "environment": "2013年9月制限（1309）",
+  "period": "1309",
+  "period_basis": "使用日 2013-11-30",
   "note": "メイン42枚はKnifeCSのみの次元幽閉を含む数（愛知は41枚）。サイドは愛知個人版。愛知チーム版・KnifeCS版は side_alt。次元幽閉はKnifeCSのみ、メンタルスフィア・デーモンは愛知両日のみ、聖刻神龍－エネアードはKnifeCSのみ（本人注記）。",
   "side_alt": [
    {
