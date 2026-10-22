@@ -14,7 +14,7 @@ import {
 import { planIdle, sigOf } from './ai_plan.js';
 
 const T_MONSTER = 0x1, T_SPELL = 0x2, T_TRAP = 0x4, T_QUICK = 0x10000, T_FUSION = 0x40, T_SYNCHRO = 0x2000, T_XYZ = 0x800000;
-const T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000, T_EFFECT = 0x20;
+const T_TUNER = 0x1000, T_CONT = 0x20000, T_EQUIP = 0x40000, T_FIELD = 0x80000, T_FLIP = 0x200000, T_EFFECT = 0x20;
 const PH_DRAW = 1, PH_STANDBY = 2, PH_MAIN1 = 4, PH_END = 512;
 const VEILER = 97268402, TRAP_STUN = 59616123, BOOK_OF_MOON = 14087893, HURRICANE = 42703248;
 const SKILL_DRAIN = 82732705, FORBIDDEN_LANCE = 27243130, SCAPEGOAT = 73915051;
@@ -167,12 +167,21 @@ function idleGreedy(ctx, m) {
   if (PAR.routeOn && ctx.rules?.routes?.length) {
     const have = new Set([...f[me].hand, ...f[me].mz.filter(Boolean), ...f[me].sz.filter(Boolean)].map(q => q.code));
     const FIELD = { summon: ['summons', 0], special: ['special_summons', 1], activate: ['activates', 5] };
+    const onField = id => f[me].mz.some(q => q && q.code === id && (q.position & POS.FACEUP));
     for (const r of ctx.rules.routes) {
-      if (!r.starters.some(id => have.has(id))) continue;
-      for (const st of r.steps) {
+      // 必要なカードが全部そろっている時だけ（必要なカードの記載が無ければ、初動カードのどれか）
+      if (r.requires?.length ? !r.requires.every(id => have.has(id)) : !r.starters.some(id => have.has(id))) continue;
+      // 手順は順番どおりに打つ。今打てない手があれば、その先へは飛ばさない
+      // （小町を出せないのに簡易融合だけ撃つ、のような手順の崩れを防ぐ）
+      for (let k = 0; k < r.steps.length; k++) {
+        const st = r.steps[k], done = `route:${r.name}:${k}`;
+        if (memo.used[done]) continue;
         const fd = FIELD[st.act]; if (!fd) continue;
         const i = m[fd[0]].findIndex(c => c.code === st.id && !used(c) && !(fd[1] === 0 && hold.has(c.code)));
-        if (i >= 0) { mark(m[fd[0]][i]); memo.route = r; return { type: R.SELECT_IDLECMD, action: fd[1], index: i }; }
+        if (i >= 0) { mark(m[fd[0]][i]); memo.used[done] = 1; memo.route = r; return { type: R.SELECT_IDLECMD, action: fd[1], index: i }; }
+        if (st.act === 'activate' && (info(duel, st.id).type & T_MONSTER)) continue;   // 召喚時の効果などはチェーンで処理される
+        if (st.act !== 'activate' && onField(st.id)) continue;                         // もう場に出ている
+        break;
       }
     }
   }
@@ -184,6 +193,8 @@ function idleGreedy(ctx, m) {
     if (c.code === BOOK_OF_MOON) return false;                           // 月の書は相手の攻撃・召喚に合わせて使う
     if (e.type & T_TRAP) return OWN_TURN_TRAPS.has(c.code) && !HOLD_TRAPS.has(c.code);
     if (c.code === JS.ARAGYO) return false;                              // 六武衆の荒行はバトルフェイズに（jspeed）
+    // 簡易融合：出した融合モンスターはエンドフェイズに破壊されるので、場に表側のチューナーがいて、そのままシンクロに使える時だけ
+    if (c.code === JS.INSTANT_FUSION) return f[me].mz.some(q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_TUNER));
     // 強欲で謙虚な壺：このターンに特殊召喚できるなら撃たない（撃つと特殊召喚できなくなる）（jspeed）
     if (c.code === JS.PROSPERITY && m.special_summons.some(x => spValue(ctx, x) > 0)) return false;
     // ブラック・ホールは「我慢しすぎなぐらい」温存する（jspeed）
@@ -209,7 +220,10 @@ function idleGreedy(ctx, m) {
   // リバース効果モンスターは表で出さず、セットする（下の5で）
   const summons = m.summons.map((c, i) => ({ c, i })).filter(({ c }) => !(info(duel, c.code).type & T_FLIP) && !noLead(ctx, c.code));
   if (summons.length) {
-    const best = summons.map(({ c, i }) => ({ i, v: (SUMMON_PRIORITY[c.code] || 0) * 100 + cardValue(duel, c.code) - (hold.has(c.code) ? 20000 : 0) })).sort((a, b) => b.v - a.v)[0];
+    // カラクリ小町は、手札に他のカラクリがいれば先に出す（小町が表側でいる間だけカラクリをもう1体召喚できる）
+    const karakuri = id => (info(duel, id).setcodes || []).includes(0x11) && (info(duel, id).type & T_MONSTER);
+    const komachiFirst = c => c.code === JS.KOMACHI && f[me].hand.some(q => q.code !== JS.KOMACHI && karakuri(q.code)) ? 3000 : 0;
+    const best = summons.map(({ c, i }) => ({ i, v: (SUMMON_PRIORITY[c.code] || 0) * 100 + komachiFirst(c) + cardValue(duel, c.code) - (hold.has(c.code) ? 20000 : 0) })).sort((a, b) => b.v - a.v)[0];
     return { type: R.SELECT_IDLECMD, action: 0, index: best.i };
   }
   if (acts.length) { mark(acts[0].c); return { type: R.SELECT_IDLECMD, action: 5, index: acts[0].i }; }
@@ -492,7 +506,12 @@ function searchScore(ctx, c, v) {
   // 今処理している効果のカード（チェーンの一番上）ごとに、記事で推奨された持ってくる順
   const src = ctx.duel.chain[ctx.duel.chain.length - 1];
   const order = src && src.player === ctx.me && ctx.rules?.searchBy?.[src.code];
-  if (order) { const k = order.indexOf(c.code); if (k >= 0) return 100000 - k * 100; }
+  if (order) {
+    const k = order.indexOf(c.code);
+    // 推奨順の中でも、もう手札にあるカード（2枚目）は後回し（例：小町を持っているなら商人は解体新書を持ってくる）
+    const held = ctx.f[ctx.me].hand.some(q => q.code === c.code);
+    if (k >= 0) return 100000 - (k + (held && order.length > 1 ? order.length : 0)) * 100;
+  }
   return (SUMMON_PRIORITY[c.code] || 0) * 50 + v;
 }
 function attackTargetScore(ctx, c) {
@@ -506,7 +525,9 @@ function attackTargetScore(ctx, c) {
   const win = q.position & POS.ATTACK ? myAtk > q.attack : myAtk > q.defense;
   if (!OFF.has('fine') && honestRisk(ctx, q)) return 100 - val / 10;
   if (!OFF.has('fine') && win && RECRUITERS.has(q.code)) return 3000 + cardValue(duel, q.code, q) / 10;
-  return win ? 4000 + cardValue(duel, q.code, q) / 10 : 1000 - val;
+  if (win) return 4000 + cardValue(duel, q.code, q) / 10;
+  // 勝てない攻撃（カラクリの攻撃の強制など）：守備表示を殴れば自分は破壊されない。攻撃表示なら差の小さい相手に
+  return q.position & POS.DEFENSE ? 2000 - (val - myAtk) : 1000 - (val - myAtk);
 }
 function position(ctx, m) {
   const { duel, f, op } = ctx;
@@ -567,7 +588,12 @@ function honestRisk(ctx, t) {
 // 先読みが選んだ手でも、助言に反するもの（先出し・メイン1のトリシューラ）は採らない
 function jspeedVeto(ctx, m, r) {
   if (r.type !== R.SELECT_IDLECMD) return false;
-  const c = r.action === 0 ? m.summons[r.index] : r.action === 1 ? m.special_summons[r.index] : null;
+  const c = r.action === 0 ? m.summons[r.index] : r.action === 1 ? m.special_summons[r.index] : r.action === 5 ? m.activates[r.index] : null;
   if (!c) return false;
+  const { duel, f, me } = ctx;
+  // 簡易融合は場に表側のチューナーがいる時だけ
+  if (r.action === 5) return c.code === JS.INSTANT_FUSION && !f[me].mz.some(q => q && (q.position & POS.FACEUP) && (info(duel, q.code).type & T_TUNER));
+  // 小町を出せるのに、他のカラクリを先に通常召喚しない
+  if (r.action === 0 && c.code !== JS.KOMACHI && m.summons.some(x => x.code === JS.KOMACHI) && (info(duel, c.code).setcodes || []).includes(0x11)) return true;
   return (r.action === 0 && noLead(ctx, c.code)) || (c.code === JS.TRISHULA && trishulaLater(ctx, m));
 }

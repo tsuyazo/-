@@ -33,7 +33,8 @@ export function loadAiRules(cards, report = false) {
   const missing = new Set();
   const id = raw => {
     for (const part of String(raw).split(/[／/]/)) {
-      const n = norm(part.replace(/[（(].*$/, ''));
+      // 先頭の条件書き「(展開パーツが足りない)カラクリ小町」と、末尾の補足「（参謀でも可）」を外す
+      const n = norm(part.replace(/^\s*[（(][^）)]*[）)]/, '').replace(/[（(].*$/, ''));
       if (byName[n]) return byName[n];
       const hit = Object.keys(byName).find(k => k.length > 3 && (k.startsWith(n) || n.startsWith(k)));
       if (hit && n.length > 3) return byName[hit];
@@ -65,7 +66,7 @@ export function loadAiRules(cards, report = false) {
     for (const [key, d] of Object.entries(JSON.parse(fs.readFileSync(p2)))) {
       const o = out[key] || (out[key] = { plan: '', searchBy: {}, threats: [], hold: [] });
       o.routes = (d.routes || []).map(r => ({
-        name: r.name, prio: r.priority || 5, starters: ids(r.starters),
+        name: r.name, prio: r.priority || 5, starters: ids(r.starters), requires: ids(r.requires),
         steps: (r.steps || []).filter(st => ACT[st.do]).map(st => ({ act: ACT[st.do], id: id(st.card), choose: ids(st.choose) })).filter(st => st.id),
       })).filter(r => r.starters.length && r.steps.length).sort((a, b) => b.prio - a.prio);
       // 発動して選ぶカード（サーチ先など）は、ルートの指定を優先する
