@@ -1,0 +1,72 @@
+{
+  "found": false,
+  "title": null,
+  "event": null,
+  "date": null,
+  "result": null,
+  "url": null,
+  "source": null,
+  "main": [],
+  "extra": [],
+  "side": [],
+  "note": "成績の記載があり、かつリスト本文まで読めるJ-SPEED氏のクイックダンディ／ジャンド系リストは見つからなかった。成績つきの候補は1件ある（candidates の1件目、レジェンドCS 2011-05-04 ベスト16のデブリジャンド）。ただし、リストが載っているページ（fatelove.exblog.jp）は503／403で読めない。Wayback Machineの保存版（http://web.archive.org/web/20190822165321/https://fatelove.exblog.jp/14722923/）もある。しかし web.archive.org はこの環境のネットワーク設定で遮断されていて、archive.ph は429だった。検索エンジンの要約には一部のカード名が出ていた（ローンファイア・ブロッサム2、ライトロード・ハンター ライコウ3、ドッペル・ウォリアー、デブリ・ドラゴン2、など）。本文で確認できないので、リストには入れていない。推測では埋めていない。",
+  "search_scope": [
+    "公式デッキDB（cgid=41363cc84f4445376accf5e804f1a4cb）：公開されているのは dno=1「トマトハンデス」（成績無し・2011年頃の記憶による再現）と dno=2「第6回横浜CS 個人7-0 墓地BF」の2件だけ。dno=3〜40は非公開。クイックダンディ・ジャンドは無い。",
+    "Duel Entrance（duel-entrance.seesaa.net）と Duel Entrance Decklist（duel-entrance-deck.seesaa.net）：どちらも403で本文を読めない。検索結果のタイトル・抜粋だけ確認した。",
+    "fatelove.exblog.jp（ポンコツと嫁の愉快な毎日）：503／403。",
+    "Wayback Machine（web.archive.org）：この環境のネットワーク設定で遮断。archive.ph：429。",
+    "ウェブ検索：「J-SPEED クイックダンディ 優勝 デッキレシピ」「duel-entrance.seesaa.net J-SPEED クイックダンディ」「\"J-SPEED\" クイックダンディ 大会結果 入賞 2010」「\"J-SPEED\" ジャンド OR デブリジャンド 遊戯王 2011 優勝 レシピ」「fatelove.exblog.jp レジェンドCSベスト16 J-SPEED デブリジャンド」「J-SPEED レジェンドCS デブリジャンド ローンファイア ドッペル デッキ」。クイックダンディでJ-SPEED氏が成績を残したリストは出てこなかった。",
+    "note.com/ice9685「私と遊戯王」：【クイックダンディ】優勝A／第6回ISDCS(8/30)のリストがあるが、別の人のもので J-SPEED氏のものではない。対象外。"
+  ],
+  "candidates": [
+    {
+      "title": "レジェンドCSベスト16-J-SPEEDさん-",
+      "deck": "デブリジャンド",
+      "event": "レジェンドCS（レジェンドチャンピオンシップ）",
+      "date": "2011-05-04",
+      "period": "1103",
+      "result": "ベスト16",
+      "url": "https://fatelove.exblog.jp/14722923/",
+      "status": "本文を読めない（503／403。Wayback Machineは環境の設定で遮断）。成績は Duel Entrance の結果記事のタイトル・抜粋でも確認した。"
+    },
+    {
+      "title": "【結果】レジェンドCS(5/4)",
+      "deck": "デブリジャンド",
+      "event": "レジェンドCS",
+      "date": "2011-05-04",
+      "period": "1103",
+      "result": "ベスト16（検索結果の抜粋による）",
+      "url": "http://duel-entrance.seesaa.net/article/199423855.html",
+      "status": "403で本文を読めない。結果一覧の記事で、リストが載っているかは不明。"
+    },
+    {
+      "title": "【結果】J-SPEED CS(7/18)",
+      "deck": "墓地BF（エキシビション）",
+      "event": "J-SPEED CS",
+      "date": "2011-07-18",
+      "period": "1103",
+      "result": "記載無し（エキシビション）",
+      "url": "https://duel-entrance.seesaa.net/article/217234579.html",
+      "status": "403。クイックダンディ・ジャンドではなく、成績も無いので対象外。"
+    },
+    {
+      "title": "ＪーＳＰＥＥＤ 第６回横浜CS 個人7-0 墓地BF（2011/02/19―20）",
+      "deck": "墓地BF",
+      "event": "第6回横浜CS",
+      "date": "2011-02-19",
+      "period": "1009",
+      "result": "個人7-0",
+      "url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=41363cc84f4445376accf5e804f1a4cb&dno=2&request_locale=ja",
+      "status": "読める。ただしクイックダンディ・ジャンドではないので対象外。"
+    },
+    {
+      "title": "トマトハンデス",
+      "deck": "トマトハンデス",
+      "event": null,
+      "date": null,
+      "result": "記載無し（2011年頃の記憶による再現）",
+      "url": "https://www.db.yugioh-card.com/yugiohdb/member_deck.action?ope=1&cgid=41363cc84f4445376accf5e804f1a4cb&dno=1&request_locale=ja",
+      "status": "読める。成績が無く、クイックダンディでもないので対象外。"
+    }
+  ]
+}
